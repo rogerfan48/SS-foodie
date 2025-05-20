@@ -12,4 +12,4 @@ class HalalTag {
 const halalTags = {
   HalalTags.yes: true, // TODO:
   HalalTags.no: true, // TODO:
-}
+};
