@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 enum HalalTags { yes, no }
 
 class HalalTag {
-  const HalalTag(this.title, this.icon);
+  const HalalTag(this.title, this.image);
 
   final String title;
-  final Icon icon;
+  final Image image;
 }
 
-const halalTags = {
-  HalalTags.yes: true, // TODO:
-  HalalTags.no: true, // TODO:
+final halalTags = {
+  HalalTags.yes: ("Yes", Image.asset('assets/imgs/halal.png', width: 150)), 
+  HalalTags.no: ("No", Image.asset('assets/imgs/halal.png', width: 150)), 
 };
