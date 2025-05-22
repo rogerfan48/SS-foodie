@@ -11,12 +11,18 @@ enum VeganTags {
 }
 
 class VeganTag {
-  const VeganTag(this.title, this.icon);
+  const VeganTag(this.title, this.image);
 
   final String title;
-  final Icon icon;
+  final Image image;
 }
 
-const veganTags = {
-  VeganTags.vegan: true, // TODO:
+final veganTags = {
+  VeganTags.vegan: ("Vegan", Image.asset('assets/imgs/leaf.png', width: 150)), 
+  VeganTags.veganPartial: VeganTag("VeganPartial", Image.asset('assets/imgs/leaf.png', width: 150)),
+  VeganTags.lactoOvo: VeganTag("LactoOvo", Image.asset('assets/imgs/milk.png', width: 150)),  
+  VeganTags.lactoOvoPartial: VeganTag("LactoOvoPartial", Image.asset('assets/imgs/milk.png', width: 150)),
+  VeganTags.vegetarian: VeganTag("Vegetarian", Image.asset('assets/imgs/onion.png', width: 150)),
+  VeganTags.vegetarianPartial: VeganTag("VegetarianPartial", Image.asset('assets/imgs/onion.png', width: 150)),
+  VeganTags.nonVegetarian: VeganTag("NonVegetarian", Image.asset('assets/imgs/meat.png', width: 150)),
 };
