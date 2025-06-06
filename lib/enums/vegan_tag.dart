@@ -18,7 +18,7 @@ class VeganTag {
 }
 
 final veganTags = {
-  VeganTags.vegan: ("Vegan", Image.asset('assets/imgs/leaf.png', width: 150)), 
+  VeganTags.vegan: VeganTag("Vegan", Image.asset('assets/imgs/leaf.png', width: 150)),
   VeganTags.veganPartial: VeganTag("VeganPartial", Image.asset('assets/imgs/leaf.png', width: 150)),
   VeganTags.lactoOvo: VeganTag("LactoOvo", Image.asset('assets/imgs/milk.png', width: 150)),  
   VeganTags.lactoOvoPartial: VeganTag("LactoOvoPartial", Image.asset('assets/imgs/milk.png', width: 150)),
