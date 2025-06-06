@@ -1,0 +1,36 @@
+import 'package:flutter/material.dart';
+
+class SearchBarWidget extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback? onFilterPressed;
+  final VoidCallback? onListPressed;
+
+  const SearchBarWidget({
+    Key? key,
+    required this.controller,
+    this.onFilterPressed,
+    this.onListPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              hintText: "Search Restaurant",
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
+              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+            ),
+          ),
+        ),
+        IconButton(icon: Icon(Icons.filter_alt_outlined), onPressed: onFilterPressed),
+        IconButton(icon: Icon(Icons.list), onPressed: onListPressed),
+      ],
+    );
+  }
+}
+
