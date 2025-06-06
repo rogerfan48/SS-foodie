@@ -21,13 +21,6 @@ class _MapPageState extends State<MapPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            GoogleMapWidget( // TODO:
-              initialPosition: CameraPosition(
-                target: LatLng(24.7956, 120.9936), // 竹科附近
-                zoom: 15,
-              ),
-              markers: {}, // 這裡之後接 marker
-            ),
             // 搜尋欄 + 按鈕
             Positioned(
               top: 16,
@@ -38,6 +31,18 @@ class _MapPageState extends State<MapPage> {
                 onFilterPressed: () {}, // 實作過濾
                 onListPressed: () {},   // 實作清單
               ),
+            ),
+            Positioned(
+              top: 80,
+              left: 16,
+              right: 16,
+              child: GoogleMapWidget( // TODO:
+              initialPosition: CameraPosition(
+                target: LatLng(24.7956, 120.9936), // 竹科附近
+                zoom: 15,
+              ),
+              markers: {}, // 這裡之後接 marker
+            ),
             ),
           ],
         ),

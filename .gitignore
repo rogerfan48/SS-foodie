@@ -20,7 +20,7 @@
 .classpath
 .project
 .settings/
-.vscode/*
+.vscode/
 .ccls-cache
 
 # This file, on the master branch, should never exist or be checked-in.
@@ -84,6 +84,7 @@ unlinked_spec.ds
 *.jks
 local.properties
 **/.cxx/
+**/android/app/src/main/AndroidManifest.xml
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
