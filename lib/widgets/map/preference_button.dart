@@ -1,8 +1,6 @@
-// lib/widgets/map/preference_button.dart
-
 import 'package:flutter/material.dart';
 import 'package:foodie/models/filter_options.dart';
-import 'package:foodie/widgets/map/filter_overlay.dart';
+import 'package:foodie/widgets/map/preference_overlay.dart';
 
 class PreferenceButton extends StatefulWidget {
   final FilterOptions options;
@@ -27,7 +25,7 @@ class _PreferenceButtonState extends State<PreferenceButton> {
         final RenderBox renderBox = _buttonKey.currentContext!.findRenderObject() as RenderBox;
         _overlayEntry = OverlayEntry(
           builder:
-              (context) => FilterOverlay(
+              (context) => PreferenceOverlay(
                 buttonRenderBox: renderBox,
                 onClose: _toggleOverlay,
                 initialOptions: widget.options, // 傳遞從 MapPage 來的狀態

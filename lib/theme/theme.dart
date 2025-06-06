@@ -336,14 +336,22 @@ class MaterialTheme {
   }
 
   ThemeData theme(ColorScheme colorScheme) => ThemeData(
-        useMaterial3: true,
-        brightness: colorScheme.brightness,
-        colorScheme: colorScheme,
-        textTheme: buildTextTheme(colorScheme),
-        primaryTextTheme: buildTextTheme(colorScheme),
-        scaffoldBackgroundColor: colorScheme.surface,
-        canvasColor: colorScheme.surface,
-      );
+    useMaterial3: true,
+    brightness: colorScheme.brightness,
+    colorScheme: colorScheme,
+    textTheme: buildTextTheme(colorScheme),
+    primaryTextTheme: buildTextTheme(colorScheme),
+    scaffoldBackgroundColor: colorScheme.surface,
+    canvasColor: colorScheme.surface,
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return colorScheme.primary;
+        }
+        return null;
+      }),
+    ),
+  );
 
   List<ExtendedColor> get extendedColors => [];
 }
