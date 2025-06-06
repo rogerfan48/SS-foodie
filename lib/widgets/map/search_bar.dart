@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final TextEditingController controller;
-  final VoidCallback? onFilterPressed;
-  final VoidCallback? onListPressed;
 
   const SearchBarWidget({
     Key? key,
     required this.controller,
-    this.onFilterPressed,
-    this.onListPressed,
   }) : super(key: key);
 
   @override

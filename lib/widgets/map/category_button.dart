@@ -1,8 +1,6 @@
-// lib/widgets/map/category_button.dart
-
 import 'package:flutter/material.dart';
 import 'package:foodie/models/filter_options.dart';
-import 'package:foodie/widgets/map/filter_overlay.dart';
+import 'package:foodie/widgets/map/category_overlay.dart';
 
 class CategoryButton extends StatefulWidget {
   final FilterOptions options;
@@ -26,7 +24,7 @@ class _CategoryButtonState extends State<CategoryButton> {
         final RenderBox renderBox = _buttonKey.currentContext!.findRenderObject() as RenderBox;
         _overlayEntry = OverlayEntry(
           builder:
-              (context) => FilterOverlay(
+              (context) => CategoryOverlay(
                 buttonRenderBox: renderBox,
                 onClose: _toggleOverlay,
                 initialOptions: widget.options, // 傳遞從 MapPage 來的狀態
