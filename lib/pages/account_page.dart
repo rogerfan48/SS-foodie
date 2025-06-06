@@ -94,7 +94,7 @@ class AccountPage extends StatelessWidget {
                       const Text('模式', style: TextStyle(fontSize: 20)),
                       ElevatedButton(
                         onPressed: () {
-                          context.read<ThemeProvider>().toggleTheme();
+                          context.read<ThemeService>().toggleTheme();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.surface,
