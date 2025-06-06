@@ -5,8 +5,8 @@ class Dish {
   String? name, summary, bestReviewSummary;
   int? price;
   int? rating;
-  List<Image>? images;
-  Image? mainImage;
+  List<String>? imageURLs;
+  String? mainImageURL;
   List<DishReview>? reviews;
 
 }
