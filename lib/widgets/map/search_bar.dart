@@ -20,6 +20,8 @@ class SearchBarWidget extends StatelessWidget {
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
               prefixIcon: Icon(Icons.search),
               hintText: "Search Restaurant",
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
@@ -27,8 +29,6 @@ class SearchBarWidget extends StatelessWidget {
             ),
           ),
         ),
-        IconButton(icon: Icon(Icons.filter_alt_outlined), onPressed: onFilterPressed),
-        IconButton(icon: Icon(Icons.list), onPressed: onListPressed),
       ],
     );
   }

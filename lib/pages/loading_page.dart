@@ -19,7 +19,7 @@ class LoadingPage extends StatelessWidget {
               width: 200,
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(seconds: 2),
+                duration: const Duration(milliseconds: 400),
                 builder: (context, value, child) {
                   return LinearProgressIndicator(value: value);
                 },

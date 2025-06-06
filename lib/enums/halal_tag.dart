@@ -10,6 +10,6 @@ class HalalTag {
 }
 
 final halalTags = {
-  HalalTags.yes: ("Yes", Image.asset('assets/imgs/halal.png', width: 150)), 
-  HalalTags.no: ("No", Image.asset('assets/imgs/halal.png', width: 150)), 
+  HalalTags.yes: HalalTag("Yes", Image.asset('assets/imgs/halal.png', width: 150)),
+  HalalTags.no: HalalTag("No", Image.asset('assets/imgs/halal.png', width: 150)),
 };
