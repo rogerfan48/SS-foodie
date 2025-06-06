@@ -6,11 +6,8 @@ class GoogleMapWidget extends StatefulWidget {
   final Set<Marker> markers;
   final CameraPosition initialPosition;
 
-  const GoogleMapWidget({
-    Key? key,
-    required this.markers,
-    required this.initialPosition,
-  }) : super(key: key);
+  const GoogleMapWidget({Key? key, required this.markers, required this.initialPosition})
+    : super(key: key);
 
   @override
   State<GoogleMapWidget> createState() => _GoogleMapWidgetState();
@@ -21,16 +18,12 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 700, 
-      width: double.infinity, 
-      child: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: widget.initialPosition,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
+    return GoogleMap(
+      mapType: MapType.normal,
+      initialCameraPosition: widget.initialPosition,
+      onMapCreated: (GoogleMapController controller) {
+        _controller.complete(controller);
+      },
     );
   }
 }
