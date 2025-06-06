@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodie/services/ai_chat.dart';
 import 'package:provider/provider.dart';
+import 'package:foodie/widgets/ai/ai_recommendation_button.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class _AiPageState extends State<AiPage> {
         child: Stack(
           children: [
             Positioned(
-              bottom: 100,
+              bottom: 120,
               left: 16,
               right: 16,
               child: Column(
@@ -53,6 +54,26 @@ class _AiPageState extends State<AiPage> {
                           ),
                         )
                         .toList(),
+              ),
+            ),
+            Positioned(
+              bottom: 85,
+              left: 16,
+              right: 16,
+              child: SizedBox(
+                height: 30,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    SizedBox(width: 8),
+                    AiRecommendationButton(msg: "AI Recommendation 1"),
+                    SizedBox(width: 8),
+                    AiRecommendationButton(msg: "AI Recommendation 2"),
+                    SizedBox(width: 8),
+                    AiRecommendationButton(msg: "AI Recommendation 3"),
+                    SizedBox(width: 8),
+                  ],
+                ),
               ),
             ),
             Positioned(
