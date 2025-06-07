@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodie/services/theme.dart';
+import 'package:foodie/view_models/account_vm.dart';
 import 'package:provider/provider.dart';
 
 class AccountPage extends StatelessWidget {
@@ -8,7 +9,7 @@ class AccountPage extends StatelessWidget {
   Widget _buildSettingsTile(
     BuildContext context, {
     required String title,
-    Widget? trailing, // 尾部的 Widget 可以是圖標、Switch 或其他
+    Widget? trailing,
     VoidCallback? onTap,
   }) {
     final theme = Theme.of(context);
@@ -32,6 +33,7 @@ class AccountPage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final themeService = context.watch<ThemeService>();
+    final accountViewModel = context.watch<AccountViewModel>(); // Watch the ViewModel
 
     return Scaffold(
       body: SafeArea(
@@ -43,57 +45,41 @@ class AccountPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 child: Row(
                   children: [
-                    Icon(Icons.account_circle, size: 80, color: colorScheme.inverseSurface),
+                    if (accountViewModel.isLoggedIn && accountViewModel.firebaseUser?.photoURL != null)
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(accountViewModel.firebaseUser!.photoURL!),
+                        radius: 40,
+                      )
+                    else
+                      Icon(Icons.account_circle, size: 80, color: colorScheme.inverseSurface),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: Login google account
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text(
-                          'Log in with Google',
-                          style: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary),
-                        ),
-                      ),
+                      child: accountViewModel.isLoggedIn
+                          ? _buildUserInfo(context, accountViewModel) // Show user info and logout
+                          : _buildLoginButton(context, accountViewModel), // Show login button
                     ),
                   ],
                 ),
               ),
-
               _buildSettingsTile(
                 context,
-                title: 'Browse Record',
-                onTap: () {
-                  // TODO: Jump to Browse Record
-                },
+                title: 'Browse History',
+                onTap: () { /* TODO: Jump to Browse History */ },
               ),
-              // 3. 元件優化：使用標準的 Divider Widget
               const Divider(height: 1),
               _buildSettingsTile(
                 context,
                 title: 'My Review',
-                onTap: () {
-                  // TODO: Jump to My Review
-                },
+                onTap: () { /* TODO: Jump to My Review */ },
               ),
               const Divider(height: 1),
               _buildSettingsTile(
                 context,
                 title: 'Dark Theme',
-                onTap: () {
-                  themeService.toggleTheme();
-                },
+                onTap: () => themeService.toggleTheme(),
                 trailing: Switch(
                   value: themeService.isDarkMode,
-                  onChanged: (value) {
-                    themeService.toggleTheme();
-                  },
+                  onChanged: (value) => themeService.toggleTheme(),
                 ),
               ),
               const Divider(height: 1),
@@ -101,6 +87,59 @@ class AccountPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  // Widget to show when user is not logged in
+  Widget _buildLoginButton(BuildContext context, AccountViewModel viewModel) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ElevatedButton(
+          onPressed: () => viewModel.signInWithGoogle(),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.login, color: colorScheme.onPrimary),
+              const SizedBox(width: 12),
+              Text('Log in with Google', style: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Widget to show when user is logged in
+  Widget _buildUserInfo(BuildContext context, AccountViewModel viewModel) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          viewModel.firebaseUser?.displayName ?? 'Welcome!',
+          style: textTheme.headlineSmall,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          viewModel.firebaseUser?.email ?? '',
+          style: textTheme.bodyMedium,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: () => viewModel.signOut(),
+          child: const Text('Log Out'),
+        ),
+      ],
     );
   }
 }

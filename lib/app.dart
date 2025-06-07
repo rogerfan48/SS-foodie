@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:foodie/services/auth_service.dart';
+import 'package:foodie/view_models/account_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/theme/theme.dart';
 import 'package:foodie/services/ai_chat.dart';
@@ -14,9 +16,16 @@ class FoodieApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        // Services
         Provider<NavigationService>(create: (_) => NavigationService()),
+        Provider<AuthService>(create: (_) => AuthService()),
+        
+        // View Models & Notifiers
         ChangeNotifierProvider<ThemeService>(create: (_) => ThemeService()),
         ChangeNotifierProvider<AiChatService>(create: (_) => AiChatService()),
+        ChangeNotifierProvider<AccountViewModel>(
+          create: (context) => AccountViewModel(context.read<AuthService>()),
+        ),
       ],
       child: Consumer<ThemeService>(
         builder: (context, themeService, child) {
@@ -26,7 +35,6 @@ class FoodieApp extends StatelessWidget {
             darkTheme: theme.dark(),
             themeMode: themeService.themeMode,
             routerConfig: routerConfig,
-            // Allow the Navigator built by the MaterialApp to restore the navigation stack when app restarts
             restorationScopeId: 'app',
           );
         },
