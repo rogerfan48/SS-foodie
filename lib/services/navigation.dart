@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:foodie/pages/restaurant_info_page.dart';
+import 'package:foodie/pages/restaurant_menu_page.dart';
+import 'package:foodie/pages/restaurant_reviews_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodie/pages/loading_page.dart';
 import 'package:foodie/pages/main_page.dart';
@@ -21,9 +24,22 @@ final routerConfig = GoRouter(
           path: '/map',
           pageBuilder: (context, state) => NoTransitionPage(child: MapPage()),
           routes: [
-            GoRoute(
-              path: '/restaurant',
-              pageBuilder: (context, state) => NoTransitionPage(child: RestaurantPage()),
+            ShellRoute(
+              builder: (context, state, child) => RestaurantPage(child: child),
+              routes: [
+                GoRoute(
+                  path: 'info',
+                  pageBuilder: (context, state) => NoTransitionPage(child: RestaurantInfoPage()),
+                ),
+                GoRoute(
+                  path: 'menu', 
+                  pageBuilder: (context, state) => NoTransitionPage(child: RestaurantMenuPage()),
+                ),
+                GoRoute(
+                  path: 'reviews', 
+                  pageBuilder: (context, state) => NoTransitionPage(child: RestaurantReviewsPage()),
+                ),
+              ],
             ),
           ],
         ),

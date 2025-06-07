@@ -44,7 +44,7 @@ class _BottomSheetState extends State<BottomSheet> {
                         icon: const Icon(Icons.expand_less),
                         onPressed: () {
                           setState(() {
-                            context.go('/map/restaurant');
+                            context.go('/map/info');
                           });
                         },
                       ),
