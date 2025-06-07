@@ -1,31 +1,77 @@
-{
-    "restaurantName": "",
-    "genreTags": [""],
-    "summary": "",
-    "businessHours": {
-        "Monday": "",
-        "Tuesday": "",
-        "Wednesday": "",
-        "Thursday": "",
-        "Friday": "",
-        "Saturday": "",
-        "Sunday": ""
-    },
-    "address": "",
-    "phoneNumber": "",
-    "restaurantReviewIDs": [""],
-    "latitude": 123.0,
-    "longitude": 123.0,
-    "menu": [
+[
+  {
+        "restaurantName": "吉米洋食屋",
+        "genreTags": [
+            "italian"
+        ],
+        "summary": "提供多樣義大利麵與燉飯，價格實惠，深受學生喜愛。",
+        "businessHour": {
+            "Monday": "11:30-14:00,17:00-21:00",
+            "Tuesday": "11:30-14:00,17:00-21:00",
+            "Wednesday": "11:30-14:00,17:00-21:00",
+            "Thursday": "11:30-14:00,17:00-21:00",
+            "Friday": "11:30-14:00,17:00-21:00",
+            "Saturday": "11:30-14:00,17:00-21:00",
+            "Sunday": "11:30-14:00,17:00-21:00"
+        },
+        "address": "300新竹市東區建功路16號2樓",
+        "phoneNumber": "03-5745631",
+        "restaurantReviewIDs": [],
+        "latitude": 24.79650279365678,
+        "longitude": 120.99860430982652,
+        "googleMapURL": "https://www.google.com/maps/place/%E5%90%89%E7%B1%B3%E6%B4%8B%E9%A3%9F%E5%B1%8B/@24.796494,120.9985161,17z/data=!4m15!1m8!3m7!1s0x34683672acf1643d:0x984959b3aff0aed7!2z5ZCJ57Gz5rSL6aOf5bGL!8m2!3d24.7963762!4d120.9985614!10e9!16s%2Fg%2F11b6367w4w!3m5!1s0x34683672acf1643d:0x984959b3aff0aed7!8m2!3d24.7963762!4d120.9985614!16s%2Fg%2F11b6367w4w?entry=ttu&g_ep=EgoyMDI1MDYwNC4wIKXMDSoASAFQAw%3D%3D",
+        "veganTag": "nonVegetarian",
+        "menu": [
         {
-            "dishName": "",
-            "dishReviewIDs": "",
-            "veganTag": "",
-            "halalTag": "",
-            "dishGenre": "",
-            "summary": "",
-            "bestReviewSummary": "",
-            "dishPrice": 100
+            "dishName": "茄汁培根義大利麵",
+            "dishReviewIDs": [],
+            "veganTag": "nonVegetarian",
+            "halalTag": "no",
+            "dishGenre": "義大利麵",
+            "summary": "經典番茄醬搭配香脆培根，酸甜適中。",
+            "bestReviewSummary": "番茄醬香濃、培根口感佳。",
+            "dishPrice": 135
+        },
+        {
+            "dishName": "奶油蛤蜊義大利麵",
+            "dishReviewIDs": [],
+            "veganTag": "nonVegetarian",
+            "halalTag": "no",
+            "dishGenre": "義大利麵",
+            "summary": "鮮美蛤蜊配以濃郁奶油醬汁。",
+            "bestReviewSummary": "蛤蜊新鮮，醬汁濃郁不膩。",
+            "dishPrice": 135
+        },
+        {
+            "dishName": "松露野菇燉飯",
+            "dishReviewIDs": [],
+            "veganTag": "nonVegetarian",
+            "halalTag": "no",
+            "dishGenre": "燉飯",
+            "summary": "松露香氣與野菇完美結合，口感豐富。",
+            "bestReviewSummary": "松露味道濃郁，燉飯軟硬適中。",
+            "dishPrice": 165
+        },
+        {
+            "dishName": "田園燉飯",
+            "dishReviewIDs": [],
+            "veganTag": "nonVegetarian",
+            "halalTag": "no",
+            "dishGenre": "燉飯",
+            "summary": "綿密奶油與鮮嫩蘑菇，口感滑順。",
+            "bestReviewSummary": "奶香十足，蘑菇香氣明顯。",
+            "dishPrice": 170
+        },
+        {
+            "dishName": "綜合海鮮燉飯",
+            "dishReviewIDs": [],
+            "veganTag": "nonVegetarian",
+            "halalTag": "no",
+            "dishGenre": "燉飯",
+            "summary": "多樣海鮮配以香濃燉飯，鮮味十足。",
+            "bestReviewSummary": "海鮮新鮮，飯粒鮮美多汁。",
+            "dishPrice": 200
         }
     ]
-}
+    }
+]
