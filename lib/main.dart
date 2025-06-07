@@ -10,5 +10,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const FoodieApp());
+  // runApp(const FoodieApp());
+  runApp(const TestFirebaseApp());
 }

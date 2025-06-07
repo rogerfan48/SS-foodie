@@ -11,6 +11,7 @@ class RestaurantModel {
   final double latitude;
   final double longtitude;
   final Map<String, DishModel> menuMap;
+  final String googleMapURL;
 
   RestaurantModel({
     required this.restaurantName,
@@ -22,6 +23,7 @@ class RestaurantModel {
     required this.latitude,
     required this.longtitude,
     required this.menuMap,
+    required this.googleMapURL,
     List<String>? restaurantReviewIDs
   }) : restaurantReviewIDs = restaurantReviewIDs ?? [];
 

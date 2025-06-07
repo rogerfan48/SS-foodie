@@ -18,6 +18,7 @@ class RestaurantInfo {
   final List<GenreTag> genreTags;
   final VeganTag veganTag;
   final int priceLevel, rating;
+  final String googleMapURL;
 
   RestaurantInfo({
     required this.restaurantName,
@@ -30,6 +31,7 @@ class RestaurantInfo {
     required this.priceLevel,
     required this.rating,
     required this.imageURLs,
+    required this.googleMapURL,
   });
 }
 
@@ -67,6 +69,7 @@ class InfoPageViewModel with ChangeNotifier {
           address:        _restaurant.address,
           phoneNumber:    _restaurant.phoneNumber,
           businessHour:   _restaurant.businessHour,
+          googleMapURL:   _restaurant.googleMapURL,
           genreTags:      _restaurant.genreTags.map(GenreTag.fromString).toList(),
           veganTag:       calculateVeganTag(),
           priceLevel:     calculatePriceLevel(),
