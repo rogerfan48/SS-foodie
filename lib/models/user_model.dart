@@ -1,11 +1,13 @@
 class UserModel {
   String? uid; // Google Auth UID
   final String userName;
+  final String? photoURL;
   final Map<String, List<String>> viewedRestaurantIDs; // (ID, [viewDate])
   final List<String> userReviewIDs;
 
   UserModel({
     required this.userName,
+    this.photoURL,
     Map<String, List<String>>? viewedRestaurantIDs,
     List<String>? userReviewIDs,
   })  : viewedRestaurantIDs = viewedRestaurantIDs ?? {},
@@ -24,6 +26,7 @@ class UserModel {
     });
     return UserModel(
       userName: map['userName'] as String,
+      photoURL: map['photoURL'] as String?,
       viewedRestaurantIDs: viewedMap,
       userReviewIDs: List<String>.from(map['userReviewIDs'] ?? []),
     );

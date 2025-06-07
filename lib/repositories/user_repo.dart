@@ -16,14 +16,23 @@ class UserRepository {
   Future<void> createUser(auth.User user) {
     final newAppUser = UserModel(
       userName: user.displayName ?? 'Foodie User',
+      photoURL: user.photoURL,
       viewedRestaurantIDs: {},
       userReviewIDs: [],
     );
 
     return _userCollection.doc(user.uid).set({
       'userName': newAppUser.userName,
+      'photoURL': newAppUser.photoURL,
       'viewedRestaurantIDs': newAppUser.viewedRestaurantIDs,
       'userReviewIDs': newAppUser.userReviewIDs,
+    });
+  }
+
+  Future<void> updateUserProfile(String uid, String displayName, String? photoURL) {
+    return _userCollection.doc(uid).update({
+      'userName': displayName,
+      'photoURL': photoURL,
     });
   }
 

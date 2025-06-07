@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:foodie/models/user_model.dart';
 import 'package:foodie/models/review_model.dart';
+import 'package:foodie/view_models/restaurant_detail_vm.dart';
 
 class ReviewListItem extends StatelessWidget {
   final ReviewModel review;
@@ -9,13 +12,32 @@ class ReviewListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final vm = context.read<RestaurantDetailViewModel>();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(child: Icon(Icons.person_outline)), // 評論者頭像
+          FutureBuilder<UserModel?>(
+            future: vm.getUserData(review.reviewerID),
+            builder: (context, snapshot) {
+              // 正在加載或數據為空
+              if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
+                return const CircleAvatar(child: Icon(Icons.person_outline));
+              }
+              // 獲取到用戶數據
+              final user = snapshot.data;
+              return CircleAvatar(
+                backgroundImage: (user?.photoURL != null)
+                    ? NetworkImage(user!.photoURL!)
+                    : null,
+                child: (user?.photoURL == null)
+                    ? const Icon(Icons.person_outline)
+                    : null,
+              );
+            },
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -23,8 +45,15 @@ class ReviewListItem extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    // TODO: 根據 reviewerID 查找真實用戶名
-                    Text('User ${review.reviewerID.substring(0, 6)}', style: textTheme.titleSmall),
+                    FutureBuilder<UserModel?>(
+                      future: vm.getUserData(review.reviewerID),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
+                          return Text('Loading...', style: textTheme.titleSmall);
+                        }
+                        return Text(snapshot.data?.userName ?? 'Unknown User', style: textTheme.titleSmall);
+                      },
+                    ),
                     const Spacer(),
                     IconButton(icon: const Icon(Icons.thumb_up_alt_outlined, size: 18), onPressed: () {}),
                     Text(review.agree.toString()),

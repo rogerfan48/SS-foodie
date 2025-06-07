@@ -26,7 +26,7 @@ class AuthService {
       );
 
       final userCredential = await _auth.signInWithCredential(credential);
-      
+
       if (userCredential.user != null) {
         await _getOrCreateUserInFirestore(userCredential.user!);
       }
@@ -44,8 +44,17 @@ class AuthService {
   Future<void> _getOrCreateUserInFirestore(User user) async {
     final userDoc = await _userRepository.getUser(user.uid);
     if (!userDoc.exists) {
-      print('Creating new user document in Firestore with uid: ${user.uid}');
       await _userRepository.createUser(user);
+    } else {
+      final existingUserData = userDoc.data() as Map<String, dynamic>;
+      if (existingUserData['userName'] != user.displayName ||
+          existingUserData['photoURL'] != user.photoURL) {
+        await _userRepository.updateUserProfile(
+          user.uid,
+          user.displayName ?? 'Foodie User',
+          user.photoURL,
+        );
+      }
     }
   }
 

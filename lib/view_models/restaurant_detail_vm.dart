@@ -16,6 +16,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
   final RestaurantRepository _restaurantRepository;
   final ReviewRepository _reviewRepository;
   final UserRepository _userRepository;
+  final Map<String, UserModel> _userCache = {};
 
   StreamSubscription? _restaurantSubscription;
   StreamSubscription? _reviewSubscription;
@@ -47,7 +48,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
     }
     return distribution;
   }
-  
+
   void sortReviews(ReviewSortType sortType) {
     _currentSortType = sortType;
     switch (sortType) {
@@ -59,7 +60,9 @@ class RestaurantDetailViewModel with ChangeNotifier {
         break;
       case ReviewSortType.Latest:
       default:
-        _reviews.sort((a, b) => DateTime.parse(b.reviewDate).compareTo(DateTime.parse(a.reviewDate)));
+        _reviews.sort(
+          (a, b) => DateTime.parse(b.reviewDate).compareTo(DateTime.parse(a.reviewDate)),
+        );
         break;
     }
     notifyListeners();
@@ -70,9 +73,9 @@ class RestaurantDetailViewModel with ChangeNotifier {
     required RestaurantRepository restaurantRepository,
     required ReviewRepository reviewRepository,
     required UserRepository userRepository,
-  })  : _restaurantRepository = restaurantRepository,
-        _reviewRepository = reviewRepository,
-        _userRepository = userRepository {
+  }) : _restaurantRepository = restaurantRepository,
+       _reviewRepository = reviewRepository,
+       _userRepository = userRepository {
     _listenToData();
   }
 
@@ -92,14 +95,16 @@ class RestaurantDetailViewModel with ChangeNotifier {
       notifyListeners();
     });
 
-    _categoriezedMenu = _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
-      final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
-      if (!map.containsKey(category)) {
-        map[category] = [];
-      }
-      map[category]!.add(dish);
-      return map;
-    }) ?? {};
+    _categoriezedMenu =
+        _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
+          final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
+          if (!map.containsKey(category)) {
+            map[category] = [];
+          }
+          map[category]!.add(dish);
+          return map;
+        }) ??
+        {};
   }
 
   void _checkLoadingStatus() {
@@ -127,14 +132,21 @@ class RestaurantDetailViewModel with ChangeNotifier {
     return _reviews.expand((review) => review.reviewImgURLs).toList();
   }
 
-  /// 透過 UserRepository 查使用者名稱
-  Future<String> getUserName(String userId) async {
+  Future<UserModel?> getUserData(String userId) async {
+    if (_userCache.containsKey(userId)) {
+      return _userCache[userId];
+    }
     try {
-      // 假設 user_repo.dart 提供 streamUserMap()
-      final Map<String, UserModel> userMap = await _userRepository.streamUserMap().first;
-      return userMap[userId]?.userName ?? 'Unknown';
-    } catch (_) {
-      return 'Unknown';
+      final userDoc = await _userRepository.getUser(userId);
+      if (userDoc.exists) {
+        final user = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        _userCache[userId] = user; // 存入快取
+        return user;
+      }
+      return null;
+    } catch (e) {
+      print("Error fetching user data: $e");
+      return null;
     }
   }
 
