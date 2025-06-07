@@ -8,13 +8,21 @@ import 'package:foodie/view_models/restaurant_detail_vm.dart';
 
 class ReviewListItem extends StatelessWidget {
   final ReviewModel review;
-  const ReviewListItem({super.key, required this.review});
+  final Future<UserModel?> userDataFuture;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDisagree;
+  const ReviewListItem({
+    super.key,
+    required this.review,
+    required this.userDataFuture,
+    this.onAgree,
+    this.onDisagree,
+  });
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final vm = context.read<RestaurantDetailViewModel>();
     final currentUserId = context.watch<AccountViewModel>().firebaseUser?.uid;
 
     final bool hasAgreed = currentUserId != null && review.agreedBy.contains(currentUserId);
@@ -26,13 +34,11 @@ class ReviewListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FutureBuilder<UserModel?>(
-            future: vm.getUserData(review.reviewerID),
+            future: userDataFuture,
             builder: (context, snapshot) {
-              // 正在加載或數據為空
               if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
                 return const CircleAvatar(child: Icon(Icons.person_outline));
               }
-              // 獲取到用戶數據
               final user = snapshot.data;
               return CircleAvatar(
                 backgroundImage: (user?.photoURL != null) ? NetworkImage(user!.photoURL!) : null,
@@ -48,7 +54,7 @@ class ReviewListItem extends StatelessWidget {
                 Row(
                   children: [
                     FutureBuilder<UserModel?>(
-                      future: vm.getUserData(review.reviewerID),
+                      future: userDataFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
                           return Text('Loading...', style: textTheme.titleSmall);
@@ -66,18 +72,9 @@ class ReviewListItem extends StatelessWidget {
                         size: 18,
                         color: hasAgreed ? colorScheme.primary : null,
                       ),
-                      onPressed: () {
-                        if (currentUserId != null) {
-                          vm.toggleReviewVote(
-                            reviewId: review.reviewID,
-                            currentUserId: currentUserId,
-                            voteType: VoteType.agree,
-                            isCurrentlyVoted: hasAgreed,
-                          );
-                        }
-                      },
+                      onPressed: onAgree,
                     ),
-                    Text(( review.agreedBy.length-1 ).toString()),
+                    Text((review.agreedBy.length - 1).toString()),
                     const SizedBox(width: 8),
                     IconButton(
                       icon: Icon(
@@ -85,18 +82,9 @@ class ReviewListItem extends StatelessWidget {
                         size: 18,
                         color: hasDisagreed ? Colors.grey : null,
                       ),
-                      onPressed: () {
-                        if (currentUserId != null) {
-                          vm.toggleReviewVote(
-                            reviewId: review.reviewID,
-                            currentUserId: currentUserId,
-                            voteType: VoteType.disagree,
-                            isCurrentlyVoted: hasDisagreed,
-                          );
-                        }
-                      },
+                      onPressed: onDisagree,
                     ),
-                    Text(( review.disagreedBy.length-1 ).toString()),
+                    Text((review.disagreedBy.length - 1).toString()),
                   ],
                 ),
                 Row(
