@@ -29,7 +29,7 @@ class _MapPageState extends State<MapPage> {
   final String _mapStyle = '''[{"featureType": "poi","stylers": [{"visibility": "off"}]}]''';
   
   RestaurantDetailViewModel? _selectedRestaurantDetailVM;
-  final double _sheetHeight = 250;
+  final double _sheetHeight = 200;
 
   @override
   void initState() {

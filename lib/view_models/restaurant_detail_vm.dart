@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:foodie/enums/vegan_tag.dart';
 import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/review_model.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
@@ -21,6 +22,11 @@ class RestaurantDetailViewModel with ChangeNotifier {
   List<ReviewModel> get reviews => _reviews;
   bool get isLoading => _isLoading;
   String get restaurantName => _restaurant?.restaurantName ?? 'Loading...';
+
+  int get averageRating => _calculateRating();
+  int get averagePriceLevel => _calculatePriceLevel();
+  VeganTag get overallVeganTag => _calculateVeganTag();
+  List<String> get displayImageUrls => _getImageURLs();
 
   RestaurantDetailViewModel({
     required this.restaurantId,
@@ -49,10 +55,43 @@ class RestaurantDetailViewModel with ChangeNotifier {
   }
 
   void _checkLoadingStatus() {
-    // 只有在 restaurant 數據也載入後才算完成
     if (_restaurant != null && _isLoading) {
       _isLoading = false;
     }
+  }
+
+  VeganTag _calculateVeganTag() {
+    if (_restaurant == null) return veganTags[VeganTags.nonVegetarian]!;
+    final tags = _restaurant!.menuMap.values
+        .map((dish) => dish.veganTag)
+        .map((tag) => VeganTag.fromString(tag))
+        .toList();
+
+    if (tags.isEmpty) return veganTags[VeganTags.nonVegetarian]!;
+    if (tags.any((t) => t.title == veganTags[VeganTags.nonVegetarian]!.title)) return veganTags[VeganTags.nonVegetarian]!;
+    if (tags.any((t) => t.title == veganTags[VeganTags.vegetarian]!.title)) return veganTags[VeganTags.vegetarian]!;
+    if (tags.any((t) => t.title == veganTags[VeganTags.lacto]!.title)) return veganTags[VeganTags.lacto]!;
+    if (tags.any((t) => t.title == veganTags[VeganTags.veganPartial]!.title)) return veganTags[VeganTags.veganPartial]!;
+    return veganTags[VeganTags.vegan]!;
+  }
+
+  int _calculateRating() {
+    if (_reviews.isEmpty) return 0; // 沒有評論則返回 0 顆星
+    final total = _reviews.fold<int>(0, (sum, review) => sum + review.rating);
+    return (total / _reviews.length).round();
+  }
+
+  int _calculatePriceLevel() {
+    if (_reviews.isEmpty) return 1; // 預設為 1
+    final validReviews = _reviews.where((r) => r.priceLevel != null).toList();
+    if (validReviews.isEmpty) return 1;
+    final total = validReviews.fold<int>(0, (sum, review) => sum + review.priceLevel!);
+    return (total / validReviews.length).round().clamp(1, 5); // 確保價格等級在 1-5 之間
+  }
+
+  List<String> _getImageURLs() {
+    if (_reviews.isEmpty) return [];
+    return _reviews.expand((review) => review.reviewImgURLs).toList();
   }
 
   @override
