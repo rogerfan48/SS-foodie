@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/view_models/account_vm.dart';
+import 'package:foodie/view_models/write_review_vm.dart';
 import 'package:foodie/widgets/restaurant/rating_summary_card.dart';
 import 'package:foodie/widgets/restaurant/review_list_item.dart';
 import 'package:foodie/pages/restaurant_write_review_page.dart';
@@ -11,13 +12,18 @@ class RestaurantReviewsPage extends StatelessWidget {
   const RestaurantReviewsPage({super.key});
 
   void _showWriteReviewPage(BuildContext context) {
+    final detailVM = context.read<RestaurantDetailViewModel>();
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Close',
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (context, anim1, anim2) {
-        return const RestaurantWriteReviewPage();
+        return ChangeNotifierProvider(
+          create: (_) => WriteReviewViewModel(detailVM.categorizedMenu),
+          child: const RestaurantWriteReviewPage(),
+        );
       },
       transitionBuilder: (context, anim1, anim2, child) {
         return SlideTransition(

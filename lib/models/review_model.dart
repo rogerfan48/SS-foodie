@@ -1,5 +1,5 @@
 class ReviewModel {
-  final String reviewID;
+  final String? reviewID;
   final String reviewerID;
   final String restaurantID;
   final String? dishID;
@@ -12,7 +12,7 @@ class ReviewModel {
   final List<String> reviewImgURLs;
 
   ReviewModel({
-    required this.reviewID,
+    this.reviewID,
     required this.reviewerID,
     required this.restaurantID,
     List<String>? agreedBy,
@@ -43,4 +43,3 @@ class ReviewModel {
     );
   }
 }
-
