@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:foodie/enums/vegan_tag.dart';
+import 'package:foodie/models/dish_model.dart';
 import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/review_model.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
@@ -14,10 +15,12 @@ class RestaurantDetailViewModel with ChangeNotifier {
   StreamSubscription? _restaurantSubscription;
   StreamSubscription? _reviewSubscription;
 
+  Map<String, List<DishModel>> _categoriezedMenu = {};
   RestaurantModel? _restaurant;
   List<ReviewModel> _reviews = [];
   bool _isLoading = true;
 
+  Map<String, List<DishModel>> get categorizedMenu => _categoriezedMenu;
   RestaurantModel? get restaurant => _restaurant;
   List<ReviewModel> get reviews => _reviews;
   bool get isLoading => _isLoading;
@@ -52,6 +55,15 @@ class RestaurantDetailViewModel with ChangeNotifier {
       _checkLoadingStatus();
       notifyListeners();
     });
+
+    _categoriezedMenu = _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
+      final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
+      if (!map.containsKey(category)) {
+        map[category] = [];
+      }
+      map[category]!.add(dish);
+      return map;
+    }) ?? {};
   }
 
   void _checkLoadingStatus() {
