@@ -6,6 +6,7 @@ import 'package:foodie/theme/theme.dart';
 import 'package:foodie/services/ai_chat.dart';
 import 'package:foodie/services/navigation.dart';
 import 'package:foodie/services/theme.dart';
+import 'package:foodie/pages/firestore_test_page/firestore_data_page.dart'; 
 
 class FoodieApp extends StatelessWidget {
   const FoodieApp({super.key});
@@ -39,6 +40,22 @@ class FoodieApp extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class TestFirebaseApp extends StatelessWidget {
+  const TestFirebaseApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Foodie - Firestore Viewer',
+      theme: MaterialTheme().light(),
+      darkTheme: MaterialTheme().dark(),
+      // instead of routerConfig, just show your FirestoreDataPage:
+      home: const FirestoreDataPage(),
+      // remove routerConfig/restorationScopeId if not needed here
     );
   }
 }
