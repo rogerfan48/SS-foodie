@@ -61,7 +61,11 @@ class RestaurantDetailViewModel with ChangeNotifier {
       case ReviewSortType.Latest:
       default:
         _reviews.sort(
-          (a, b) => DateTime.parse(b.reviewDate).compareTo(DateTime.parse(a.reviewDate)),
+          (a, b) {
+            final aUser = a.agreedBy.length + a.disagreedBy.length;
+            final bUser = b.agreedBy.length + b.disagreedBy.length;
+            return bUser.compareTo(aUser);
+          },
         );
         break;
     }
