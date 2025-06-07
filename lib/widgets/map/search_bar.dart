@@ -29,4 +29,3 @@ class SearchBarWidget extends StatelessWidget {
     );
   }
 }
-

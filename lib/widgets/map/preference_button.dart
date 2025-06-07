@@ -52,10 +52,10 @@ class _PreferenceButtonState extends State<PreferenceButton> {
   Widget build(BuildContext context) {
     // 根據 overlay 是否可見來決定按鈕樣式
     final Color borderColor =
-        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.outline;
+        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurfaceVariant;
     final double borderWidth = _isOverlayVisible ? 2.0 : 1.0;
     final Color iconColor =
-        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.outline;
+        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Container(
       key: _buttonKey,

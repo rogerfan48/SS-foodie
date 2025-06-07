@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 enum VeganTags {
   vegan, // 全素
   veganPartial,
-  lactoOvo, // 蛋奶素
-  lactoOvoPartial,
+  lacto, // 蛋奶素
+  lactoPartial,
   vegetarian, // 五辛素
   vegetarianPartial,
   nonVegetarian, // 葷食
@@ -19,10 +19,10 @@ class VeganTag {
 
 final veganTags = {
   VeganTags.vegan: VeganTag("Vegan", Image.asset('assets/imgs/leaf.png', width: 150)),
-  VeganTags.veganPartial: VeganTag("VeganPartial", Image.asset('assets/imgs/leaf.png', width: 150)),
-  VeganTags.lactoOvo: VeganTag("LactoOvo", Image.asset('assets/imgs/milk.png', width: 150)),  
-  VeganTags.lactoOvoPartial: VeganTag("LactoOvoPartial", Image.asset('assets/imgs/milk.png', width: 150)),
+  VeganTags.veganPartial: VeganTag("Vegan (Partial)", Image.asset('assets/imgs/leaf.png', width: 150)),
+  VeganTags.lacto: VeganTag("Lacto", Image.asset('assets/imgs/milk.png', width: 150)),  
+  VeganTags.lactoPartial: VeganTag("Lacto (Partial)", Image.asset('assets/imgs/milk.png', width: 150)),
   VeganTags.vegetarian: VeganTag("Vegetarian", Image.asset('assets/imgs/onion.png', width: 150)),
-  VeganTags.vegetarianPartial: VeganTag("VegetarianPartial", Image.asset('assets/imgs/onion.png', width: 150)),
-  VeganTags.nonVegetarian: VeganTag("NonVegetarian", Image.asset('assets/imgs/meat.png', width: 150)),
+  VeganTags.vegetarianPartial: VeganTag("Vegetarian (Partial)", Image.asset('assets/imgs/onion.png', width: 150)),
+  VeganTags.nonVegetarian: VeganTag("Non Vegetarian", Image.asset('assets/imgs/meat.png', width: 150)),
 };

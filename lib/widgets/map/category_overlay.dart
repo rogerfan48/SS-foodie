@@ -100,11 +100,11 @@ class _CategoryOverlayState extends State<CategoryOverlay> {
                       widget.onUpdate(_currentOptions);
                     });
                   },
-                  child: const Text("全選"),
+                  child: const Text("Select All"),
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -114,7 +114,7 @@ class _CategoryOverlayState extends State<CategoryOverlay> {
                       widget.onUpdate(_currentOptions);
                     });
                   },
-                  child: const Text("全部取消"),
+                  child: const Text("Clear All"),
                 ),
               ],
             ),

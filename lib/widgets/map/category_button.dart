@@ -50,10 +50,10 @@ class _CategoryButtonState extends State<CategoryButton> {
   @override
   Widget build(BuildContext context) {
     final Color borderColor =
-        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.outline;
+        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurfaceVariant;
     final double borderWidth = _isOverlayVisible ? 2.0 : 1.0;
     final Color iconColor =
-        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.outline;
+        _isOverlayVisible ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Container(
       key: _buttonKey,

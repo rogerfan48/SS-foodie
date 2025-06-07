@@ -10,7 +10,7 @@ class GenreTag {
 }
 
 const genreTags = {
-  GenreTags.fastFood: GenreTag("FastFood", Color(0xFFFCADAD)),
+  GenreTags.fastFood: GenreTag("Fast Food", Color(0xFFFCADAD)),
   GenreTags.chinese: GenreTag("Chinese", Color(0xFFE45454)),
   GenreTags.western: GenreTag("Western", Color(0xFF0088FF)),
   GenreTags.indian: GenreTag("Indian", Color(0xFFDC9832)),
@@ -20,7 +20,7 @@ const genreTags = {
   GenreTags.hotpot: GenreTag("Hotpot", Color(0xFFDCDCDC)),
   GenreTags.barbecue: GenreTag("Barbecue", Color(0xFFFFA426)),
   GenreTags.teppanyaki: GenreTag("Teppanyaki", Color(0xFF41CF41)),
-  GenreTags.streetFood: GenreTag("StreetFood", Color(0xFFD157DA)),
+  GenreTags.streetFood: GenreTag("Street Food", Color(0xFFD157DA)),
   GenreTags.drink: GenreTag("Drink", Color(0xFF5AE5B5)),
   GenreTags.coffee: GenreTag("Coffee", Color(0xFF38D4E6)),
 };
