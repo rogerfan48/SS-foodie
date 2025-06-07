@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:foodie/models/review_model.dart';
+import 'package:foodie/repositories/review_repo.dart';
 
 class MyReview {
   String? content;
@@ -7,28 +11,46 @@ class MyReview {
   // List<String>? imageURLs;
 
   MyReview({
-    this.content,
-    this.reviewDate,
+    required this.content,
+    required this.reviewDate,
+    required this.rating,
+    required this.agree,
+    required this.disagree,
   });
 }
 
 class MyReviewViewModel with ChangeNotifier {
+  final String _userId;
+  final ReviewRepository _reviewRepository = ReviewRepository();
+  late final StreamSubscription<Map<String, ReviewModel>?> _reviewSubscription;
   final List<MyReview> _myReviews = [];
 
   List<MyReview> get myReviews => _myReviews;
 
-  void addMyReview(MyReview review) {
-    _myReviews.add(review);
-    notifyListeners();
+  MyReviewViewModel(this._userId) {
+    _reviewSubscription = _reviewRepository
+      .streamReviewMap()
+      .listen((allReviews) {
+        _myReviews.clear();
+        allReviews?.forEach((key, review) {
+          // only keep reviews where the owner matches
+          if (review.reviewerID == _userId) {
+            _myReviews.add(MyReview(
+              content:    review.content,
+              reviewDate: DateTime.parse(review.reviewDate),
+              rating:     review.rating,
+              agree:      review.agree,
+              disagree:   review.disagree,
+            ));
+          }
+        });
+        notifyListeners();
+      });
   }
 
-  void removeMyReview(MyReview review) {
-    _myReviews.remove(review);
-    notifyListeners();
-  }
-
-  void clearMyReviews() {
-    _myReviews.clear();
-    notifyListeners();
+  @override
+  void dispose() {
+    _reviewSubscription.cancel();
+    super.dispose();
   }
 }

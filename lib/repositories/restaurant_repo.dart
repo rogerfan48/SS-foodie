@@ -3,6 +3,10 @@ import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/dish_model.dart';
 
 class RestaurantRepository {
+  RestaurantRepository._internal();
+  static final RestaurantRepository _instance = RestaurantRepository._internal();
+  factory RestaurantRepository() => _instance;
+  
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final timeout = const Duration(seconds: 10);
 

@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodie/models/review_model.dart';
 
 class ReviewRepository {
+  ReviewRepository._internal();
+  static final ReviewRepository _instance = ReviewRepository._internal();
+  factory ReviewRepository() => _instance;
+
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final timeout = const Duration(seconds: 10);
 

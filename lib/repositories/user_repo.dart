@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodie/models/user_model.dart';
 
 class UserRepository {
+  UserRepository._internal();
+  static final UserRepository _instance = UserRepository._internal();
+  factory UserRepository() => _instance;
+  
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final timeout = const Duration(seconds: 10);
 

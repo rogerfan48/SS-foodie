@@ -97,8 +97,8 @@ class InfoPageViewModel with ChangeNotifier {
       return veganTags[VeganTags.vegetarian]!;
     }
     // else if any dish is lactoOvo → lactoOvo
-    if (tags.any((t) => t.title == veganTags[VeganTags.lactoOvo]!.title)) {
-      return veganTags[VeganTags.lactoOvo]!;
+    if (tags.any((t) => t.title == veganTags[VeganTags.lacto]!.title)) {
+      return veganTags[VeganTags.lacto]!;
     }
     // else if any dish is veganPartial
     if (tags.any((t) => t.title == veganTags[VeganTags.veganPartial]!.title)) {
