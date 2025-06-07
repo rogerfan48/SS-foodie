@@ -1,6 +1,4 @@
-
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:foodie/enums/genre_tag.dart';
 import 'package:foodie/models/restaurant_model.dart';
@@ -17,30 +15,31 @@ class RestaurantItem {
     required this.restaurantName,
     required this.latitude,
     required this.longitude,
-    required this.genreTag
+    required this.genreTag,
   });
 }
 
-class AllRestaurantViewModel with ChangeNotifier{
-  final RestaurantRepository _restaurantRepository = RestaurantRepository();
+class AllRestaurantViewModel with ChangeNotifier {
+  final RestaurantRepository _restaurantRepository;
   final List<RestaurantItem> _restaurants = [];
   late final StreamSubscription<Map<String, RestaurantModel>> _restaurantSubscription;
 
   List<RestaurantItem> get restaurants => _restaurants;
 
-  AllRestaurantViewModel() {
+  AllRestaurantViewModel(this._restaurantRepository) {
     _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen((restaurantMap) {
       _restaurants.clear();
-      restaurantMap.forEach(
-        (docId, restaurant) {
-          _restaurants.add(RestaurantItem(
+      restaurantMap.forEach((docId, restaurant) {
+        _restaurants.add(
+          RestaurantItem(
             restaurantId: docId,
             restaurantName: restaurant.restaurantName,
             latitude: restaurant.latitude,
             longitude: restaurant.longtitude,
-            genreTag: GenreTag.fromString(restaurant.genreTags.first), // Assuming genreTags is a map of String to GenreTag
-          ));
-        });
+            genreTag: GenreTag.fromString(restaurant.genreTags.first),
+          ),
+        );
+      });
       notifyListeners();
     });
   }

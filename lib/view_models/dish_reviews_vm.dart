@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/review_model.dart';
@@ -12,60 +11,59 @@ class DishReview {
   List<String>? imageURLs;
 
   DishReview({
-    required this.dishName,
-    required this.content,
-    required this.reviewDate,
-    required this.reviewerID,
-    required this.restaurantID,
-    required this.dishID,
-    required this.priceLevel,
-    required this.rating,
-    required this.agree,
-    required this.disagree,
-    List<String>? imageURLs,
+    this.dishName, this.content, this.reviewDate, this.reviewerID, 
+    this.restaurantID, this.dishID, this.priceLevel, this.rating, 
+    this.agree, this.disagree, List<String>? imageURLs,
   }) : imageURLs = imageURLs ?? [];
 }
 
 class DishReviewsViewModel with ChangeNotifier {
-  final RestaurantRepository _restaurantRepository = RestaurantRepository();
-  final ReviewRepository _reviewRepository = ReviewRepository();
-  late final StreamSubscription<Map<String, RestaurantModel>?> _restaurantSubscription;
-  late final StreamSubscription<Map<String, ReviewModel>?> _reviewSubscription;
-  late final String _dishName;
+  final RestaurantRepository _restaurantRepository;
+  final ReviewRepository _reviewRepository;
 
+  late final StreamSubscription<Map<String, RestaurantModel>> _restaurantSubscription;
+  late final StreamSubscription<Map<String, ReviewModel>> _reviewSubscription;
+  
+  String _dishName = ''; // 初始化為空字串，避免 bug
   final List<DishReview> _reviews = [];
   List<DishReview> get reviews => _reviews;
 
-  DishReviewsViewModel(String restaurantId, String dishId) {
-    late String newName;
+  DishReviewsViewModel(this._restaurantRepository, this._reviewRepository, String restaurantId, String dishId) {
     _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen(
       (restaurantMap) {
-        newName = restaurantMap[restaurantId]?.menuMap[dishId]?.dishName ?? "Unknown Dish";
+        final newName = restaurantMap[restaurantId]?.menuMap[dishId]?.dishName ?? "Unknown Dish";
         if(newName != _dishName) {
           _dishName = newName;
+          // 菜名更新後，需要更新現有評論列表中的菜名
+          for (var review in _reviews) {
+            review.dishName = _dishName;
+          }
           notifyListeners();
         }
     });
 
-    _reviewSubscription = _reviewRepository.streamReviewMap().listen(
-      (reviewMap) {
+    _reviewSubscription = _reviewRepository.streamReviewMap().listen((reviewMap) {
+        if (reviewMap == null) return;
         _reviews.clear();
-        reviewMap?.forEach((id, review) {
-          _reviews.add(DishReview(
-            dishName: _dishName,
-            content: review.content,
-            reviewDate: review.reviewDate,
-            reviewerID: review.reviewerID,
-            restaurantID: review.restaurantID,
-            dishID: review.dishID,
-            priceLevel: review.priceLevel,
-            rating: review.rating,
-            agree: review.agree,
-            disagree: review.disagree,
-            imageURLs: List<String>.from(review.reviewImgURLs),
-          ));
+        reviewMap.forEach((id, review) {
+          // 只加入符合 restaurantId 和 dishId 的評論
+          if (review.restaurantID == restaurantId && review.dishID == dishId) {
+            _reviews.add(DishReview(
+              dishName: _dishName, // 使用已經獲取到的菜名
+              content: review.content,
+              reviewDate: review.reviewDate,
+              reviewerID: review.reviewerID,
+              restaurantID: review.restaurantID,
+              dishID: review.dishID,
+              priceLevel: review.priceLevel,
+              rating: review.rating,
+              agree: review.agree,
+              disagree: review.disagree,
+              imageURLs: List<String>.from(review.reviewImgURLs),
+            ));
+          }
         });
-      notifyListeners();
+        notifyListeners();
     });
   }
 
@@ -74,20 +72,5 @@ class DishReviewsViewModel with ChangeNotifier {
     _restaurantSubscription.cancel();
     _reviewSubscription.cancel();
     super.dispose();
-  }
-
-  void addReview(DishReview review) {
-    _reviews.add(review);
-    notifyListeners();
-  }
-
-  void removeReview(DishReview review) {
-    _reviews.remove(review);
-    notifyListeners();
-  }
-
-  void clearReviews() {
-    _reviews.clear();
-    notifyListeners();
   }
 }

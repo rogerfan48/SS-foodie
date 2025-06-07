@@ -1,24 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:foodie/models/user_model.dart';
 
 class UserRepository {
-  UserRepository._internal();
-  static final UserRepository _instance = UserRepository._internal();
-  factory UserRepository() => _instance;
-  
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final CollectionReference _userCollection;
   final timeout = const Duration(seconds: 10);
 
+  UserRepository() : _userCollection = FirebaseFirestore.instance.collection('apps/foodie/users');
+
+  Future<DocumentSnapshot> getUser(String uid) {
+    return _userCollection.doc(uid).get();
+  }
+
+  Future<void> createUser(auth.User user) {
+    final newAppUser = UserModel(
+      userName: user.displayName ?? 'Foodie User',
+      viewedRestaurantIDs: {},
+      userReviewIDs: [],
+    );
+
+    return _userCollection.doc(user.uid).set({
+      'userName': newAppUser.userName,
+      'viewedRestaurantIDs': newAppUser.viewedRestaurantIDs,
+      'userReviewIDs': newAppUser.userReviewIDs,
+    });
+  }
 
   Stream<Map<String, UserModel>> streamUserMap() {
-    return _db
-      .collection('apps/foodie/users')
+    return _userCollection
       .snapshots()
       .map((snapshot) {
         return Map.fromEntries(
           snapshot.docs.map((doc) => MapEntry(
             doc.id,
-            UserModel.fromMap(doc.data()),
+            UserModel.fromMap(doc.data() as Map<String, dynamic>),
           )),
         );
       });

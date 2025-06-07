@@ -3,21 +3,17 @@ import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/dish_model.dart';
 
 class RestaurantRepository {
-  RestaurantRepository._internal();
-  static final RestaurantRepository _instance = RestaurantRepository._internal();
-  factory RestaurantRepository() => _instance;
-  
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final timeout = const Duration(seconds: 10);
 
-  /// Streams a map where each key is a restaurant doc ID
-  /// and each value is the RestaurantModel (with its menu loaded).
+  RestaurantRepository();
+
   Stream<Map<String, RestaurantModel>> streamRestaurantMap() {
     return _db
       .collection('apps/foodie/restaurants')
       .snapshots()
       .asyncMap((snapshot) async {
-        final entries = await Future.wait(snapshot.docs.map((doc) async { // each doc is a restaurant
+        final entries = await Future.wait(snapshot.docs.map((doc) async {
           final data = doc.data();
           final menuSnap = await doc.reference.collection('menu').get();
           final menuMap = {

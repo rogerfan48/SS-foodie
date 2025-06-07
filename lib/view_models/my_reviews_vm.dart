@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:foodie/models/review_model.dart';
 import 'package:foodie/repositories/review_repo.dart';
@@ -21,19 +20,18 @@ class MyReview {
 
 class MyReviewViewModel with ChangeNotifier {
   final String _userId;
-  final ReviewRepository _reviewRepository = ReviewRepository();
-  late final StreamSubscription<Map<String, ReviewModel>?> _reviewSubscription;
+  final ReviewRepository _reviewRepository;
+  late final StreamSubscription<Map<String, ReviewModel>> _reviewSubscription;
   final List<MyReview> _myReviews = [];
 
   List<MyReview> get myReviews => _myReviews;
 
-  MyReviewViewModel(this._userId) {
+  MyReviewViewModel(this._userId, this._reviewRepository) {
     _reviewSubscription = _reviewRepository
       .streamReviewMap()
       .listen((allReviews) {
         _myReviews.clear();
-        allReviews?.forEach((key, review) {
-          // only keep reviews where the owner matches
+        allReviews.forEach((key, review) {
           if (review.reviewerID == _userId) {
             _myReviews.add(MyReview(
               content:    review.content,
