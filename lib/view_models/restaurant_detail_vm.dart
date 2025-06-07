@@ -152,6 +152,24 @@ class RestaurantDetailViewModel with ChangeNotifier {
     }
   }
 
+  Future<void> toggleReviewVote({
+    required String reviewId,
+    required String currentUserId,
+    required VoteType voteType,
+    required bool isCurrentlyVoted,
+  }) async {
+    try {
+      await _reviewRepository.toggleVote(
+        reviewId: reviewId,
+        userId: currentUserId,
+        voteType: voteType,
+        isCurrentlyVoted: isCurrentlyVoted,
+      );
+    } catch (e) {
+      print("Failed to toggle vote: $e");
+    }
+  }
+
   @override
   void dispose() {
     _restaurantSubscription?.cancel();

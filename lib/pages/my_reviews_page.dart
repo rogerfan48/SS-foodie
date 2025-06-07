@@ -19,29 +19,30 @@ class MyReviewsPage extends StatelessWidget {
         ),
         title: const Text('My Reviews'),
       ),
-      body: (myReviewViewModel == null || myReviewViewModel.myReviews.isEmpty)
-          ? const Center(child: Text('You have no reviews yet.'))
-          : ListView.builder(
-              itemCount: myReviewViewModel.myReviews.length,
-              itemBuilder: (context, index) {
-                final reviewDisplay = myReviewViewModel.myReviews[index];
-                final reviewData = ReviewCardData(
-                  restaurantName: reviewDisplay.restaurantName,
-                  content: reviewDisplay.review.content,
-                  rating: reviewDisplay.review.rating,
-                  agreeCount: reviewDisplay.review.agree,
-                  disagreeCount: reviewDisplay.review.disagree,
-                  reviewDate: reviewDisplay.review.reviewDate, // 您可以進一步格式化日期
-                  onEdit: () {
-                    // TODO: 執行編輯評論的邏輯
-                  },
-                  onDelete: () {
-                    // TODO: 執行刪除評論的邏輯
-                  },
-                );
-                return ReviewCard(data: reviewData);
-              },
-            ),
+      body: Center(child: Text('You have no reviews yet.')),
+      // (myReviewViewModel == null || myReviewViewModel.myReviews.isEmpty)
+      //       ? const Center(child: Text('You have no reviews yet.'))
+      //       : ListView.builder(
+      //           itemCount: myReviewViewModel.myReviews.length,
+      //           itemBuilder: (context, index) {
+      //             final reviewDisplay = myReviewViewModel.myReviews[index];
+      //             final reviewData = ReviewCardData(
+      //               restaurantName: reviewDisplay.restaurantName,
+      //               content: reviewDisplay.review.content,
+      //               rating: reviewDisplay.review.rating,
+      //               agreeCount: reviewDisplay.review.agree,
+      //               disagreeCount: reviewDisplay.review.disagree,
+      //               reviewDate: reviewDisplay.review.reviewDate, // 您可以進一步格式化日期
+      //               onEdit: () {
+      //                 // TODO: 執行編輯評論的邏輯
+      //               },
+      //               onDelete: () {
+      //                 // TODO: 執行刪除評論的邏輯
+      //               },
+      //             );
+      //             return ReviewCard(data: reviewData);
+      //           },
+      //         ),
     );
   }
 }

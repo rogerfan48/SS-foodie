@@ -1,9 +1,10 @@
 class ReviewModel {
+  final String reviewID;
   final String reviewerID;
   final String restaurantID;
   final String? dishID;
-  final int agree;
-  final int disagree;
+  final List<String> agreedBy;
+  final List<String> disagreedBy;
   final int rating;
   final int? priceLevel;
   final String content;
@@ -11,25 +12,29 @@ class ReviewModel {
   final List<String> reviewImgURLs;
 
   ReviewModel({
+    required this.reviewID,
     required this.reviewerID,
     required this.restaurantID,
-    required this.agree,
-    required this.disagree,
+    List<String>? agreedBy,
+    List<String>? disagreedBy,
     required this.rating,
     required this.content,
     required this.reviewDate,
     this.dishID,
     this.priceLevel,
     List<String>? reviewImgURLs,
-  }) : reviewImgURLs = reviewImgURLs ?? [];
+  }) : agreedBy = agreedBy ?? [],
+       disagreedBy = disagreedBy ?? [],
+       reviewImgURLs = reviewImgURLs ?? [];
 
-  factory ReviewModel.fromMap(Map<String, dynamic> map) {
+  factory ReviewModel.fromMap(String id, Map<String, dynamic> map) {
     return ReviewModel(
+      reviewID: id,
       reviewerID: map['reviewerID'] as String,
       restaurantID: map['restaurantID'] as String,
       dishID: map['dishID'] as String?,
-      agree: map['agree'] as int,
-      disagree: map['disagree'] as int,
+      agreedBy: List<String>.from(map['agreedBy'] ?? []),
+      disagreedBy: List<String>.from(map['disagreedBy'] ?? []),
       rating: map['rating'] as int,
       priceLevel: map['priceLevel'] as int?,
       content: map['content'] as String,
@@ -38,3 +43,4 @@ class ReviewModel {
     );
   }
 }
+
