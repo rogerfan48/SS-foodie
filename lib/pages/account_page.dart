@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final listPadding = 16.0;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -16,7 +17,7 @@ class AccountPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.asset('assets/imgs/account.png', width: 75),
+                  Icon(Icons.account_circle, size: 75),
                   ElevatedButton(
                     onPressed: () {
                       // Login google account
@@ -41,9 +42,9 @@ class AccountPage extends StatelessWidget {
                 children: [
                   Container(
                     height: 1, // 線條高度
-                    color: Colors.black, // 線條顏色
+                    color: Theme.of(context).colorScheme.onSurface, // 線條顏色
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: listPadding),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -60,12 +61,12 @@ class AccountPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: listPadding),
                   Container(
                     height: 1, // 線條高度
-                    color: Colors.black, // 線條顏色
+                    color: Theme.of(context).colorScheme.onSurface, // 線條顏色
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: listPadding),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -82,12 +83,12 @@ class AccountPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: listPadding),
                   Container(
                     height: 1, // 線條高度
-                    color: Colors.black, // 線條顏色
+                    color: Theme.of(context).colorScheme.onSurface, // 線條顏色
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: listPadding),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
