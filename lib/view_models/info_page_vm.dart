@@ -8,6 +8,7 @@ import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
 
 class RestaurantInfo {
+  final String restaurantId;      // ← new
   final String restaurantName;
   final String summary;
   final String address;
@@ -20,6 +21,7 @@ class RestaurantInfo {
   final String? googleMapURL;
 
   RestaurantInfo({
+    required this.restaurantId,   // ← new
     required this.restaurantName,
     required this.summary,
     required this.address,
@@ -37,7 +39,7 @@ class RestaurantInfo {
 class InfoPageViewModel with ChangeNotifier {
   final RestaurantRepository _restaurantRepository;
   final ReviewRepository _reviewRepository;
-  final String restaurantId;
+  final String _restaurantId;
 
   RestaurantInfo? _restaurantInfo;
   List<ReviewModel> _restaurantReviews = [];
@@ -47,17 +49,18 @@ class InfoPageViewModel with ChangeNotifier {
 
   RestaurantInfo? get restaurantInfo => _restaurantInfo;
 
-  InfoPageViewModel(this.restaurantId, this._restaurantRepository, this._reviewRepository) {
+  InfoPageViewModel(this._restaurantId, this._restaurantRepository, this._reviewRepository) {
     _reviewSubscription = _reviewRepository.streamReviewMap().listen((allReviews) {
-      _restaurantReviews = allReviews.values.where((r) => r.restaurantID == restaurantId).toList();
-      // 當評論更新時，也可能需要重新計算評分等信息
+      _restaurantReviews = allReviews.values
+          .where((r) => r.restaurantID == _restaurantId)
+          .toList();
       _updateRestaurantInfo();
       notifyListeners();
     });
 
     _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen((restaurantMap) {
-      if (restaurantMap.containsKey(restaurantId)) {
-        _restaurant = restaurantMap[restaurantId]!;
+      if (restaurantMap.containsKey(_restaurantId)) {
+        _restaurant = restaurantMap[_restaurantId]!;
         _updateRestaurantInfo();
         notifyListeners();
       }
@@ -66,19 +69,19 @@ class InfoPageViewModel with ChangeNotifier {
 
   void _updateRestaurantInfo() {
     if (_restaurant == null) return;
-
     _restaurantInfo = RestaurantInfo(
+      restaurantId:   _restaurant!.restaurantId,        // ← use model’s ID
       restaurantName: _restaurant!.restaurantName,
-      summary: _restaurant!.summary,
-      address: _restaurant!.address,
-      phoneNumber: _restaurant!.phoneNumber,
-      businessHour: _restaurant!.businessHour,
-      googleMapURL: _restaurant!.googleMapURL,
-      genreTags: _restaurant!.genreTags.map(GenreTag.fromString).toList(),
-      veganTag: calculateVeganTag(),
-      priceLevel: calculatePriceLevel(),
-      rating: calculateRating(),
-      imageURLs: getImageURLs(),
+      summary:        _restaurant!.summary,
+      address:        _restaurant!.address,
+      phoneNumber:    _restaurant!.phoneNumber,
+      businessHour:   _restaurant!.businessHour,
+      googleMapURL:   _restaurant!.googleMapURL,
+      genreTags:      _restaurant!.genreTags.map(GenreTag.fromString).toList(),
+      veganTag:       calculateVeganTag(),
+      priceLevel:     calculatePriceLevel(),
+      rating:         calculateRating(),
+      imageURLs:      getImageURLs(),
     );
   }
 

@@ -14,24 +14,22 @@ class RestaurantRepository {
       .snapshots()
       .asyncMap((snapshot) async {
         final entries = await Future.wait(snapshot.docs.map((doc) async {
-          final data = doc.data();
-          final menuSnap = await doc.reference.collection('menu').get();
-          final menuMap = {
-            for (var dish in menuSnap.docs)
-              dish.id: DishModel.fromMap(dish.data()),
-          };
+          final data   = doc.data();
+          final menu   = await doc.reference.collection('menu').get();
+          final menuMap = { for (var d in menu.docs) d.id: DishModel.fromMap(d.data()) };
           final restaurant = RestaurantModel(
-            restaurantName:        data['restaurantName']      as String,
-            summary:               data['summary']             as String,
-            genreTags:             List<String>.from(data['genreTags'] as List),
-            businessHour:          Map<String, String>.from(data['businessHour'] as Map),
-            phoneNumber:           data['phoneNumber']         as String,
-            address:               data['address']             as String,
-            latitude:              data['latitude']            as double,
-            longtitude:            data['longtitude']          as double,
-            googleMapURL:          data['googleMapURL']        as String,
-            menuMap:               menuMap,
-            restaurantReviewIDs:   List<String>.from(data['restaurantReviewIDs'] ?? []),
+            restaurantId:        doc.id,                           // ← pass the ID
+            restaurantName:      data['restaurantName'] as String,
+            summary:             data['summary']       as String,
+            genreTags:           List<String>.from(data['genreTags'] as List),
+            businessHour:        Map<String, String>.from(data['businessHour'] as Map),
+            phoneNumber:         data['phoneNumber']   as String,
+            address:             data['address']       as String,
+            latitude:            data['latitude']      as double,
+            longtitude:          data['longtitude']    as double,
+            googleMapURL:        data['googleMapURL']  as String,
+            menuMap:             menuMap,
+            restaurantReviewIDs: List<String>.from(data['restaurantReviewIDs'] ?? []),
           );
           return MapEntry(doc.id, restaurant);
         }));
