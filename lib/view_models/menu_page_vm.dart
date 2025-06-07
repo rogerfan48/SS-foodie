@@ -21,8 +21,8 @@ class DishItem {
 }
 
 class MenuPageViewModel with ChangeNotifier {
-  RestaurantRepository _restaurantRepository = RestaurantRepository();
-  ReviewRepository _reviewRepository = ReviewRepository();
+  final RestaurantRepository _restaurantRepository = RestaurantRepository();
+  final ReviewRepository _reviewRepository = ReviewRepository();
   StreamSubscription<Map<String, RestaurantModel>>? _restaurantSubscription;
   StreamSubscription<Map<String, ReviewModel>?>? _reviewSubscription;
   final String restaurantId;
