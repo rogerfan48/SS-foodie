@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:provider/provider.dart';
+import 'package:foodie/widgets/restaurant/restaurant_info_card.dart';
 
 class RestaurantInfoPage extends StatelessWidget {
   const RestaurantInfoPage({super.key});
@@ -16,16 +17,16 @@ class RestaurantInfoPage extends StatelessWidget {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          RestaurantInfoCard(),
           SizedBox(
             height: 120,
             child: imageURLs.isNotEmpty
                 ? ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: imageURLs.length,
                     itemBuilder: (context, index) => Card(
                       clipBehavior: Clip.antiAlias,
@@ -40,22 +41,16 @@ class RestaurantInfoPage extends StatelessWidget {
                 : const Center(child: Text("No images yet")),
           ),
           const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Summary', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(restaurant.summary, style: Theme.of(context).textTheme.bodyMedium),
-              ],
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Summary', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text(restaurant.summary, style: Theme.of(context).textTheme.bodyMedium),
+            ],
           ),
           const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Information', style: Theme.of(context).textTheme.titleLarge),
-          ),
+          Text('Information', style: Theme.of(context).textTheme.titleLarge),
           ListTile(
             leading: const Icon(Icons.access_time_outlined),
             title: Text(restaurant.businessHour['weekday'] ?? 'No business hours available'),
