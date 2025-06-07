@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,6 +18,7 @@ import 'services/theme.dart';
 import 'view_models/account_vm.dart';
 import 'view_models/my_reviews_vm.dart';
 import 'view_models/viewed_restaurants_vm.dart';
+import 'view_models/all_restaurants_vm.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +27,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // 1. Repositories
+        // 1. Repositories (數據層)
         Provider<UserRepository>(create: (_) => UserRepository()),
         Provider<ReviewRepository>(create: (_) => ReviewRepository()),
         Provider<RestaurantRepository>(create: (_) => RestaurantRepository()),
@@ -33,11 +36,10 @@ void main() async {
         Provider<FirebaseAuth>(create: (_) => FirebaseAuth.instance),
         Provider<GoogleSignIn>(create: (_) => GoogleSignIn()),
 
-        // 3. Services
+        // 3. Services (服務層)
         ProxyProvider3<FirebaseAuth, GoogleSignIn, UserRepository, AuthService>(
-          update:
-              (_, auth, googleSignIn, userRepo, previous) =>
-                  AuthService(auth, googleSignIn, userRepo),
+          update: (_, auth, googleSignIn, userRepo, previous) =>
+              AuthService(auth, googleSignIn, userRepo),
         ),
 
         // 4. Global ViewModels & Notifiers
@@ -46,8 +48,12 @@ void main() async {
         ChangeNotifierProvider<AccountViewModel>(
           create: (context) => AccountViewModel(context.read<AuthService>()),
         ),
+        // 全局提供 AllRestaurantViewModel，供地圖頁使用
+        ChangeNotifierProvider<AllRestaurantViewModel>(
+          create: (context) => AllRestaurantViewModel(context.read<RestaurantRepository>()),
+        ),
 
-        // 5. Proxy ViewModels
+        // 5. Proxy ViewModels (依賴登入狀態)
         ChangeNotifierProxyProvider<AccountViewModel, MyReviewViewModel?>(
           create: (_) => null,
           update: (context, accountViewModel, previous) {
@@ -60,12 +66,12 @@ void main() async {
             );
           },
         ),
-        ChangeNotifierProxyProvider<AccountViewModel, ViewRestaurantsViewModel?>(
+        ChangeNotifierProxyProvider<AccountViewModel, ViewedRestaurantsViewModel?>(
           create: (_) => null,
           update: (context, accountViewModel, previous) {
             final userId = accountViewModel.firebaseUser?.uid;
             if (userId == null) return null;
-            return ViewRestaurantsViewModel(
+            return ViewedRestaurantsViewModel(
               userId,
               context.read<UserRepository>(),
               context.read<RestaurantRepository>(),

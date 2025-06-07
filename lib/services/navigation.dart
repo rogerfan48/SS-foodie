@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:foodie/repositories/restaurant_repo.dart';
+import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/pages/restaurant_info_page.dart';
 import 'package:foodie/pages/restaurant_menu_page.dart';
 import 'package:foodie/pages/restaurant_reviews_page.dart';
-import 'package:go_router/go_router.dart';
 import 'package:foodie/pages/loading_page.dart';
 import 'package:foodie/pages/main_page.dart';
 import 'package:foodie/pages/map_page.dart';
@@ -28,19 +32,36 @@ final routerConfig = GoRouter(
           pageBuilder: (context, state) => NoTransitionPage(child: MapPage()),
           routes: [
             ShellRoute(
-              builder: (context, state, child) => RestaurantPage(child: child),
+              pageBuilder: (context, state, child) {
+                final restaurantId = state.pathParameters['id']!;
+                return CupertinoPage(
+                  child: ChangeNotifierProvider(
+                    create:
+                        (context) => RestaurantDetailViewModel(
+                          restaurantId: restaurantId,
+                          restaurantRepository: context.read<RestaurantRepository>(),
+                          reviewRepository: context.read<ReviewRepository>(),
+                        ),
+                    // RestaurantPage 是 consumer，也是外殼
+                    child: RestaurantPage(restaurantId: restaurantId, child: child),
+                  ),
+                );
+              },
               routes: [
                 GoRoute(
-                  path: 'info',
-                  pageBuilder: (context, state) => NoTransitionPage(child: RestaurantInfoPage()),
+                  path: 'restaurant/:id/info',
+                  pageBuilder:
+                      (context, state) => const NoTransitionPage(child: RestaurantInfoPage()),
                 ),
                 GoRoute(
-                  path: 'menu', 
-                  pageBuilder: (context, state) => NoTransitionPage(child: RestaurantMenuPage()),
+                  path: 'restaurant/:id/menu',
+                  pageBuilder:
+                      (context, state) => const NoTransitionPage(child: RestaurantMenuPage()),
                 ),
                 GoRoute(
-                  path: 'reviews', 
-                  pageBuilder: (context, state) => NoTransitionPage(child: RestaurantReviewsPage()),
+                  path: 'restaurant/:id/reviews',
+                  pageBuilder:
+                      (context, state) => const NoTransitionPage(child: RestaurantReviewsPage()),
                 ),
               ],
             ),
@@ -57,7 +78,8 @@ final routerConfig = GoRouter(
             ),
             GoRoute(
               path: 'reviews',
-              pageBuilder: (context, state) => CupertinoPage(child: const MyReviewsPage()),),
+              pageBuilder: (context, state) => CupertinoPage(child: const MyReviewsPage()),
+            ),
           ],
         ),
       ],

@@ -9,7 +9,7 @@ class BrowsingHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<ViewRestaurantsViewModel?>();
+    final viewModel = context.watch<ViewedRestaurantsViewModel?>();
 
     return Scaffold(
       appBar: AppBar(

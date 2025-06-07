@@ -1,145 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:foodie/enums/genre_tag.dart';
-import 'package:foodie/enums/vegan_tag.dart';
-import 'package:foodie/view_models/info_page_vm.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-class BottomSheet extends StatefulWidget {
-  final RestaurantInfo info;
-
-  const BottomSheet({Key? key, required this.info}) : super(key: key);
-
-  @override
-  State<BottomSheet> createState() => _BottomSheetState();
-}
-
-class _BottomSheetState extends State<BottomSheet> {
-  double _sheetHeight = 200;
+class BottomSheet extends StatelessWidget {
+  const BottomSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<RestaurantDetailViewModel>();
+
     return SafeArea(
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        height: _sheetHeight,
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(0.2))],
         ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: 16,
-              left: 32,
-              right: 32,
-              child: Column(
-                children: [
-                  // Name
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(widget.info.restaurantName, style: Theme.of(context).textTheme.headlineSmall),
-                      IconButton(
-                        icon: const Icon(Icons.expand_less),
-                        onPressed: () {
-                          setState(() {
-                            context.go('/map/info');
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  // Tags
-                  Row(
-                    children: [
-                      SizedBox(width: 24, height: 24, child: widget.info.veganTag.image),
-                      Row(
-                        children:
-                            widget.info.genreTags.map((tag) {
-                              return Row(
-                                children: [
-                                  const VerticalDivider(width: 7, thickness: 1),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: tag.color,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      tag.title,
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5,),
-                  // Rate
-                  Row(
-                    children: [
-                      Row(
-                        children: List.generate(
-                          widget.info.rating,
-                          (index) => const Icon(Icons.star, color: Colors.amber),
-                        ),
-                      ),
-                      Row(
-                        children: List.generate(
-                          5 - widget.info.rating,
-                          (index) => const Icon(Icons.star, color: Colors.grey),
-                        ),
-                      ),
-                      const VerticalDivider(width: 14, thickness: 1),
-                      Row(
-                        children: List.generate(
-                          widget.info.priceLevel,
-                          (index) => const Icon(Icons.attach_money, color: Colors.grey),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5,),
-                  // Navigation
-                  ElevatedButton(
-                    onPressed: () async {
-                      final googleMapsUrl = Uri.parse(
-                        'https://maps.app.goo.gl/ZgLefs3YvWr6a3tWA',  // vm 需要新增
-                      );
-                      if (await canLaunchUrl(googleMapsUrl)) {
-                        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
-                      } else {
-                        print('無法開啟 Google 地圖');
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(width: 7,),
-                        Icon(Icons.navigation),
-                        Text(
-                          'Navigation',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+        child: vm.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _buildContent(context, vm),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, RestaurantDetailViewModel vm) {
+    final restaurant = vm.restaurant;
+    if (restaurant == null) {
+      return const Center(child: Text('Failed to load details.'));
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(restaurant.restaurantName, style: Theme.of(context).textTheme.headlineSmall),
+              ),
+              IconButton(
+                icon: const Icon(Icons.open_in_new),
+                onPressed: () {
+                  context.go('/map/restaurant/${vm.restaurantId}/info');
+                },
+              ),
+            ],
+          ),
+          // 您可以根據您的設計圖，在這裡顯示更多來自 `restaurant` 物件的預覽資訊
+        ],
       ),
     );
   }

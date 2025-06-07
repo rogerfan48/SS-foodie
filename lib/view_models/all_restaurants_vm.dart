@@ -36,7 +36,7 @@ class AllRestaurantViewModel with ChangeNotifier {
             restaurantName: restaurant.restaurantName,
             latitude: restaurant.latitude,
             longitude: restaurant.longtitude,
-            genreTag: GenreTag.fromString(restaurant.genreTags.first),
+            genreTag: GenreTag.fromString(restaurant.genreTags.firstOrNull ?? 'others'),
           ),
         );
       });
@@ -48,20 +48,5 @@ class AllRestaurantViewModel with ChangeNotifier {
   void dispose() {
     _restaurantSubscription.cancel();
     super.dispose();
-  }
-
-  void addRestaurant(RestaurantItem restaurant) {
-    _restaurants.add(restaurant);
-    notifyListeners();
-  }
-
-  void removeRestaurant(RestaurantItem restaurant) {
-    _restaurants.remove(restaurant);
-    notifyListeners();
-  }
-
-  void clearRestaurants() {
-    _restaurants.clear();
-    notifyListeners();
   }
 }

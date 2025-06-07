@@ -9,6 +9,7 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       currentIndex: currentIndex,
       onTap: onTap,
       items: const [

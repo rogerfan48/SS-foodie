@@ -1,18 +1,22 @@
+// lib/pages/map_page.dart
+
 import 'package:flutter/material.dart' hide BottomSheet;
-import 'package:foodie/view_models/info_page_vm.dart';
-import 'package:foodie/widgets/map/bottom_sheet.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:foodie/repositories/restaurant_repo.dart';
+import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/view_models/all_restaurants_vm.dart';
+import 'package:foodie/view_models/restaurant_detail_vm.dart';
+import 'package:foodie/widgets/map/bottom_sheet.dart';
 import 'package:foodie/models/filter_options.dart';
 import 'package:foodie/enums/genre_tag.dart';
 import 'package:foodie/enums/vegan_tag.dart';
-import 'package:foodie/widgets/map/google_map.dart';
 import 'package:foodie/widgets/map/search_bar.dart';
 import 'package:foodie/widgets/map/category_button.dart';
 import 'package:foodie/widgets/map/preference_button.dart';
-import 'package:foodie/widgets/map/bottom_sheet.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -21,18 +25,11 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final TextEditingController _searchController = TextEditingController();
   late FilterOptions _filterOptions;
-  late GoogleMapController _mapController;
-  final String _mapStyle = '''[
-    {
-      "featureType": "poi",
-      "elementType": "all",
-      "stylers": [
-        { "visibility": "off" }
-      ]
-    }
-  ]''';
-  PersistentBottomSheetController? _controller;
-  double _sheetHeight = 200;
+  GoogleMapController? _mapController;
+  final String _mapStyle = '''[{"featureType": "poi","stylers": [{"visibility": "off"}]}]''';
+  
+  RestaurantDetailViewModel? _selectedRestaurantDetailVM;
+  final double _sheetHeight = 250;
 
   @override
   void initState() {
@@ -46,68 +43,61 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void _updateFilters(FilterOptions newOptions) {
-    setState(() {
-      _filterOptions = newOptions;
-      // 在這裡，您可以根據新的 _filterOptions 重新篩選地圖上的 markers
-    });
+  @override
+  void dispose() {
+    // 非常重要：在頁面銷毀時，也要 dispose ViewModel 以取消監聽
+    _selectedRestaurantDetailVM?.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // 如果你想要 full screen 效果時會用到
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
-      builder: (BuildContext context) {
-        return BottomSheet(
-          info: RestaurantInfo(
-            restaurantName: "中式餐廳1",
-            summary: "summary",
-            address: "address",
-            phoneNumber: "phoneNumber",
-            businessHour: {},
-            genreTags: [
-              genreTags[GenreTags.chinese]!,
-              genreTags[GenreTags.barbecue]!,
-              genreTags[GenreTags.hotpot]!,
-            ],
-            veganTag: veganTags[VeganTags.lacto]!,
-            priceLevel: 1,
-            rating: 1,
-            imageURLs: ["imageURLs"],
-          ),
-        );
-      },
-    );
+  Set<Marker> _createMarkers(List<RestaurantItem> restaurants) {
+    return restaurants.map((restaurant) {
+      return Marker(
+        markerId: MarkerId(restaurant.restaurantId),
+        position: LatLng(restaurant.latitude, restaurant.longitude),
+        onTap: () {
+          if (_selectedRestaurantDetailVM?.restaurantId != restaurant.restaurantId) {
+            _selectedRestaurantDetailVM?.dispose();
+            
+            final newVM = RestaurantDetailViewModel(
+              restaurantId: restaurant.restaurantId,
+              restaurantRepository: context.read<RestaurantRepository>(),
+              reviewRepository: context.read<ReviewRepository>(),
+            );
+
+            setState(() {
+              _selectedRestaurantDetailVM = newVM;
+            });
+          }
+        },
+      );
+    }).toSet();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Set<Marker> restaurantMarkers = {
-      Marker(
-        markerId: MarkerId('library'),
-        position: LatLng(24.795188206929602, 120.9947881482545),
-        onTap: () {
-          _showBottomSheet(context);
-        },
-      ),
-    };
+    final allRestaurantViewModel = context.watch<AllRestaurantViewModel>();
+    final restaurants = allRestaurantViewModel.restaurants;
+    final restaurantMarkers = _createMarkers(restaurants);
 
     return Scaffold(
       body: Stack(
         children: [
           Positioned.fill(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: LatLng(24.7956, 120.9936), zoom: 15),
+              initialCameraPosition: const CameraPosition(target: LatLng(24.7956, 120.9936), zoom: 15),
               markers: restaurantMarkers,
               onMapCreated: (controller) {
                 _mapController = controller;
-                _mapController.setMapStyle(_mapStyle);
+                _mapController?.setMapStyle(_mapStyle);
               },
               onTap: (LatLng position) {
                 FocusScope.of(context).unfocus();
+                setState(() {
+                  _selectedRestaurantDetailVM?.dispose();
+                  _selectedRestaurantDetailVM = null;
+                });
               },
             ),
           ),
@@ -123,16 +113,35 @@ class _MapPageState extends State<MapPage> {
                   children: [
                     Expanded(child: SearchBarWidget(controller: _searchController)),
                     const SizedBox(width: 8),
-                    CategoryButton(options: _filterOptions, onUpdate: _updateFilters),
+                    CategoryButton(options: _filterOptions, onUpdate: (newOptions) => setState(() => _filterOptions = newOptions)),
                     const SizedBox(width: 8),
-                    PreferenceButton(options: _filterOptions, onUpdate: _updateFilters),
+                    PreferenceButton(options: _filterOptions, onUpdate: (newOptions) => setState(() => _filterOptions = newOptions)),
                   ],
                 ),
               ),
             ),
           ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            bottom: _selectedRestaurantDetailVM != null ? 0 : -_sheetHeight,
+            left: 0,
+            right: 0,
+            height: _sheetHeight,
+            child: _buildBottomSheet(),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBottomSheet() {
+    if (_selectedRestaurantDetailVM == null) {
+      return const SizedBox.shrink();
+    }
+    return ChangeNotifierProvider.value(
+      value: _selectedRestaurantDetailVM!,
+      child: const BottomSheet(),
     );
   }
 }
