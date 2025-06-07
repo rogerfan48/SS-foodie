@@ -1,6 +1,7 @@
 import 'package:foodie/models/dish_model.dart';
 
 class RestaurantModel {
+  final String restaurantId;    // ← new
   final String restaurantName;
   final String summary;
   final List<String> genreTags;
@@ -11,9 +12,10 @@ class RestaurantModel {
   final double latitude;
   final double longtitude;
   final Map<String, DishModel> menuMap;
-  final String googleMapURL;
+  final String? googleMapURL;
 
   RestaurantModel({
+    required this.restaurantId,  // ← new
     required this.restaurantName,
     required this.summary,
     required this.genreTags,
@@ -23,8 +25,8 @@ class RestaurantModel {
     required this.latitude,
     required this.longtitude,
     required this.menuMap,
-    required this.googleMapURL,
-    List<String>? restaurantReviewIDs
+    this.googleMapURL,
+    List<String>? restaurantReviewIDs,
   }) : restaurantReviewIDs = restaurantReviewIDs ?? [];
 
   // factory RestaurantModel.fromMap(Map<String, dynamic> map) {
