@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/repositories/user_repo.dart';
 import 'package:foodie/view_models/all_restaurants_vm.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/widgets/map/bottom_sheet.dart';
@@ -71,7 +72,6 @@ class _MapPageState extends State<MapPage> {
       }
       if (hue < 0) hue += 360;
       if (hue >= 360) hue %= 360;
-      print(hue);
       return hue;
     }
 
@@ -94,6 +94,7 @@ class _MapPageState extends State<MapPage> {
                   restaurantId: restaurant.restaurantId,
                   restaurantRepository: context.read<RestaurantRepository>(),
                   reviewRepository: context.read<ReviewRepository>(),
+                  userRepository: context.read<UserRepository>(),
                 );
 
                 setState(() {

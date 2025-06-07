@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/repositories/user_repo.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/pages/restaurant_info_page.dart';
 import 'package:foodie/pages/restaurant_menu_page.dart';
@@ -50,6 +51,7 @@ final routerConfig = GoRouter(
                           restaurantId: restaurantId,
                           restaurantRepository: context.read<RestaurantRepository>(),
                           reviewRepository: context.read<ReviewRepository>(),
+                          userRepository: context.read<UserRepository>(),
                         ),
                     // RestaurantPage 是 consumer，也是外殼
                     child: RestaurantPage(restaurantId: restaurantId, child: child),
