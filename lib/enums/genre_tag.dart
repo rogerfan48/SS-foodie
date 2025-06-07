@@ -50,6 +50,47 @@ class GenreTag {
         throw ArgumentError("Unknown genre tag: $tag");
     }
   }
+
+  GenreTags toGenreTags() {
+    switch (title) {
+      case "Fast Food":
+        return GenreTags.fastFood;
+      case "Chinese":
+        return GenreTags.chinese;
+      case "Western":
+        return GenreTags.western;
+      case "Indian":
+        return GenreTags.indian;
+      case "Yhai":
+        return GenreTags.thai;
+      case "Korean":
+        return GenreTags.korean;
+      case "Japanese":
+        return GenreTags.japanese;
+      case "Italian":
+        return GenreTags.italian;
+      case "Taiwanese":
+        return GenreTags.taiwanese;
+      case "Vietnamese":
+        return GenreTags.vietnamese;
+      case "Hotpot":
+        return GenreTags.hotpot;
+      case "Barbecue":
+        return GenreTags.barbecue;
+      case "Teppanyaki":
+        return GenreTags.teppanyaki;
+      case "Street Food":
+        return GenreTags.streetFood;
+      case "Drink":
+        return GenreTags.drink;
+      case "Coffee":
+        return GenreTags.coffee;
+      case "Dessert":
+        return GenreTags.dessert;
+      default:
+        throw ArgumentError("Unknown genre tag: $title");
+    }
+  }
 }
 
 const genreTags = {

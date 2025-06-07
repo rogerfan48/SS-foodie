@@ -27,7 +27,7 @@ class _MapPageState extends State<MapPage> {
   late FilterOptions _filterOptions;
   GoogleMapController? _mapController;
   final String _mapStyle = '''[{"featureType": "poi","stylers": [{"visibility": "off"}]}]''';
-  
+
   RestaurantDetailViewModel? _selectedRestaurantDetailVM;
   final double _sheetHeight = 200;
 
@@ -52,27 +52,58 @@ class _MapPageState extends State<MapPage> {
   }
 
   Set<Marker> _createMarkers(List<RestaurantItem> restaurants) {
-    return restaurants.map((restaurant) {
-      return Marker(
-        markerId: MarkerId(restaurant.restaurantId),
-        position: LatLng(restaurant.latitude, restaurant.longitude),
-        onTap: () {
-          if (_selectedRestaurantDetailVM?.restaurantId != restaurant.restaurantId) {
-            _selectedRestaurantDetailVM?.dispose();
-            
-            final newVM = RestaurantDetailViewModel(
-              restaurantId: restaurant.restaurantId,
-              restaurantRepository: context.read<RestaurantRepository>(),
-              reviewRepository: context.read<ReviewRepository>(),
-            );
+    double colorToHue(Color color) {
+      double r = color.red / 255.0;
+      double g = color.green / 255.0;
+      double b = color.blue / 255.0;
+      double maxVal = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      double minVal = r < g ? (r < b ? r : b) : (g < b ? g : b);
+      double delta = maxVal - minVal;
+      double hue = 0.0;
+      if (delta == 0) {
+        hue = 0;
+      } else if (maxVal == r) {
+        hue = 60 * (((g - b) / delta) + 0);
+      } else if (maxVal == g) {
+        hue = 60 * (((b - r) / delta) + 2);
+      } else if (maxVal == b) {
+        hue = 60 * (((r - g) / delta) + 4);
+      }
+      if (hue < 0) hue += 360;
+      if (hue >= 360) hue %= 360;
+      print(hue);
+      return hue;
+    }
 
-            setState(() {
-              _selectedRestaurantDetailVM = newVM;
-            });
-          }
-        },
-      );
-    }).toSet();
+    return restaurants
+        .where(
+          (restaurant) => _filterOptions.selectedGenres.contains(restaurant.genreTag.toGenreTags()),
+        ).where(
+          (restaurant) => _filterOptions.selectedVeganTags.contains(restaurant.veganTag.toVeganTags()),
+        )
+        .map((restaurant) {
+          return Marker(
+            markerId: MarkerId(restaurant.restaurantId),
+            position: LatLng(restaurant.latitude, restaurant.longitude),
+            icon: BitmapDescriptor.defaultMarkerWithHue(colorToHue(restaurant.genreTag.color)),
+            onTap: () {
+              if (_selectedRestaurantDetailVM?.restaurantId != restaurant.restaurantId) {
+                _selectedRestaurantDetailVM?.dispose();
+
+                final newVM = RestaurantDetailViewModel(
+                  restaurantId: restaurant.restaurantId,
+                  restaurantRepository: context.read<RestaurantRepository>(),
+                  reviewRepository: context.read<ReviewRepository>(),
+                );
+
+                setState(() {
+                  _selectedRestaurantDetailVM = newVM;
+                });
+              }
+            },
+          );
+        })
+        .toSet();
   }
 
   @override
@@ -86,7 +117,10 @@ class _MapPageState extends State<MapPage> {
         children: [
           Positioned.fill(
             child: GoogleMap(
-              initialCameraPosition: const CameraPosition(target: LatLng(24.7956, 120.9936), zoom: 15),
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(24.7956, 120.9936),
+                zoom: 15,
+              ),
               markers: restaurantMarkers,
               onMapCreated: (controller) {
                 _mapController = controller;
@@ -113,9 +147,15 @@ class _MapPageState extends State<MapPage> {
                   children: [
                     Expanded(child: SearchBarWidget(controller: _searchController)),
                     const SizedBox(width: 8),
-                    CategoryButton(options: _filterOptions, onUpdate: (newOptions) => setState(() => _filterOptions = newOptions)),
+                    CategoryButton(
+                      options: _filterOptions,
+                      onUpdate: (newOptions) => setState(() => _filterOptions = newOptions),
+                    ),
                     const SizedBox(width: 8),
-                    PreferenceButton(options: _filterOptions, onUpdate: (newOptions) => setState(() => _filterOptions = newOptions)),
+                    PreferenceButton(
+                      options: _filterOptions,
+                      onUpdate: (newOptions) => setState(() => _filterOptions = newOptions),
+                    ),
                   ],
                 ),
               ),

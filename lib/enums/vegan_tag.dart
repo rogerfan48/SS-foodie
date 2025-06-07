@@ -36,6 +36,27 @@ class VeganTag {
         throw ArgumentError("Unknown vegan tag: $tag");
     }
   }
+
+  VeganTags toVeganTags() {
+    switch (title) {
+      case "Vegan":
+        return VeganTags.vegan;
+      case "Vegan (Partial)":
+        return VeganTags.veganPartial;
+      case "Lacto":
+        return VeganTags.lacto;
+      case "Lacto (Partial)":
+        return VeganTags.lactoPartial;
+      case "Vegetarian":
+        return VeganTags.vegetarian;
+      case "Vegetarian (Partial)":
+        return VeganTags.vegetarianPartial;
+      case "Non Vegetarian":
+        return VeganTags.nonVegetarian;
+      default:
+        throw ArgumentError("Unknown vegan tag: $title");
+    }
+  }
 }
 
 final veganTags = {
