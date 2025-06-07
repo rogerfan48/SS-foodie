@@ -5,9 +5,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class GoogleMapWidget extends StatefulWidget {
   final Set<Marker> markers;
   final CameraPosition initialPosition;
+  final void Function(LatLng)? onTap;
 
-  const GoogleMapWidget({Key? key, required this.markers, required this.initialPosition})
-    : super(key: key);
+  const GoogleMapWidget({
+    Key? key,
+    required this.markers,
+    required this.initialPosition,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   State<GoogleMapWidget> createState() => _GoogleMapWidgetState();
@@ -24,6 +29,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
       onMapCreated: (GoogleMapController controller) {
         _controller.complete(controller);
       },
+      onTap: widget.onTap,
     );
   }
 }

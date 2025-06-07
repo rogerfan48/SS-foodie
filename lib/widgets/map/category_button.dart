@@ -18,6 +18,7 @@ class _CategoryButtonState extends State<CategoryButton> {
   bool _isOverlayVisible = false;
 
   void _toggleOverlay() {
+    FocusScope.of(context).unfocus();
     setState(() {
       if (!_isOverlayVisible) {
         _isOverlayVisible = true;

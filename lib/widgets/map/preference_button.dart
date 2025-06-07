@@ -19,6 +19,7 @@ class _PreferenceButtonState extends State<PreferenceButton> {
   bool _isOverlayVisible = false;
 
   void _toggleOverlay() {
+    FocusScope.of(context).unfocus();
     setState(() {
       if (!_isOverlayVisible) {
         _isOverlayVisible = true;

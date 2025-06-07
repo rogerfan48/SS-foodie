@@ -50,6 +50,9 @@ class _MapPageState extends State<MapPage> {
                 zoom: 15,
               ),
               markers: {}, // 這裡之後接 marker
+              onTap: (LatLng position) {
+                FocusScope.of(context).unfocus();
+              },
             ),
           ),
           Positioned(
