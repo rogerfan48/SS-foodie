@@ -1,4 +1,5 @@
 class DishModel {
+  final String dishId;
   final String dishName;
   final String veganTag;
   final String halalTag;
@@ -9,6 +10,7 @@ class DishModel {
   final List<String> dishReviewIDs;
 
   DishModel({
+    required this.dishId,
     required this.dishName,
     required this.veganTag,
     required this.halalTag,
@@ -21,13 +23,21 @@ class DishModel {
         bestReviewSummary = bestReviewSummary ?? '',
         dishReviewIDs = dishReviewIDs ?? [];
       
-  factory DishModel.fromMap(Map<String, dynamic> map) {
+  factory DishModel.fromMap(String id, Map<String, dynamic> map) {
+    int price = 0;
+    final dynamic rawPrice = map['dishPrice'];
+    if (rawPrice is int) {
+      price = rawPrice;
+    } else if (rawPrice is String) {
+      price = int.tryParse(rawPrice) ?? 0;
+    }
     return DishModel(
+      dishId: id,
       dishName: map['dishName'] as String,
       veganTag: map['veganTag'] as String,
       halalTag: map['halalTag'] as String,
       dishGenre: map['dishGenre'] as String,
-      dishPrice: map['dishPrice'] as int,
+      dishPrice: price,
       summary: map['summary'] as String? ?? '',
       bestReviewSummary: map['bestReviewSummary'] as String? ?? '',
       dishReviewIDs: List<String>.from(map['dishReviewIDs'] ?? []),

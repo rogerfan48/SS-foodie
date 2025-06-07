@@ -100,6 +100,7 @@ class RestaurantReviewsPage extends StatelessWidget {
                 child: ReviewListItem(
                   review: reviews[index],
                   userDataFuture: vm.getUserData(reviews[index].reviewerID),
+                  dishNameLookup: vm.getDishNameById,
                   onAgree: () {
                     if (currentUserId != null) {
                       vm.toggleReviewVote(

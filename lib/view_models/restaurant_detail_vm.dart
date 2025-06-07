@@ -174,6 +174,10 @@ class RestaurantDetailViewModel with ChangeNotifier {
     }
   }
 
+  String? getDishNameById(String dishId) {
+    return _restaurant?.menuMap[dishId]?.dishName;
+  }
+
   @override
   void dispose() {
     _restaurantSubscription?.cancel();

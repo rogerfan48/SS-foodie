@@ -39,6 +39,7 @@ class MyReviewsPage extends StatelessWidget {
                   return ReviewListItem(
                     review: reviewDisplay.review,
                     userDataFuture: myReviewViewModel.getUserData(reviewDisplay.review.reviewerID),
+                    dishNameLookup: (dishId) => myReviewViewModel.getDishNameById(review.restaurantID, dishId),
                     onAgree:
                         () =>
                             currentUserId != null

@@ -95,6 +95,12 @@ class MyReviewViewModel with ChangeNotifier {
     }
   }
 
+  String? getDishNameById(String restaurantId, String dishId) {
+    final restaurant = _restaurantMap[restaurantId];
+    if (restaurant == null) return null;
+    return restaurant.menuMap[dishId]?.dishName;
+  }
+
   @override
   void dispose() {
     _reviewSubscription.cancel();

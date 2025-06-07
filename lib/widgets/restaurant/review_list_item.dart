@@ -9,12 +9,14 @@ import 'package:foodie/view_models/restaurant_detail_vm.dart';
 class ReviewListItem extends StatelessWidget {
   final ReviewModel review;
   final Future<UserModel?> userDataFuture;
+  final String? Function(String dishId)? dishNameLookup;
   final VoidCallback? onAgree;
   final VoidCallback? onDisagree;
   const ReviewListItem({
     super.key,
     required this.review,
     required this.userDataFuture,
+    this.dishNameLookup,
     this.onAgree,
     this.onDisagree,
   });
@@ -27,6 +29,11 @@ class ReviewListItem extends StatelessWidget {
 
     final bool hasAgreed = currentUserId != null && review.agreedBy.contains(currentUserId);
     final bool hasDisagreed = currentUserId != null && review.disagreedBy.contains(currentUserId);
+
+    final String? dishName =
+        (review.dishID != null && review.dishID!.isNotEmpty && dishNameLookup != null)
+            ? dishNameLookup!(review.dishID!)
+            : null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -51,41 +58,45 @@ class ReviewListItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    FutureBuilder<UserModel?>(
-                      future: userDataFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
-                          return Text('Loading...', style: textTheme.titleSmall);
-                        }
-                        return Text(
-                          snapshot.data?.userName ?? 'Unknown User',
-                          style: textTheme.titleSmall,
-                        );
-                      },
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: Icon(
-                        hasAgreed ? Icons.thumb_up_alt : Icons.thumb_up_alt_outlined,
-                        size: 18,
-                        color: hasAgreed ? colorScheme.primary : null,
+                SizedBox(
+                  height: 40,
+                  child: Row(
+                    children: [
+                      FutureBuilder<UserModel?>(
+                        future: userDataFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState != ConnectionState.done ||
+                              !snapshot.hasData) {
+                            return Text('Loading...', style: textTheme.titleSmall);
+                          }
+                          return Text(
+                            snapshot.data?.userName ?? 'Unknown User',
+                            style: textTheme.titleSmall,
+                          );
+                        },
                       ),
-                      onPressed: onAgree,
-                    ),
-                    Text((review.agreedBy.length - 1).toString()),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: Icon(
-                        hasDisagreed ? Icons.thumb_down_alt : Icons.thumb_down_alt_outlined,
-                        size: 18,
-                        color: hasDisagreed ? Colors.grey : null,
+                      const Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          hasAgreed ? Icons.thumb_up_alt : Icons.thumb_up_alt_outlined,
+                          size: 18,
+                          color: hasAgreed ? colorScheme.primary : null,
+                        ),
+                        onPressed: onAgree,
                       ),
-                      onPressed: onDisagree,
-                    ),
-                    Text((review.disagreedBy.length - 1).toString()),
-                  ],
+                      Text((review.agreedBy.length - 1).toString()),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(
+                          hasDisagreed ? Icons.thumb_down_alt : Icons.thumb_down_alt_outlined,
+                          size: 18,
+                          color: hasDisagreed ? Colors.grey : null,
+                        ),
+                        onPressed: onDisagree,
+                      ),
+                      Text((review.disagreedBy.length - 1).toString()),
+                    ],
+                  ),
                 ),
                 Row(
                   children: [
@@ -102,6 +113,14 @@ class ReviewListItem extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
+                if (dishName != null)
+                  Chip(
+                    avatar: Icon(Icons.restaurant_menu, size: 16, color: colorScheme.secondary),
+                    label: Text(dishName, style: textTheme.labelLarge),
+                    backgroundColor: colorScheme.secondaryContainer.withOpacity(0.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    side: BorderSide.none,
+                  ),
                 Text(review.content, style: textTheme.bodyMedium),
               ],
             ),
