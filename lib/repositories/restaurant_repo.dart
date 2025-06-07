@@ -26,7 +26,7 @@ class RestaurantRepository {
             phoneNumber:         data['phoneNumber']   as String,
             address:             data['address']       as String,
             latitude:            data['latitude']      as double,
-            longtitude:          data['longtitude']    as double,
+            longitude:           data['longitude']    as double,
             googleMapURL:        data['googleMapURL']  as String,
             menuMap:             menuMap,
             restaurantReviewIDs: List<String>.from(data['restaurantReviewIDs'] ?? []),

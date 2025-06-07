@@ -5,9 +5,9 @@ class RestaurantReviewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Text("reviews")
+    return const Scaffold(
+      body: Center(
+        child: Text('Reviews Page Content'),
       ),
     );
   }

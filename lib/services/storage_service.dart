@@ -1,0 +1,29 @@
+import 'package:firebase_storage/firebase_storage.dart';
+
+class StorageService {
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  // 快取 Map，用來儲存已經獲取過的下載連結，避免重複請求
+  final Map<String, String> _downloadUrlCache = {};
+
+  Future<String?> getDownloadUrl(String? gsUri) async {
+    if (gsUri == null || !gsUri.startsWith('gs://')) {
+      return null;
+    }
+
+    // 如果快取中已有，直接返回
+    if (_downloadUrlCache.containsKey(gsUri)) {
+      return _downloadUrlCache[gsUri];
+    }
+
+    try {
+      // 如果快取中沒有，則從 Firebase Storage 獲取
+      final url = await _storage.refFromURL(gsUri).getDownloadURL();
+      // 存入快取
+      _downloadUrlCache[gsUri] = url;
+      return url;
+    } catch (e) {
+      print('Error getting download URL for $gsUri: $e');
+      return null; // 獲取失敗返回 null
+    }
+  }
+}
