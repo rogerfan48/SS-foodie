@@ -7,6 +7,25 @@ import 'package:provider/provider.dart';
 class RestaurantInfoPage extends StatelessWidget {
   const RestaurantInfoPage({super.key});
 
+  Widget _buildInfoRow(BuildContext context, {required IconData icon, required String text}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(width: 16),
+          // 使用 Expanded 讓文字可以自動換行
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RestaurantDetailViewModel>();
@@ -17,74 +36,90 @@ class RestaurantInfoPage extends StatelessWidget {
       return const Center(child: Text('Restaurant data not found.'));
     }
 
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final sortedBusinessHours =
+        restaurant.businessHour.entries.toList()
+          ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key)));
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Restaurant Info Card
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: RestaurantInfoCard(),
-          ),
+          RestaurantInfoCard(),
           const SizedBox(height: 16),
-
-          // 2. Image Carousel
           SizedBox(
             height: 120,
-            child: imageURLs.isNotEmpty
-                ? ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: imageURLs.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) => Card(
-                      clipBehavior: Clip.antiAlias,
-                      child: FirebaseImage(gsUri: imageURLs[index], width: 120),
-                    ),
-                  )
-                : const SizedBox.shrink(),
+            child:
+                imageURLs.isNotEmpty
+                    ? ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: imageURLs.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 6),
+                      itemBuilder:
+                          (context, index) => Card(
+                            clipBehavior: Clip.antiAlias,
+                            child: FirebaseImage(gsUri: imageURLs[index], width: 120),
+                          ),
+                    )
+                    : const SizedBox.shrink(),
           ),
           const SizedBox(height: 24),
-
-          // 3. Summary Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Summary', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text(restaurant.summary, style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text('Information', style: Theme.of(context).textTheme.titleLarge),
+          Theme(
+            // 覆寫預設的 Divider 樣式，讓它消失
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              visualDensity: VisualDensity.compact,
+              tilePadding: EdgeInsets.zero,
+              title: _buildInfoRow(
+                context,
+                icon: Icons.access_time_outlined,
+                text: 'Business Hours',
+              ),
               children: [
-                Text('Summary', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(restaurant.summary, style: Theme.of(context).textTheme.bodyMedium),
+                // 展開後的內容
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Column(
+                    children:
+                        sortedBusinessHours.map((entry) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: Row(
+                              children: [
+                                // 將星期幾推到左邊
+                                Text(entry.key, style: Theme.of(context).textTheme.bodyMedium),
+                                const Spacer(), // Spacer 會佔據所有可用空間
+                                // 將時間推到右邊
+                                Text(
+                                  entry.value,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-
-          // 4. Information Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text('Information', style: Theme.of(context).textTheme.titleLarge),
-          ),
-          ExpansionTile(
-            leading: const Icon(Icons.access_time_outlined),
-            title: Text(restaurant.businessHour['weekday'] ?? 'Business Hours'),
-            children: restaurant.businessHour.entries.map((entry) {
-              return ListTile(
-                title: Text(entry.key),
-                trailing: Text(entry.value),
-                dense: true,
-              );
-            }).toList(),
-          ),
-          ListTile(
-            leading: const Icon(Icons.phone_outlined),
-            title: Text(restaurant.phoneNumber),
-          ),
-          ListTile(
-            leading: const Icon(Icons.location_on_outlined),
-            title: Text(restaurant.address),
-          ),
+          const Divider(height: 1),
+          _buildInfoRow(context, icon: Icons.phone_outlined, text: restaurant.phoneNumber),
+          const Divider(height: 1),
+          _buildInfoRow(context, icon: Icons.location_on_outlined, text: restaurant.address),
         ],
       ),
     );
