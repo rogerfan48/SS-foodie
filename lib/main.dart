@@ -13,7 +13,7 @@ import 'repositories/review_repo.dart';
 import 'repositories/user_repo.dart';
 import 'services/ai_chat.dart';
 import 'services/auth_service.dart';
-import 'services/navigation.dart';
+import 'services/storage_service.dart';
 import 'services/theme.dart';
 import 'view_models/account_vm.dart';
 import 'view_models/my_reviews_vm.dart';
@@ -35,6 +35,7 @@ void main() async {
         // 2. Firebase 服務實例
         Provider<FirebaseAuth>(create: (_) => FirebaseAuth.instance),
         Provider<GoogleSignIn>(create: (_) => GoogleSignIn()),
+        Provider<StorageService>(create: (_) => StorageService()),
 
         // 3. Services (服務層)
         ProxyProvider3<FirebaseAuth, GoogleSignIn, UserRepository, AuthService>(

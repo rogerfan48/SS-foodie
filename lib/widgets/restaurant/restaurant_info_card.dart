@@ -12,7 +12,7 @@ class RestaurantInfoCard extends StatelessWidget {
     final vm = context.watch<RestaurantDetailViewModel>();
     final restaurant = vm.restaurant;
     if (restaurant == null) {
-      return const Center(child: Text(''));
+      return const SizedBox.shrink(); // 如果餐廳資料為空，則不顯示任何內容
     }
 
     return SizedBox(
