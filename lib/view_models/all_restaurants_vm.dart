@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:foodie/enums/genre_tag.dart';
+import 'package:foodie/enums/vegan_tag.dart';
 import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 
@@ -9,6 +10,7 @@ class RestaurantItem {
   final String restaurantName;
   final double latitude, longitude;
   final GenreTag genreTag;
+  final VeganTag veganTag;
 
   RestaurantItem({
     required this.restaurantId,
@@ -16,6 +18,7 @@ class RestaurantItem {
     required this.latitude,
     required this.longitude,
     required this.genreTag,
+    required this.veganTag,
   });
 }
 
@@ -37,6 +40,7 @@ class AllRestaurantViewModel with ChangeNotifier {
             latitude: restaurant.latitude,
             longitude: restaurant.longitude,
             genreTag: GenreTag.fromString(restaurant.genreTags.firstOrNull ?? 'others'),
+            veganTag: VeganTag.fromString(restaurant.veganTag),
           ),
         );
       });
