@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:foodie/widgets/firebase_image.dart';
 
 class RestaurantMenuPage extends StatefulWidget {
   const RestaurantMenuPage({super.key});
@@ -10,8 +12,21 @@ class RestaurantMenuPage extends StatefulWidget {
 }
 
 class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
-  final ScrollController _scrollController = ScrollController();
   final Map<String, GlobalKey> _categoryKeys = {};
+
+  void _scrollToCategory(int index) {
+    final vm = context.read<RestaurantDetailViewModel>();
+    final categoryName = vm.categorizedMenu.keys.elementAt(index);
+    final keyContext = _categoryKeys[categoryName]?.currentContext;
+    if (keyContext != null) {
+      Scrollable.ensureVisible(
+        keyContext,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        alignment: 0.05,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,139 +34,156 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
     final categories = vm.categorizedMenu;
 
     if (categories.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('No menu items available')),
-      );
+      return const Center(child: Text('No menu items available'));
     }
 
     final categoryList = categories.keys.toList();
 
-    // Create a GlobalKey for each category if not already present.
     for (final cat in categoryList) {
       _categoryKeys.putIfAbsent(cat, () => GlobalKey());
     }
 
     return Scaffold(
-      body: Column(
-        children: [
-          // Horizontally scrolling category buttons
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            child: Row(
-              children: categoryList.map((cat) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final keyContext = _categoryKeys[cat]?.currentContext;
-                      if (keyContext != null) {
-                        Scrollable.ensureVisible(
-                          keyContext,
-                          duration: const Duration(milliseconds: 300),
-                        );
-                      }
-                    },
-                    child: Text(cat),
-                  ),
-                );
-              }).toList(),
+      body: CustomScrollView(
+        slivers: [
+          SliverPersistentHeader(
+            delegate: _CategoryHeaderDelegate(
+              categoryNames: categoryList,
+              selectedIndex: -1,
+              onCategorySelected: _scrollToCategory,
             ),
+            pinned: true,
           ),
-
-          // Sections for each category
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                children: categoryList.map((catName) {
-                  final catDishes = categories[catName]!;
-                  return Container(
-                    key: _categoryKeys[catName],
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          catName,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Column(
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final categoryName = categoryList[index];
+                final dishes = categories[categoryName]!;
+                return Container(
+                  key: _categoryKeys[categoryName],
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 16, 0, 4),
+                        child: Text(categoryName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      ),
+                      ...dishes.asMap().entries.map((entry) {
+                        final dishIndex = entry.key;
+                        final dish = entry.value;
+                        
+                        return Column(
                           children: [
-                            for (int dishIndex = 0; dishIndex < catDishes.length; dishIndex++) ...[
-                              InkWell(
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/dish-detail',
-                                    arguments: {
-                                      'restaurantId': vm.restaurant?.restaurantId,
-                                      'dishName': catDishes[dishIndex].dishName,
-                                    },
-                                  );
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 12.0),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
+                            InkWell(
+                              onTap: () {
+                                context.go('/map/restaurant/${vm.restaurantId}/menu/${dish.dishId}');
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                                child: Row(
+                                  children: [
+                                    // 菜色圖片
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: FirebaseImage(
+                                        gsUri: null,
+                                        width: 60,
+                                        height: 60,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(dish.dishName, style: Theme.of(context).textTheme.titleMedium),
+                                          if (dish.bestReviewSummary.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 4.0),
                                               child: Text(
-                                                catDishes[dishIndex].dishName,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleMedium,
+                                                dish.bestReviewSummary,
+                                                style: Theme.of(context).textTheme.bodySmall,
+                                                maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                            Text(
-                                              '\$${catDishes[dishIndex].dishPrice}',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Theme.of(context).primaryColor,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                        if (catDishes[dishIndex].bestReviewSummary.isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 8.0),
-                                            child: Text(
-                                              catDishes[dishIndex].bestReviewSummary,
-                                              style:
-                                                  Theme.of(context).textTheme.bodyMedium,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 16),
+                                    // 右側的價格
+                                    Text(
+                                      '\$${dish.dishPrice}',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const Divider(), // Add a divider below each dish
-                            ],
+                            ),
+                            // 只在非最後一個項目下方顯示分隔線
+                            if (dishIndex < dishes.length - 1)
+                              const Divider(height: 1, indent: 4, endIndent: 4), // 縮排以對齊文字
                           ],
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                );
+              },
+              childCount: categoryList.length,
             ),
-          ),
+          )
         ],
       ),
     );
+  }
+}
+
+class _CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final List<String> categoryNames;
+  final int selectedIndex;
+  final Function(int) onCategorySelected;
+
+  _CategoryHeaderDelegate({
+    required this.categoryNames,
+    required this.selectedIndex,
+    required this.onCategorySelected,
+  });
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Wrap(
+          spacing: 8.0,
+          children: List.generate(categoryNames.length, (index) {
+            return FilterChip(
+              label: Text(categoryNames[index]),
+              selected: selectedIndex == index,
+              onSelected: (selected) {
+                if (selected) {
+                  onCategorySelected(index);
+                }
+              },
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => 56.0; // Header 的最大高度
+
+  @override
+  double get minExtent => 56.0; // Header 的最小高度（釘選時的高度）
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return true; // 簡單起見，總是重建
   }
 }

@@ -36,7 +36,7 @@ class _RestaurantPageState extends State<RestaurantPage> with TickerProviderStat
   void didChangeDependencies() {
     super.didChangeDependencies();
     final location = GoRouterState.of(context).uri.toString();
-    if (location.endsWith('/menu')) {
+    if (location.startsWith(RegExp(r'/map/restaurant/(\w{20})/menu'))) {
       _tabController.index = 1;
     } else if (location.endsWith('/reviews')) {
       _tabController.index = 2;

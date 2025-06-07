@@ -17,6 +17,7 @@ import 'package:foodie/pages/account_page.dart';
 import 'package:foodie/pages/restaurant_page.dart';
 import 'package:foodie/pages/browsing_history_page.dart';
 import 'package:foodie/pages/my_reviews_page.dart';
+import 'package:foodie/pages/dish_detail_page.dart';
 
 final routerConfig = GoRouter(
   initialLocation: '/loading',
@@ -68,6 +69,16 @@ final routerConfig = GoRouter(
                   path: 'restaurant/:id/menu',
                   pageBuilder:
                       (context, state) => const NoTransitionPage(child: RestaurantMenuPage()),
+                  routes: [
+                    GoRoute(
+                      path: ':dishId',
+                      pageBuilder: (context, state) {
+                        final dishId = state.pathParameters['dishId']!;
+                        // 這裡我們暫時用一個佔位頁面
+                        return CupertinoPage(child: DishDetailPage(dishId: dishId));
+                      },
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'restaurant/:id/reviews',
