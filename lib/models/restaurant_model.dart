@@ -13,6 +13,7 @@ class RestaurantModel {
   final double longitude;
   final Map<String, DishModel> menuMap;
   final String? googleMapURL;
+  final String veganTag;
 
   RestaurantModel({
     required this.restaurantId,  // ← new
@@ -25,6 +26,7 @@ class RestaurantModel {
     required this.latitude,
     required this.longitude,
     required this.menuMap,
+    required this.veganTag,
     this.googleMapURL,
     List<String>? restaurantReviewIDs,
   }) : restaurantReviewIDs = restaurantReviewIDs ?? [];

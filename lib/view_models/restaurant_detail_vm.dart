@@ -61,6 +61,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
   }
 
   VeganTag _calculateVeganTag() {
+    return VeganTag.fromString(_restaurant?.veganTag ?? VeganTags.nonVegetarian.toString());
     if (_restaurant == null) return veganTags[VeganTags.nonVegetarian]!;
     final tags = _restaurant!.menuMap.values
         .map((dish) => dish.veganTag)

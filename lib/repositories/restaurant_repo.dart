@@ -28,6 +28,7 @@ class RestaurantRepository {
             latitude:            data['latitude']      as double,
             longitude:           data['longitude']    as double,
             googleMapURL:        data['googleMapURL']  as String,
+            veganTag:            data['veganTag']     as String,
             menuMap:             menuMap,
             restaurantReviewIDs: List<String>.from(data['restaurantReviewIDs'] ?? []),
           );
