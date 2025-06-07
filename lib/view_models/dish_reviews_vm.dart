@@ -47,8 +47,8 @@ class DishReviewsViewModel with ChangeNotifier {
         }
     });
 
-    _reviewSubscription = _reviewRepository.streamReviewMap().listen((
-      reviewMap) {
+    _reviewSubscription = _reviewRepository.streamReviewMap().listen(
+      (reviewMap) {
         _reviews.clear();
         reviewMap?.forEach((id, review) {
           _reviews.add(DishReview(
