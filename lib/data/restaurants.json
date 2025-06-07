@@ -140,7 +140,27 @@
                 "dishGenre": "鬆餅",
                 "summary": "經典原味鬆餅，外酥內軟。",
                 "bestReviewSummary": "香酥可口，口感綿密。",
-                "dishPrice": 80
+                "dishPrice": 45
+            },
+            {
+                "dishName": "蜂蜜鬆餅",
+                "dishReviewIDs": [],
+                "veganTag": "lacto",
+                "halalTag": "no",
+                "dishGenre": "鬆餅",
+                "summary": "經典原味鬆餅，外酥內軟。",
+                "bestReviewSummary": "香酥可口，口感綿密。",
+                "dishPrice": 45
+            },
+            {
+                "dishName": "抹茶鬆餅",
+                "dishReviewIDs": [],
+                "veganTag": "lacto",
+                "halalTag": "no",
+                "dishGenre": "鬆餅",
+                "summary": "經典原味鬆餅，外酥內軟。",
+                "bestReviewSummary": "香酥可口，口感綿密。",
+                "dishPrice": 60
             },
             {
                 "dishName": "巧克力鬆餅",
@@ -150,17 +170,17 @@
                 "dishGenre": "鬆餅",
                 "summary": "濃郁巧克力醬搭配鬆餅，甜而不膩。",
                 "bestReviewSummary": "巧克力味道濃厚，孩子們最愛。",
-                "dishPrice": 95
+                "dishPrice": 60
             },
             {
-                "dishName": "草莓鬆餅",
+                "dishName": "草莓果醬卡士達鬆餅",
                 "dishReviewIDs": [],
                 "veganTag": "lacto",
                 "halalTag": "no",
                 "dishGenre": "鬆餅",
                 "summary": "鮮甜草莓與奶油完美結合。",
                 "bestReviewSummary": "草莓新鮮多汁，香氣十足。",
-                "dishPrice": 110
+                "dishPrice": 85
             },
             {
                 "dishName": "抹茶紅豆鬆餅",
@@ -170,7 +190,7 @@
                 "dishGenre": "鬆餅",
                 "summary": "日本抹茶粉揉入鬆餅，搭配蜜紅豆。",
                 "bestReviewSummary": "抹茶香醇，紅豆甜度適中。",
-                "dishPrice": 120
+                "dishPrice": 80
             },
             {
                 "dishName": "美式咖啡",
@@ -180,7 +200,7 @@
                 "dishGenre": "飲料",
                 "summary": "單品手沖，美式黑咖啡。",
                 "bestReviewSummary": "咖啡香醇，回甘明顯。",
-                "dishPrice": 60
+                "dishPrice": 35
             },
             {
                 "dishName": "拿鐵",
@@ -190,17 +210,17 @@
                 "dishGenre": "飲料",
                 "summary": "濃厚 espresso 與綿密牛奶。",
                 "bestReviewSummary": "牛奶與咖啡比例恰到好處。",
-                "dishPrice": 80
+                "dishPrice": 55
             },
             {
-                "dishName": "紅茶",
+                "dishName": "莊園琥珀紅茶",
                 "dishReviewIDs": [],
                 "veganTag": "vegan",
                 "halalTag": "no",
                 "dishGenre": "飲料",
                 "summary": "台灣高山紅茶，香氣馥郁。",
                 "bestReviewSummary": "茶香甘醇，不澀口。",
-                "dishPrice": 50
+                "dishPrice": 30
             }
         ]
     },
