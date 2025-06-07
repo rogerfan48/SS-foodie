@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/models/user_model.dart';
@@ -23,6 +24,7 @@ class ReviewListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formatter = DateFormat('yyyy-MM-dd hh:mm a');
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final currentUserId = context.watch<AccountViewModel>().firebaseUser?.uid;
@@ -84,7 +86,7 @@ class ReviewListItem extends StatelessWidget {
                         ),
                         onPressed: onAgree,
                       ),
-                      Text((review.agreedBy.length - 1).toString()),
+                      Text(review.agreedBy.length.toString()),
                       const SizedBox(width: 8),
                       IconButton(
                         icon: Icon(
@@ -94,7 +96,7 @@ class ReviewListItem extends StatelessWidget {
                         ),
                         onPressed: onDisagree,
                       ),
-                      Text((review.disagreedBy.length - 1).toString()),
+                      Text(review.disagreedBy.length.toString()),
                     ],
                   ),
                 ),
@@ -109,7 +111,7 @@ class ReviewListItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(review.reviewDate, style: textTheme.bodySmall), // 格式化日期
+                    Text(formatter.format(DateTime.parse(review.reviewDate)), style: textTheme.bodySmall), // 格式化日期
                   ],
                 ),
                 const SizedBox(height: 8),

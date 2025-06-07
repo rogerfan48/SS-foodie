@@ -42,4 +42,8 @@ class ReviewRepository {
       });
     }
   }
+
+  Future<DocumentReference> addReview(ReviewModel review) {
+    return _reviewCollection.add(review.toMap());
+  }
 }

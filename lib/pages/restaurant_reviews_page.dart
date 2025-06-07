@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:foodie/services/storage_service.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/view_models/account_vm.dart';
 import 'package:foodie/view_models/write_review_vm.dart';
@@ -13,6 +14,14 @@ class RestaurantReviewsPage extends StatelessWidget {
 
   void _showWriteReviewPage(BuildContext context) {
     final detailVM = context.read<RestaurantDetailViewModel>();
+    final currentUserId = context.read<AccountViewModel>().firebaseUser?.uid;
+
+    if (currentUserId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please log in to write a review.")));
+      return;
+    }
 
     showGeneralDialog(
       context: context,
@@ -21,7 +30,15 @@ class RestaurantReviewsPage extends StatelessWidget {
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (context, anim1, anim2) {
         return ChangeNotifierProvider(
-          create: (_) => WriteReviewViewModel(detailVM.categorizedMenu),
+          create:
+              (context) => WriteReviewViewModel(
+                restaurantId: detailVM.restaurantId,
+                currentUserId: currentUserId,
+                categorizedMenu: detailVM.categorizedMenu,
+                reviewRepository: context.read<ReviewRepository>(),
+                storageService: context.read<StorageService>(), // ✅ 注入新依賴
+              ),
+
           child: const RestaurantWriteReviewPage(),
         );
       },
@@ -110,7 +127,7 @@ class RestaurantReviewsPage extends StatelessWidget {
                   onAgree: () {
                     if (currentUserId != null) {
                       vm.toggleReviewVote(
-                        reviewId: review.reviewID,
+                        reviewId: review.reviewID!,
                         currentUserId: currentUserId,
                         voteType: VoteType.agree,
                         isCurrentlyVoted: hasAgreed,
@@ -120,7 +137,7 @@ class RestaurantReviewsPage extends StatelessWidget {
                   onDisagree: () {
                     if (currentUserId != null) {
                       vm.toggleReviewVote(
-                        reviewId: review.reviewID,
+                        reviewId: review.reviewID!,
                         currentUserId: currentUserId,
                         voteType: VoteType.disagree,
                         isCurrentlyVoted: hasDisagreed,

@@ -42,4 +42,19 @@ class ReviewModel {
       reviewImgURLs: List<String>.from(map['reviewImgURLs'] ?? []),
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'reviewerID': reviewerID,
+      'restaurantID': restaurantID,
+      'dishID': dishID,
+      'agreedBy': agreedBy,
+      'disagreedBy': disagreedBy,
+      'rating': rating,
+      'priceLevel': priceLevel,
+      'content': content,
+      'reviewDate': reviewDate,
+      'reviewImgURLs': reviewImgURLs,
+    };
+  }
 }

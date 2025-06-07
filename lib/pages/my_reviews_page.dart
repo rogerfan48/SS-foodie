@@ -44,7 +44,7 @@ class MyReviewsPage extends StatelessWidget {
                         () =>
                             currentUserId != null
                                 ? myReviewViewModel.toggleReviewVote(
-                                  reviewId: review.reviewID,
+                                  reviewId: review.reviewID!,
                                   currentUserId: currentUserId,
                                   voteType: VoteType.agree,
                                   isCurrentlyVoted: hasAgreed,
@@ -54,7 +54,7 @@ class MyReviewsPage extends StatelessWidget {
                         () =>
                             currentUserId != null
                                 ? myReviewViewModel.toggleReviewVote(
-                                  reviewId: review.reviewID,
+                                  reviewId: review.reviewID!,
                                   currentUserId: currentUserId,
                                   voteType: VoteType.disagree,
                                   isCurrentlyVoted: hasDisagreed,
