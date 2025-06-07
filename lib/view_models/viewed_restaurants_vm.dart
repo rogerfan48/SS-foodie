@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:foodie/enums/genre_tag.dart';
 import 'package:foodie/models/restaurant_model.dart';
@@ -14,28 +13,36 @@ class ViewedRestaurant {
 }
 
 class ViewRestaurantsViewModel with ChangeNotifier {
-  final UserRepository _userRepository = UserRepository();
-  final RestaurantRepository _restaurantRepository = RestaurantRepository();
-  late StreamSubscription<Map<String, UserModel>?> _userSubscription;
-  late StreamSubscription<Map<String, RestaurantModel>?> _restaurantSubscription;
+  final String _userId;
+  final UserRepository _userRepository;
+  final RestaurantRepository _restaurantRepository;
+  
+  late StreamSubscription<Map<String, UserModel>> _userSubscription;
+  late StreamSubscription<Map<String, RestaurantModel>> _restaurantSubscription;
 
-  // holds <restaurantId, viewDateString>
-  late Map<String, String> idDateMap;
-
+  Map<String, String> idDateMap = {};
   final List<ViewedRestaurant> _viewedRestaurants = [];
   List<ViewedRestaurant> get viewedRestaurants => _viewedRestaurants;
 
-  ViewRestaurantsViewModel(String userId) {
+  ViewRestaurantsViewModel(this._userId, this._userRepository, this._restaurantRepository) {
     _userSubscription = _userRepository.streamUserMap().listen((allUsers) {
-      final user = allUsers[userId];
+      final user = allUsers[_userId];
       if (user != null) {
         idDateMap = user.viewedRestaurantIDs;
+        // 重新觸發餐廳的讀取，因為用戶數據可能已更新
+        _loadRestaurants();
       }
     });
 
     _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen((allRestaurants) {
+      _loadRestaurants(allRestaurants);
+    });
+  }
+
+  void _loadRestaurants([Map<String, RestaurantModel>? allRestaurants]) {
+    // 確保在 restaurant stream 觸發時也能更新
+    if (allRestaurants != null) {
       _viewedRestaurants.clear();
-      // only include restaurants in idDateMap
       idDateMap.forEach((restId, dateString) {
         final r = allRestaurants[restId];
         if (r != null) {
@@ -47,7 +54,7 @@ class ViewRestaurantsViewModel with ChangeNotifier {
         }
       });
       notifyListeners();
-    });
+    }
   }
 
   @override
@@ -55,20 +62,5 @@ class ViewRestaurantsViewModel with ChangeNotifier {
     _userSubscription.cancel();
     _restaurantSubscription.cancel();
     super.dispose();
-  }
-
-  void addViewedRestaurant(ViewedRestaurant restaurant) {
-    _viewedRestaurants.add(restaurant);
-    notifyListeners();
-  }
-
-  void removeViewedRestaurant(ViewedRestaurant restaurant) {
-    _viewedRestaurants.remove(restaurant);
-    notifyListeners();
-  }
-
-  void clearViewedRestaurants() {
-    _viewedRestaurants.clear();
-    notifyListeners();
   }
 }

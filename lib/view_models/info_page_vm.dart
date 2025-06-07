@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:foodie/enums/genre_tag.dart';
 import 'package:foodie/enums/vegan_tag.dart';
@@ -18,7 +17,7 @@ class RestaurantInfo {
   final List<GenreTag> genreTags;
   final VeganTag veganTag;
   final int priceLevel, rating;
-  final String googleMapURL;
+  final String? googleMapURL;
 
   RestaurantInfo({
     required this.restaurantName,
@@ -31,108 +30,100 @@ class RestaurantInfo {
     required this.priceLevel,
     required this.rating,
     required this.imageURLs,
-    required this.googleMapURL,
+    this.googleMapURL,
   });
 }
 
 class InfoPageViewModel with ChangeNotifier {
-  final RestaurantRepository _restaurantRepository = RestaurantRepository();
-  final ReviewRepository     _reviewRepository     = ReviewRepository();
+  final RestaurantRepository _restaurantRepository;
+  final ReviewRepository _reviewRepository;
+  final String restaurantId;
 
-  final String restaurantId;                 // ← store the passed‐in ID
-  late RestaurantInfo  _restaurantInfo;
-  List<ReviewModel>    _restaurantReviews = [];  // ← filtered reviews
-  late RestaurantModel _restaurant;
+  RestaurantInfo? _restaurantInfo;
+  List<ReviewModel> _restaurantReviews = [];
+  RestaurantModel? _restaurant;
   StreamSubscription<Map<String, RestaurantModel>>? _restaurantSubscription;
-  StreamSubscription<Map<String, ReviewModel>?>?   _reviewSubscription;
+  StreamSubscription<Map<String, ReviewModel>>? _reviewSubscription;
 
-  RestaurantInfo get restaurantInfo    => _restaurantInfo;
-  // List<ReviewModel> get restaurantReviews => _restaurantReviews;
+  RestaurantInfo? get restaurantInfo => _restaurantInfo;
 
-  InfoPageViewModel(this.restaurantId) {
-    _reviewSubscription = _reviewRepository.streamReviewMap().listen(
-      (allReviews) {
-        _restaurantReviews = allReviews?.values
-          .where((r) => r.restaurantID == restaurantId)
-          .toList() 
-          ?? [];
-        notifyListeners();
-      },
-    );
+  InfoPageViewModel(this.restaurantId, this._restaurantRepository, this._reviewRepository) {
+    _reviewSubscription = _reviewRepository.streamReviewMap().listen((allReviews) {
+      _restaurantReviews = allReviews.values.where((r) => r.restaurantID == restaurantId).toList();
+      // 當評論更新時，也可能需要重新計算評分等信息
+      _updateRestaurantInfo();
+      notifyListeners();
+    });
 
-    _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen(
-      (restaurantMap) {
+    _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen((restaurantMap) {
+      if (restaurantMap.containsKey(restaurantId)) {
         _restaurant = restaurantMap[restaurantId]!;
-        _restaurantInfo = RestaurantInfo(
-          restaurantName: _restaurant.restaurantName,
-          summary:        _restaurant.summary,
-          address:        _restaurant.address,
-          phoneNumber:    _restaurant.phoneNumber,
-          businessHour:   _restaurant.businessHour,
-          googleMapURL:   _restaurant.googleMapURL,
-          genreTags:      _restaurant.genreTags.map(GenreTag.fromString).toList(),
-          veganTag:       calculateVeganTag(),
-          priceLevel:     calculatePriceLevel(),
-          rating:         calculateRating(),
-          imageURLs:      getImageURLs(),
-        );
+        _updateRestaurantInfo();
         notifyListeners();
-      },
+      }
+    });
+  }
+
+  void _updateRestaurantInfo() {
+    if (_restaurant == null) return;
+
+    _restaurantInfo = RestaurantInfo(
+      restaurantName: _restaurant!.restaurantName,
+      summary: _restaurant!.summary,
+      address: _restaurant!.address,
+      phoneNumber: _restaurant!.phoneNumber,
+      businessHour: _restaurant!.businessHour,
+      googleMapURL: _restaurant!.googleMapURL,
+      genreTags: _restaurant!.genreTags.map(GenreTag.fromString).toList(),
+      veganTag: calculateVeganTag(),
+      priceLevel: calculatePriceLevel(),
+      rating: calculateRating(),
+      imageURLs: getImageURLs(),
     );
   }
 
+  // calculateVeganTag, calculateRating, calculatePriceLevel, getImageURLs 等方法保持不變
   VeganTag calculateVeganTag() {
-    // Collect all dish tags (skip nulls)
-    final tags = _restaurant.menuMap.values
-      .map((dish) => dish.veganTag)
-      .map((tag) => VeganTag.fromString(tag))
-      .toList();
+    if (_restaurant == null) return veganTags[VeganTags.nonVegetarian]!;
+    final tags =
+        _restaurant!.menuMap.values
+            .map((dish) => dish.veganTag)
+            .map((tag) => VeganTag.fromString(tag))
+            .toList();
 
-    if (tags.isEmpty) {
-      return veganTags[VeganTags.nonVegetarian]!;
-    }
-    // Example policy: if any dish is non‐vegetarian → nonVegetarian
+    if (tags.isEmpty) return veganTags[VeganTags.nonVegetarian]!;
     if (tags.any((t) => t.title == veganTags[VeganTags.nonVegetarian]!.title)) {
       return veganTags[VeganTags.nonVegetarian]!;
     }
-    // else if any dish is vegetarian (or partial) → vegetarian
     if (tags.any((t) => t.title == veganTags[VeganTags.vegetarian]!.title)) {
       return veganTags[VeganTags.vegetarian]!;
     }
-    // else if any dish is lactoOvo → lactoOvo
     if (tags.any((t) => t.title == veganTags[VeganTags.lacto]!.title)) {
       return veganTags[VeganTags.lacto]!;
     }
-    // else if any dish is veganPartial
     if (tags.any((t) => t.title == veganTags[VeganTags.veganPartial]!.title)) {
       return veganTags[VeganTags.veganPartial]!;
     }
-    // otherwise all dishes are fully vegan
     return veganTags[VeganTags.vegan]!;
   }
 
-
   int calculateRating() {
-    if (_restaurantReviews.isEmpty) return 3; // default if no reviews
-    final total = _restaurantReviews.fold<int>(
-      0,
-      (sum, review) => sum + review.rating,
-    );
+    if (_restaurantReviews.isEmpty) return 3;
+    final total = _restaurantReviews.fold<int>(0, (sum, review) => sum + review.rating);
     return (total / _restaurantReviews.length).round();
   }
 
   int calculatePriceLevel() {
     if (_restaurantReviews.isEmpty) return 2;
-    final totalPriceLevel = _restaurantReviews.fold<int>(
-      0, (sum, review) => sum + review.priceLevel!,
-    );
-    return (totalPriceLevel / _restaurantReviews.length).round();
+    final validReviews = _restaurantReviews.where((r) => r.priceLevel != null).toList();
+    if (validReviews.isEmpty) return 2;
+    final totalPriceLevel = validReviews.fold<int>(0, (sum, review) => sum + review.priceLevel!);
+    return (totalPriceLevel / validReviews.length).round();
   }
 
   List<String> getImageURLs() {
-    if(_restaurantReviews.isEmpty) return [];
-    final imageURLs = _restaurantReviews.expand((review) => review.reviewImgURLs).toList();
-    return imageURLs;
+    if (_restaurantReviews.isEmpty) return [];
+    return _restaurantReviews.expand((review) => review.reviewImgURLs).toList();
   }
 
   @override

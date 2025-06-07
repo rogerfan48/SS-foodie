@@ -10,7 +10,6 @@ class AccountViewModel extends ChangeNotifier {
   bool get isLoggedIn => _firebaseUser != null;
 
   AccountViewModel(this._authService) {
-    // Listen to authentication state changes from the service
     _authService.authStateChanges.listen(_onAuthStateChanged);
     _firebaseUser = _authService.currentUser;
   }

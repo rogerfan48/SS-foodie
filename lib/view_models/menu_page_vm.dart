@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/review_model.dart';
@@ -21,79 +20,61 @@ class DishItem {
 }
 
 class MenuPageViewModel with ChangeNotifier {
-  final RestaurantRepository _restaurantRepository = RestaurantRepository();
-  final ReviewRepository _reviewRepository = ReviewRepository();
+  final RestaurantRepository _restaurantRepository;
+  final ReviewRepository _reviewRepository;
+
   StreamSubscription<Map<String, RestaurantModel>>? _restaurantSubscription;
-  StreamSubscription<Map<String, ReviewModel>?>? _reviewSubscription;
+  StreamSubscription<Map<String, ReviewModel>>? _reviewSubscription;
   final String restaurantId;
   final List<DishItem> _menuItems = [];
-  late List<ReviewModel> _reviews;
-
+  List<ReviewModel> _reviews = [];
 
   List<DishItem> get menuItems => _menuItems;
 
-  MenuPageViewModel(this.restaurantId) {
-    _reviewSubscription = _reviewRepository.streamReviewMap().listen(
-      (allReviews) {
-        _reviews = allReviews?.values
-            .where((r) => r.restaurantID == restaurantId)
-            .toList() ?? [];
-        notifyListeners();
-      },
-    );
+  MenuPageViewModel(this.restaurantId, this._restaurantRepository, this._reviewRepository) {
+    _reviewSubscription = _reviewRepository.streamReviewMap().listen((allReviews) {
+      if (allReviews == null) return;
+      _reviews = allReviews.values.where((r) => r.restaurantID == restaurantId).toList();
+      // 評論更新後，菜單項目的評分和圖片可能需要更新，因此重新加載菜單
+      _loadMenu();
+      notifyListeners();
+    });
 
-    _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen(
-      (allRestaurants) {
-        if (allRestaurants.containsKey(restaurantId)) {
-          final restaurant = allRestaurants[restaurantId]!;
-          _menuItems.clear();
-          restaurant.menuMap.forEach((dishId, dish) {
-            _menuItems.add(DishItem(
-              dishName: dish.dishName,
-              price: dish.dishPrice,
-              mainImgURL: calculateMainImgURL(dishId),
-              genre: dish.dishGenre,
-              rating: calculateRating(dishId),
-            ));
-          });
-        }
-        else {
-            _menuItems.clear();
-            throw Exception('Restaurant with docId $restaurantId not found');
-        }
-        notifyListeners();
-      },
-    );
+    _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen((allRestaurants) {
+      _loadMenu(allRestaurants);
+      notifyListeners();
+    });
   }
 
-  String calculateMainImgURL(String dishId) {
-    final dishReviews = _reviews
-      .where((review) => review.dishID == dishId)
-      .toList();
-
-    final imgURLs = dishReviews
-      .expand((review) => review.reviewImgURLs)
-      .toList();
-    
-    if (imgURLs.isNotEmpty) {
-      return imgURLs.first; // Return the first image URL
-    } else {
-      return ''; // Return an empty string if no images are available
+  void _loadMenu([Map<String, RestaurantModel>? allRestaurants]) {
+    // 確保在 restaurant stream 觸發時也能更新
+    if (allRestaurants != null && allRestaurants.containsKey(restaurantId)) {
+      final restaurant = allRestaurants[restaurantId]!;
+      _menuItems.clear();
+      restaurant.menuMap.forEach((dishId, dish) {
+        _menuItems.add(
+          DishItem(
+            dishName: dish.dishName,
+            price: dish.dishPrice,
+            mainImgURL: calculateMainImgURL(dishId),
+            genre: dish.dishGenre,
+            rating: calculateRating(dishId),
+          ),
+        );
+      });
     }
   }
 
+  String calculateMainImgURL(String dishId) {
+    final dishReviews = _reviews.where((review) => review.dishID == dishId).toList();
+    final imgURLs = dishReviews.expand((review) => review.reviewImgURLs).toList();
+    return imgURLs.isNotEmpty ? imgURLs.first : '';
+  }
+
   int calculateRating(String dishId) {
-    final dishReviews = _reviews
-      .where((review) => review.dishID == dishId)
-      .toList();
-
+    final dishReviews = _reviews.where((review) => review.dishID == dishId).toList();
     if (dishReviews.isEmpty) return 0;
-
-    final total = dishReviews.fold<int>(
-      0,
-      (sum, review) => sum + review.rating,
-    );
-
+    final total = dishReviews.fold<int>(0, (sum, review) => sum + review.rating);
     return (total / dishReviews.length).round();
   }
 
@@ -102,19 +83,5 @@ class MenuPageViewModel with ChangeNotifier {
     _restaurantSubscription?.cancel();
     _reviewSubscription?.cancel();
     super.dispose();
-  }
-
-  void addMenuItem(String item) {
-    notifyListeners();
-  }
-
-  void removeMenuItem(String item) {
-    _menuItems.remove(item);
-    notifyListeners();
-  }
-
-  void clearMenu() {
-    _menuItems.clear();
-    notifyListeners();
   }
 }
