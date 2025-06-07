@@ -39,7 +39,7 @@ class _BottomSheetState extends State<BottomSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(widget.info.restaurantName),
+                      Text(widget.info.restaurantName, style: Theme.of(context).textTheme.headlineSmall),
                       IconButton(
                         icon: const Icon(Icons.expand_less),
                         onPressed: () {
@@ -80,6 +80,7 @@ class _BottomSheetState extends State<BottomSheet> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 5,),
                   // Rate
                   Row(
                     children: [
@@ -104,6 +105,7 @@ class _BottomSheetState extends State<BottomSheet> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 5,),
                   // Navigation
                   ElevatedButton(
                     onPressed: () async {
@@ -124,6 +126,7 @@ class _BottomSheetState extends State<BottomSheet> {
                     ),
                     child: Row(
                       children: [
+                        SizedBox(width: 7,),
                         Icon(Icons.navigation),
                         Text(
                           'Navigation',
