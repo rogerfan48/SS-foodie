@@ -6,6 +6,8 @@ import 'package:foodie/models/review_model.dart';
 import 'package:foodie/repositories/review_repo.dart';
 import 'package:foodie/view_models/account_vm.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
+import 'package:foodie/widgets/firebase_image.dart';
+import 'package:foodie/widgets/restaurant/image_preview_screen.dart';
 
 class ReviewListItem extends StatelessWidget {
   final ReviewModel review;
@@ -111,7 +113,10 @@ class ReviewListItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(formatter.format(DateTime.parse(review.reviewDate)), style: textTheme.bodySmall), // 格式化日期
+                    Text(
+                      formatter.format(DateTime.parse(review.reviewDate)),
+                      style: textTheme.bodySmall,
+                    ), // 格式化日期
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -124,6 +129,31 @@ class ReviewListItem extends StatelessWidget {
                     side: BorderSide.none,
                   ),
                 Text(review.content, style: textTheme.bodyMedium),
+                SizedBox(
+                  height: review.reviewImgURLs.isNotEmpty ? 120 : 0,
+                  child:
+                      review.reviewImgURLs.isNotEmpty
+                          ? ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.only(top: 8),
+                            itemCount: review.reviewImgURLs.length,
+                            separatorBuilder: (context, index) => const SizedBox(width: 8),
+                            itemBuilder: (context, index) {
+                              final gsUri = review.reviewImgURLs[index];
+                              return GestureDetector(
+                                onTap: () => showImagePreview(context, gsUri),
+                                child: Hero(
+                                  tag: gsUri,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: FirebaseImage(gsUri: gsUri, width: 120, height: 80),
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                          : const SizedBox.shrink(),
+                ),
               ],
             ),
           ),

@@ -126,7 +126,7 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
                     '\$${_currentOptions.priceRange.end.round()}',
                   ),
                   activeColor: Theme.of(context).colorScheme.primary,
-                  inactiveColor: Theme.of(context).colorScheme.primary,
+                  inactiveColor: Theme.of(context).colorScheme.surfaceDim,
                   onChanged: (values) {
                     setState(() {
                       _currentOptions.priceRange = values;
@@ -146,7 +146,7 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
                 divisions: 5,
                 label: _currentOptions.minRating.toStringAsFixed(1),
                 activeColor: Theme.of(context).colorScheme.primary,
-                inactiveColor: Theme.of(context).colorScheme.primary,
+                inactiveColor: Theme.of(context).colorScheme.surfaceDim,
                 onChanged: (value) {
                   setState(() {
                     _currentOptions.minRating = value;

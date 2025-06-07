@@ -3,6 +3,7 @@ import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/widgets/firebase_image.dart';
 import 'package:foodie/widgets/restaurant/restaurant_info_card.dart';
 import 'package:provider/provider.dart';
+import 'package:foodie/widgets/restaurant/image_preview_screen.dart';
 
 class RestaurantInfoPage extends StatelessWidget {
   const RestaurantInfoPage({super.key});
@@ -15,12 +16,7 @@ class RestaurantInfoPage extends StatelessWidget {
           Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 16),
           // 使用 Expanded 讓文字可以自動換行
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
+          Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyLarge)),
         ],
       ),
     );
@@ -49,18 +45,27 @@ class RestaurantInfoPage extends StatelessWidget {
           RestaurantInfoCard(),
           const SizedBox(height: 16),
           SizedBox(
-            height: 120,
+            height: imageURLs.isNotEmpty ? 120 : 0,
             child:
                 imageURLs.isNotEmpty
                     ? ListView.separated(
                       scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(top: 8),
                       itemCount: imageURLs.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 6),
-                      itemBuilder:
-                          (context, index) => Card(
-                            clipBehavior: Clip.antiAlias,
-                            child: FirebaseImage(gsUri: imageURLs[index], width: 120),
+                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final gsUri = imageURLs[index];
+                        return GestureDetector(
+                          onTap: () => showImagePreview(context, gsUri),
+                          child: Hero(
+                            tag: gsUri,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: FirebaseImage(gsUri: gsUri, width: 120, height: 80),
+                            ),
                           ),
+                        );
+                      },
                     )
                     : const SizedBox.shrink(),
           ),
