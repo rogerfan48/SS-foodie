@@ -4,8 +4,10 @@ import 'package:foodie/enums/vegan_tag.dart';
 import 'package:foodie/models/dish_model.dart';
 import 'package:foodie/models/restaurant_model.dart';
 import 'package:foodie/models/review_model.dart';
+import 'package:foodie/models/user_model.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/repositories/user_repo.dart';  // ← 新增
 
 enum ReviewSortType { Default, Latest, Highest, Lowest }
 
@@ -13,6 +15,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
   final String restaurantId;
   final RestaurantRepository _restaurantRepository;
   final ReviewRepository _reviewRepository;
+  final UserRepository _userRepository;           // ← 新增
 
   StreamSubscription? _restaurantSubscription;
   StreamSubscription? _reviewSubscription;
@@ -66,8 +69,10 @@ class RestaurantDetailViewModel with ChangeNotifier {
     required this.restaurantId,
     required RestaurantRepository restaurantRepository,
     required ReviewRepository reviewRepository,
+    required UserRepository userRepository,       // ← 新增
   })  : _restaurantRepository = restaurantRepository,
-        _reviewRepository = reviewRepository {
+        _reviewRepository = reviewRepository,
+        _userRepository = userRepository {         // ← 新增
     _listenToData();
   }
 
@@ -120,6 +125,17 @@ class RestaurantDetailViewModel with ChangeNotifier {
   List<String> _getImageURLs() {
     if (_reviews.isEmpty) return [];
     return _reviews.expand((review) => review.reviewImgURLs).toList();
+  }
+
+  /// 透過 UserRepository 查使用者名稱
+  Future<String> getUserName(String userId) async {
+    try {
+      // 假設 user_repo.dart 提供 streamUserMap()
+      final Map<String, UserModel> userMap = await _userRepository.streamUserMap().first;
+      return userMap[userId]?.userName ?? 'Unknown';
+    } catch (_) {
+      return 'Unknown';
+    }
   }
 
   @override
