@@ -80,22 +80,25 @@ class _AiPageState extends State<AiPage> {
               bottom: 30,
               left: 16,
               right: 16,
-              child: Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: InputDecoration(
-                    hintText: "Chat with AI",
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        context.read<AiChatService>().addMessage(_controller.text);
-                        _controller.clear();
-                      },
-                      icon: Icon(Icons.send),
-                    ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
-                    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: "Chat with AI",
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+                      context.read<AiChatService>().addMessage(_controller.text);
+                      _controller.clear();
+                    },
+                    icon: Icon(Icons.send),
                   ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                 ),
+                onSubmitted: (value) {
+                  context.read<AiChatService>().addMessage(value);
+                  _controller.clear();
+                },
               ),
             ),
           ],
