@@ -61,87 +61,93 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
 
           // Sections for each category
           Expanded(
-            child: ListView.builder(
+            child: SingleChildScrollView(
               controller: _scrollController,
-              itemCount: categoryList.length,
-              itemBuilder: (context, index) {
-                final catName = categoryList[index];
-                final catDishes = categories[catName]!;
-                return Container(
-                  key: _categoryKeys[catName],
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        catName,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: catDishes.length,
-                        itemBuilder: (context, dishIndex) {
-                          final dish = catDishes[dishIndex];
-                          return InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context, 
-                                '/dish-detail',
-                                arguments: {
-                                  'restaurantId': vm.restaurant?.restaurantId,
-                                  'dishName': dish.dishName,
+              child: Column(
+                children: categoryList.map((catName) {
+                  final catDishes = categories[catName]!;
+                  return Container(
+                    key: _categoryKeys[catName],
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          catName,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Column(
+                          children: [
+                            for (int dishIndex = 0; dishIndex < catDishes.length; dishIndex++) ...[
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/dish-detail',
+                                    arguments: {
+                                      'restaurantId': vm.restaurant?.restaurantId,
+                                      'dishName': catDishes[dishIndex].dishName,
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 12.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 12.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            dish.dishName,
-                                            style: Theme.of(context).textTheme.titleMedium,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                catDishes[dishIndex].dishName,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Text(
+                                              '\$${catDishes[dishIndex].dishPrice}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context).primaryColor,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
-                                        Text(
-                                          '\$${dish.dishPrice}',
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).primaryColor,
+                                        if (catDishes[dishIndex].bestReviewSummary.isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 8.0),
+                                            child: Text(
+                                              catDishes[dishIndex].bestReviewSummary,
+                                              style:
+                                                  Theme.of(context).textTheme.bodyMedium,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                        ),
                                       ],
                                     ),
-                                    if (dish.bestReviewSummary.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8.0),
-                                        child: Text(
-                                          dish.bestReviewSummary,
-                                          style: Theme.of(context).textTheme.bodyMedium,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+                              const Divider(), // Add a divider below each dish
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ],
