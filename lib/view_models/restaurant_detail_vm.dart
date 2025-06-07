@@ -7,6 +7,8 @@ import 'package:foodie/models/review_model.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
 
+enum ReviewSortType { Default, Latest, Highest, Lowest }
+
 class RestaurantDetailViewModel with ChangeNotifier {
   final String restaurantId;
   final RestaurantRepository _restaurantRepository;
@@ -18,18 +20,47 @@ class RestaurantDetailViewModel with ChangeNotifier {
   Map<String, List<DishModel>> _categoriezedMenu = {};
   RestaurantModel? _restaurant;
   List<ReviewModel> _reviews = [];
+  ReviewSortType _currentSortType = ReviewSortType.Default;
   bool _isLoading = true;
 
   Map<String, List<DishModel>> get categorizedMenu => _categoriezedMenu;
   RestaurantModel? get restaurant => _restaurant;
   List<ReviewModel> get reviews => _reviews;
+  ReviewSortType get currentSortType => _currentSortType;
   bool get isLoading => _isLoading;
   String get restaurantName => _restaurant?.restaurantName ?? 'Loading...';
 
-  int get averageRating => _calculateRating();
+  double get averageRating => _calculateRating();
   int get averagePriceLevel => _calculatePriceLevel();
-  VeganTag get overallVeganTag => _calculateVeganTag();
+  VeganTag get overallVeganTag => VeganTag.fromString(_restaurant?.veganTag ?? "nonVegetarian");
   List<String> get displayImageUrls => _getImageURLs();
+
+  Map<int, int> get ratingDistribution {
+    final Map<int, int> distribution = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
+    for (var review in _reviews) {
+      if (distribution.containsKey(review.rating)) {
+        distribution[review.rating] = distribution[review.rating]! + 1;
+      }
+    }
+    return distribution;
+  }
+  
+  void sortReviews(ReviewSortType sortType) {
+    _currentSortType = sortType;
+    switch (sortType) {
+      case ReviewSortType.Highest:
+        _reviews.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+      case ReviewSortType.Lowest:
+        _reviews.sort((a, b) => a.rating.compareTo(b.rating));
+        break;
+      case ReviewSortType.Latest:
+      default:
+        _reviews.sort((a, b) => DateTime.parse(b.reviewDate).compareTo(DateTime.parse(a.reviewDate)));
+        break;
+    }
+    notifyListeners();
+  }
 
   RestaurantDetailViewModel({
     required this.restaurantId,
@@ -51,7 +82,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
 
     _reviewSubscription = _reviewRepository.streamReviewMap().listen((reviewMap) {
       _reviews = reviewMap.values.where((r) => r.restaurantID == restaurantId).toList();
-      _reviews.sort((a, b) => DateTime.parse(b.reviewDate).compareTo(DateTime.parse(a.reviewDate)));
+      sortReviews(_currentSortType);
       _checkLoadingStatus();
       notifyListeners();
     });
@@ -72,26 +103,10 @@ class RestaurantDetailViewModel with ChangeNotifier {
     }
   }
 
-  VeganTag _calculateVeganTag() {
-    return VeganTag.fromString(_restaurant?.veganTag ?? VeganTags.nonVegetarian.toString());
-    if (_restaurant == null) return veganTags[VeganTags.nonVegetarian]!;
-    final tags = _restaurant!.menuMap.values
-        .map((dish) => dish.veganTag)
-        .map((tag) => VeganTag.fromString(tag))
-        .toList();
-
-    if (tags.isEmpty) return veganTags[VeganTags.nonVegetarian]!;
-    if (tags.any((t) => t.title == veganTags[VeganTags.nonVegetarian]!.title)) return veganTags[VeganTags.nonVegetarian]!;
-    if (tags.any((t) => t.title == veganTags[VeganTags.vegetarian]!.title)) return veganTags[VeganTags.vegetarian]!;
-    if (tags.any((t) => t.title == veganTags[VeganTags.lacto]!.title)) return veganTags[VeganTags.lacto]!;
-    if (tags.any((t) => t.title == veganTags[VeganTags.veganPartial]!.title)) return veganTags[VeganTags.veganPartial]!;
-    return veganTags[VeganTags.vegan]!;
-  }
-
-  int _calculateRating() {
+  double _calculateRating() {
     if (_reviews.isEmpty) return 0; // 沒有評論則返回 0 顆星
-    final total = _reviews.fold<int>(0, (sum, review) => sum + review.rating);
-    return (total / _reviews.length).round();
+    final total = _reviews.fold<double>(0, (sum, review) => sum + review.rating);
+    return (total / _reviews.length);
   }
 
   int _calculatePriceLevel() {
