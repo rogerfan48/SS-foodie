@@ -61,7 +61,7 @@ class GenreTag {
         return GenreTags.western;
       case "Indian":
         return GenreTags.indian;
-      case "Yhai":
+      case "Thai":
         return GenreTags.thai;
       case "Korean":
         return GenreTags.korean;
