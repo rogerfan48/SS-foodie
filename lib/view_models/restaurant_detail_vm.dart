@@ -21,7 +21,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
   StreamSubscription? _restaurantSubscription;
   StreamSubscription? _reviewSubscription;
 
-  Map<String, List<DishModel>> _categoriezedMenu = {};
+  late Map<String, List<DishModel>> _categoriezedMenu;
   RestaurantModel? _restaurant;
   List<ReviewModel> _reviews = [];
   ReviewSortType _currentSortType = ReviewSortType.Default;
@@ -84,6 +84,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
       if (restaurantMap.containsKey(restaurantId)) {
         _restaurant = restaurantMap[restaurantId];
         _checkLoadingStatus();
+        _buildCategorizedMenu();
         notifyListeners();
       }
     });
@@ -95,16 +96,6 @@ class RestaurantDetailViewModel with ChangeNotifier {
       notifyListeners();
     });
 
-    _categoriezedMenu =
-        _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
-          final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
-          if (!map.containsKey(category)) {
-            map[category] = [];
-          }
-          map[category]!.add(dish);
-          return map;
-        }) ??
-        {};
   }
 
   void _checkLoadingStatus() {
@@ -130,6 +121,17 @@ class RestaurantDetailViewModel with ChangeNotifier {
   List<String> _getImageURLs() {
     if (_reviews.isEmpty) return [];
     return _reviews.expand((review) => review.reviewImgURLs).toList();
+  }
+
+  void _buildCategorizedMenu() {
+    _categoriezedMenu = _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
+      final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
+      if (!map.containsKey(category)) {
+        map[category] = [];
+      }
+      map[category]!.add(dish);
+      return map;
+    }) ?? {"test": []};
   }
 
   Future<UserModel?> getUserData(String userId) async {
