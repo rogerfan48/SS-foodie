@@ -84,20 +84,38 @@ class WriteReviewViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<String>> _uploadImages(List<XFile> images) async {
+    if (images.isEmpty) return [];
+
+    // 為每一個圖片檔案建立一個上傳任務 (Future)
+    final uploadTasks =
+        images.map((imageFile) {
+          return _storageService.uploadReviewImage(
+            file: File(imageFile.path),
+            userId: _currentUserId,
+          );
+        }).toList();
+
+    // 等待所有上傳任務完成
+    return await Future.wait(uploadTasks);
+  }
+
   Future<bool> submitReview() async {
+    if (_isSubmitting) return false;
     _isSubmitting = true;
     notifyListeners();
 
     try {
-      // 1. 處理所有對菜色的評論
+      // 處理對菜色的評論
       for (final specificReview in specificReviews) {
         bool hasRating = specificReview.rating > 0;
         bool hasContent = specificReview.contentController.text.isNotEmpty;
         bool hasDish = specificReview.selectedDish != null;
 
         if (hasDish && (hasRating || hasContent)) {
-          // 上傳圖片並獲取 gs:// URI
+          // 1. 先上傳圖片
           final imageUris = await _uploadImages(specificReview.images);
+          // 2. 建立 ReviewModel
           final newReview = ReviewModel(
             reviewerID: _currentUserId,
             restaurantID: _restaurantId,
@@ -105,26 +123,26 @@ class WriteReviewViewModel with ChangeNotifier {
             rating: specificReview.rating,
             content: specificReview.contentController.text,
             reviewDate: DateTime.now().toIso8601String(),
-            priceLevel: 0, // 針對菜色的評論，price 設為 0
+            priceLevel: null,
             reviewImgURLs: imageUris,
           );
           await _reviewRepository.addReview(newReview);
         }
       }
 
-      // 2. 處理對餐廳的總體評論
+      // 處理對餐廳的總體評論
       bool hasOverallRating = overallRating > 0;
       bool hasOverallContent = overallContentController.text.isNotEmpty;
       if (hasOverallRating || hasOverallContent) {
         final newReview = ReviewModel(
           reviewerID: _currentUserId,
           restaurantID: _restaurantId,
-          dishID: null, // 總體評論沒有 dishID
+          dishID: null,
           rating: overallRating,
           content: overallContentController.text,
           reviewDate: DateTime.now().toIso8601String(),
-          priceLevel: selectedPrice ?? 0, // 使用用戶選擇的價格，或預設 0
-          reviewImgURLs: [], // 假設總體評論不帶圖片
+          priceLevel: selectedPrice,
+          reviewImgURLs: [],
         );
         await _reviewRepository.addReview(newReview);
       }
@@ -136,20 +154,6 @@ class WriteReviewViewModel with ChangeNotifier {
       _isSubmitting = false;
       notifyListeners();
     }
-  }
-
-  Future<List<String>> _uploadImages(List<XFile> images) async {
-    if (images.isEmpty) return [];
-    
-    final uploadTasks = images.map((imageFile) {
-      final file = File(imageFile.path);
-      // 這裡需要一個上傳邏輯，我們假設 StorageService 有一個 uploadReviewImage 方法
-      // 它會返回 gs:// URI
-      // return _storageService.uploadReviewImage(file, _currentUserId);
-      return Future.value('gs://fake-uri/${imageFile.name}'); // 暫用假的上傳邏輯
-    }).toList();
-
-    return await Future.wait(uploadTasks);
   }
 
   @override

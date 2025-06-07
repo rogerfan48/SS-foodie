@@ -159,7 +159,7 @@ class RestaurantWriteReviewPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 80,
+          height: state.images.isEmpty ? 0 : 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: state.images.length,
