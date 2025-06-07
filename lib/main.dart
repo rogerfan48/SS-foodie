@@ -19,9 +19,7 @@ import 'view_models/viewed_restaurants_vm.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     MultiProvider(
@@ -37,8 +35,9 @@ void main() async {
 
         // 3. Services
         ProxyProvider3<FirebaseAuth, GoogleSignIn, UserRepository, AuthService>(
-          update: (_, auth, googleSignIn, userRepo, previous) =>
-              AuthService(auth, googleSignIn, userRepo),
+          update:
+              (_, auth, googleSignIn, userRepo, previous) =>
+                  AuthService(auth, googleSignIn, userRepo),
         ),
 
         // 4. Global ViewModels & Notifiers
@@ -54,7 +53,11 @@ void main() async {
           update: (context, accountViewModel, previous) {
             final userId = accountViewModel.firebaseUser?.uid;
             if (userId == null) return null;
-            return MyReviewViewModel(userId, context.read<ReviewRepository>());
+            return MyReviewViewModel(
+              userId,
+              context.read<ReviewRepository>(),
+              context.read<RestaurantRepository>(),
+            );
           },
         ),
         ChangeNotifierProxyProvider<AccountViewModel, ViewRestaurantsViewModel?>(

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:foodie/pages/restaurant_info_page.dart';
 import 'package:foodie/pages/restaurant_menu_page.dart';
@@ -9,6 +10,8 @@ import 'package:foodie/pages/map_page.dart';
 import 'package:foodie/pages/ai_page.dart';
 import 'package:foodie/pages/account_page.dart';
 import 'package:foodie/pages/restaurant_page.dart';
+import 'package:foodie/pages/browsing_history_page.dart';
+import 'package:foodie/pages/my_reviews_page.dart';
 
 final routerConfig = GoRouter(
   initialLocation: '/loading',
@@ -47,6 +50,15 @@ final routerConfig = GoRouter(
         GoRoute(
           path: '/account',
           pageBuilder: (context, state) => NoTransitionPage(child: AccountPage()),
+          routes: [
+            GoRoute(
+              path: 'history',
+              pageBuilder: (context, state) => CupertinoPage(child: const BrowsingHistoryPage()),
+            ),
+            GoRoute(
+              path: 'reviews',
+              pageBuilder: (context, state) => CupertinoPage(child: const MyReviewsPage()),),
+          ],
         ),
       ],
     ),

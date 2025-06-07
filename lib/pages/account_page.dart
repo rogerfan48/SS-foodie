@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:foodie/services/theme.dart';
 import 'package:foodie/view_models/account_vm.dart';
-import 'package:provider/provider.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({Key? key}) : super(key: key);
@@ -45,7 +46,8 @@ class AccountPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 child: Row(
                   children: [
-                    if (accountViewModel.isLoggedIn && accountViewModel.firebaseUser?.photoURL != null)
+                    if (accountViewModel.isLoggedIn &&
+                        accountViewModel.firebaseUser?.photoURL != null)
                       CircleAvatar(
                         backgroundImage: NetworkImage(accountViewModel.firebaseUser!.photoURL!),
                         radius: 40,
@@ -54,23 +56,33 @@ class AccountPage extends StatelessWidget {
                       Icon(Icons.account_circle, size: 80, color: colorScheme.inverseSurface),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: accountViewModel.isLoggedIn
-                          ? _buildUserInfo(context, accountViewModel) // Show user info and logout
-                          : _buildLoginButton(context, accountViewModel), // Show login button
+                      child:
+                          accountViewModel.isLoggedIn
+                              ? _buildUserInfo(
+                                context,
+                                accountViewModel,
+                              ) // Show user info and logout
+                              : _buildLoginButton(context, accountViewModel), // Show login button
                     ),
                   ],
                 ),
               ),
               _buildSettingsTile(
                 context,
-                title: 'Browse History',
-                onTap: () { /* TODO: Jump to Browse History */ },
+                title: 'Browsing History',
+                onTap:
+                    accountViewModel.isLoggedIn
+                        ? () => GoRouter.of(context).push('/account/history')
+                        : null, // 如果未登入則禁用
               ),
               const Divider(height: 1),
               _buildSettingsTile(
                 context,
                 title: 'My Review',
-                onTap: () { /* TODO: Jump to My Review */ },
+                onTap:
+                    accountViewModel.isLoggedIn
+                        ? () => GoRouter.of(context).push('/account/reviews')
+                        : null, // 如果未登入則禁用,
               ),
               const Divider(height: 1),
               _buildSettingsTile(
@@ -110,7 +122,10 @@ class AccountPage extends StatelessWidget {
             children: [
               Icon(Icons.login, color: colorScheme.onPrimary),
               const SizedBox(width: 12),
-              Text('Log in with Google', style: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary)),
+              Text(
+                'Log in with Google',
+                style: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary),
+              ),
             ],
           ),
         ),
@@ -135,10 +150,7 @@ class AccountPage extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: () => viewModel.signOut(),
-          child: const Text('Log Out'),
-        ),
+        ElevatedButton(onPressed: () => viewModel.signOut(), child: const Text('Log Out')),
       ],
     );
   }
