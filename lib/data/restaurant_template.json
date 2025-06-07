@@ -1,0 +1,31 @@
+{
+    "restaurantName": "",
+    "genreTags": [""],
+    "summary": "",
+    "businessHours": {
+        "Monday": "",
+        "Tuesday": "",
+        "Wednesday": "",
+        "Thursday": "",
+        "Friday": "",
+        "Saturday": "",
+        "Sunday": ""
+    },
+    "address": "",
+    "phoneNumber": "",
+    "restaurantReviewIDs": [""],
+    "latitude": 123.0,
+    "longitude": 123.0,
+    "menu": [
+        {
+            "dishName": "",
+            "dishReviewIDs": "",
+            "veganTag": "",
+            "halalTag": "",
+            "dishGenre": "",
+            "summary": "",
+            "bestReviewSummary": "",
+            "dishPrice": 100
+        }
+    ]
+}
