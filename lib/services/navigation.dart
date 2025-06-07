@@ -5,6 +5,7 @@ import 'package:foodie/pages/main_page.dart';
 import 'package:foodie/pages/map_page.dart';
 import 'package:foodie/pages/ai_page.dart';
 import 'package:foodie/pages/account_page.dart';
+import 'package:foodie/pages/restaurant_page.dart';
 
 final routerConfig = GoRouter(
   initialLocation: '/loading',
@@ -18,18 +19,18 @@ final routerConfig = GoRouter(
       routes: [
         GoRoute(
           path: '/map',
-          pageBuilder: (context, state) =>
-              NoTransitionPage(child: MapPage()),
+          pageBuilder: (context, state) => NoTransitionPage(child: MapPage()),
+          routes: [
+            GoRoute(
+              path: '/restaurant',
+              pageBuilder: (context, state) => NoTransitionPage(child: RestaurantPage()),
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/ai',
-          pageBuilder: (context, state) =>
-              NoTransitionPage(child: AiPage()),
-        ),
+        GoRoute(path: '/ai', pageBuilder: (context, state) => NoTransitionPage(child: AiPage())),
         GoRoute(
           path: '/account',
-          pageBuilder: (context, state) =>
-              NoTransitionPage(child: AccountPage()),
+          pageBuilder: (context, state) => NoTransitionPage(child: AccountPage()),
         ),
       ],
     ),
@@ -41,9 +42,8 @@ final routerConfig = GoRouter(
     }
     return null;
   },
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(child: Text('Page not found: ${state.uri.path}')),
-  ),
+  errorBuilder:
+      (context, state) => Scaffold(body: Center(child: Text('Page not found: ${state.uri.path}'))),
 );
 
 class NavigationService {
