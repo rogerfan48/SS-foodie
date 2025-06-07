@@ -6,11 +6,13 @@ import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
 
 class DishItem {
+  String? dishId;
   String? dishName;
   int? rating, price;
   String? mainImgURL, genre;
 
   DishItem({
+    required this.dishId,
     required this.dishName,
     required this.price,
     required this.mainImgURL,
@@ -33,7 +35,6 @@ class MenuPageViewModel with ChangeNotifier {
 
   MenuPageViewModel(this.restaurantId, this._restaurantRepository, this._reviewRepository) {
     _reviewSubscription = _reviewRepository.streamReviewMap().listen((allReviews) {
-      if (allReviews == null) return;
       _reviews = allReviews.values.where((r) => r.restaurantID == restaurantId).toList();
       // 評論更新後，菜單項目的評分和圖片可能需要更新，因此重新加載菜單
       _loadMenu();
@@ -54,6 +55,7 @@ class MenuPageViewModel with ChangeNotifier {
       restaurant.menuMap.forEach((dishId, dish) {
         _menuItems.add(
           DishItem(
+            dishId: dishId,
             dishName: dish.dishName,
             price: dish.dishPrice,
             mainImgURL: calculateMainImgURL(dishId),
