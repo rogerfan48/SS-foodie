@@ -27,6 +27,15 @@ class UserRepository {
     });
   }
 
+  Future<void> updateUserViewedRestaurants(
+    String uid,
+    Map<String, List<String>> viewedRestaurantIDs,
+  ) {
+    return _userCollection
+      .doc(uid)
+      .update({'viewedRestaurantIDs': viewedRestaurantIDs});
+  }
+
   Stream<Map<String, UserModel>> streamUserMap() {
     return _userCollection
       .snapshots()

@@ -12,7 +12,7 @@ class ViewedRestaurant {
   GenreTag? genreTag;
 }
 
-class ViewRestaurantsViewModel with ChangeNotifier {
+class ViewedRestaurantsViewModel with ChangeNotifier {
   final String _userId;
   final UserRepository _userRepository;
   final RestaurantRepository _restaurantRepository;
@@ -20,11 +20,15 @@ class ViewRestaurantsViewModel with ChangeNotifier {
   late StreamSubscription<Map<String, UserModel>> _userSubscription;
   late StreamSubscription<Map<String, RestaurantModel>> _restaurantSubscription;
 
-  Map<String, String> idDateMap = {};
+  Map<String, List<String>> idDateMap = {};
   final List<ViewedRestaurant> _viewedRestaurants = [];
   List<ViewedRestaurant> get viewedRestaurants => _viewedRestaurants;
 
-  ViewRestaurantsViewModel(this._userId, this._userRepository, this._restaurantRepository) {
+  ViewedRestaurantsViewModel(
+    this._userId,
+    this._userRepository,
+    this._restaurantRepository,
+  ) {
     _userSubscription = _userRepository.streamUserMap().listen((allUsers) {
       final user = allUsers[_userId];
       if (user != null) {
@@ -34,27 +38,48 @@ class ViewRestaurantsViewModel with ChangeNotifier {
       }
     });
 
-    _restaurantSubscription = _restaurantRepository.streamRestaurantMap().listen((allRestaurants) {
-      _loadRestaurants(allRestaurants);
-    });
+    _restaurantSubscription = _restaurantRepository
+      .streamRestaurantMap()
+      .listen((allRestaurants) {
+        _loadRestaurants(allRestaurants);
+      });
   }
 
   void _loadRestaurants([Map<String, RestaurantModel>? allRestaurants]) {
     // 確保在 restaurant stream 觸發時也能更新
     if (allRestaurants != null) {
       _viewedRestaurants.clear();
-      idDateMap.forEach((restId, dateString) {
+      idDateMap.forEach((restId, dateList) {
         final r = allRestaurants[restId];
         if (r != null) {
-          _viewedRestaurants.add(ViewedRestaurant()
-            ..viewDate       = DateTime.parse(dateString)
-            ..restaurantName = r.restaurantName
-            ..genreTag       = GenreTag.fromString(r.genreTags.first)
-          );
+          for (final dateString in dateList) {
+            _viewedRestaurants.add(ViewedRestaurant()
+              ..viewDate       = DateTime.parse(dateString)
+              ..restaurantName = r.restaurantName
+              ..genreTag       = GenreTag.fromString(r.genreTags.first)
+            );
+          }
         }
       });
       notifyListeners();
     }
+  }
+
+  Future<void> deleteViewedRestaurant(String restaurantId) async {
+    if (idDateMap.containsKey(restaurantId)) {
+      idDateMap.remove(restaurantId);
+      await _userRepository.updateUserViewedRestaurants(_userId, idDateMap);
+    }
+  }
+
+  Future<void> addViewedRestaurant(String restaurantId, DateTime viewDate) async {
+    final dateString = viewDate.toIso8601String();
+    idDateMap.update(
+      restaurantId,
+      (list) => [...list, dateString],
+      ifAbsent: () => [dateString],
+    );
+    await _userRepository.updateUserViewedRestaurants(_userId, idDateMap);
   }
 
   @override
