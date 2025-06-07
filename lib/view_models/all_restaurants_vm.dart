@@ -35,7 +35,7 @@ class AllRestaurantViewModel with ChangeNotifier {
             restaurantId: docId,
             restaurantName: restaurant.restaurantName,
             latitude: restaurant.latitude,
-            longitude: restaurant.longtitude,
+            longitude: restaurant.longitude,
             genreTag: GenreTag.fromString(restaurant.genreTags.firstOrNull ?? 'others'),
           ),
         );

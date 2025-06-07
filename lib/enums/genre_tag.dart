@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-enum GenreTags { fastFood, chinese, western, indian, thai, korean, vietnamese, hotpot, barbecue, teppanyaki, streetFood, drink, coffee }
+enum GenreTags { fastFood, chinese, western, indian, thai, korean, japanese, italian, taiwanese, vietnamese, hotpot, barbecue, teppanyaki, streetFood, drink, coffee, dessert }
 
 class GenreTag {
   const GenreTag(this.title, this.color);
@@ -22,6 +24,12 @@ class GenreTag {
         return genreTags[GenreTags.thai]!;
       case "korean":
         return genreTags[GenreTags.korean]!;
+      case "japanese":
+        return genreTags[GenreTags.japanese]!;
+      case "italian":
+        return genreTags[GenreTags.italian]!;
+      case "taiwanese":
+        return genreTags[GenreTags.taiwanese]!;
       case "vietnamese":
         return genreTags[GenreTags.vietnamese]!;
       case "hotpot":
@@ -36,6 +44,8 @@ class GenreTag {
         return genreTags[GenreTags.drink]!;
       case "coffee":
         return genreTags[GenreTags.coffee]!;
+      case "dessert":
+        return genreTags[GenreTags.dessert]!;
       default:
         throw ArgumentError("Unknown genre tag: $tag");
     }
@@ -49,6 +59,9 @@ const genreTags = {
   GenreTags.indian: GenreTag("Indian", Color(0xFFDC9832)),
   GenreTags.thai: GenreTag("Thai", Color(0xFFCFBA30)),            
   GenreTags.korean: GenreTag("Korean", Color(0xFFEBDCE8)),
+  GenreTags.japanese: GenreTag("Japanese", Color(0xFFB2D6FF)),
+  GenreTags.italian: GenreTag("Italian", Color(0xFFB2FFB2)),
+  GenreTags.taiwanese: GenreTag("Taiwanese", Color(0xFFB2B2FF)),
   GenreTags.vietnamese: GenreTag("Vietnamese", Color(0xFFEBEF1B)),
   GenreTags.hotpot: GenreTag("Hotpot", Color(0xFFDCDCDC)),
   GenreTags.barbecue: GenreTag("Barbecue", Color(0xFFFFA426)),
@@ -56,4 +69,5 @@ const genreTags = {
   GenreTags.streetFood: GenreTag("Street Food", Color(0xFFD157DA)),
   GenreTags.drink: GenreTag("Drink", Color(0xFF5AE5B5)),
   GenreTags.coffee: GenreTag("Coffee", Color(0xFF38D4E6)),
+  GenreTags.dessert: GenreTag("Dessert", Color.fromARGB(255, 255, 251, 182)),
 };

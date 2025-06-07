@@ -10,7 +10,7 @@ class RestaurantModel {
   final String address;
   final List<String> restaurantReviewIDs;
   final double latitude;
-  final double longtitude;
+  final double longitude;
   final Map<String, DishModel> menuMap;
   final String? googleMapURL;
 
@@ -23,7 +23,7 @@ class RestaurantModel {
     required this.phoneNumber,
     required this.address,
     required this.latitude,
-    required this.longtitude,
+    required this.longitude,
     required this.menuMap,
     this.googleMapURL,
     List<String>? restaurantReviewIDs,

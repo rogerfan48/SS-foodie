@@ -66,7 +66,7 @@ class _RestaurantPageState extends State<RestaurantPage> with TickerProviderStat
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.keyboard_arrow_down, size: 36),
           onPressed: () => GoRouter.of(context).pop(),
         ),
         title: Text(vm.restaurantName),
