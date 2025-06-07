@@ -7,6 +7,17 @@ class HalalTag {
 
   final String title;
   final Image image;
+  
+  factory HalalTag.fromString(String tag) {
+    switch (tag) {
+      case "yes":
+        return halalTags[HalalTags.yes]!;
+      case "no":
+        return halalTags[HalalTags.no]!;
+      default:
+        throw ArgumentError("Unknown halal tag: $tag");
+    }
+  }
 }
 
 final halalTags = {

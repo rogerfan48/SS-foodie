@@ -15,6 +15,27 @@ class VeganTag {
 
   final String title;
   final Image image;
+
+  factory VeganTag.fromString(String tag) {
+    switch (tag) {
+      case "vegan":
+        return veganTags[VeganTags.vegan]!;
+      case "veganPartial":
+        return veganTags[VeganTags.veganPartial]!;
+      case "lactoOvo":
+        return veganTags[VeganTags.lacto]!;
+      case "lactoOvoPartial":
+        return veganTags[VeganTags.lactoPartial]!;
+      case "vegetarian":
+        return veganTags[VeganTags.vegetarian]!;
+      case "vegetarianPartial":
+        return veganTags[VeganTags.vegetarianPartial]!;
+      case "nonVegetarian":
+        return veganTags[VeganTags.nonVegetarian]!;
+      default:
+        throw ArgumentError("Unknown vegan tag: $tag");
+    }
+  }
 }
 
 final veganTags = {

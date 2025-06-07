@@ -7,6 +7,39 @@ class GenreTag {
 
   final String title;
   final Color color;
+
+  factory GenreTag.fromString(String tag) {
+    switch (tag) {
+      case "fastFood":
+        return genreTags[GenreTags.fastFood]!;
+      case "chinese":
+        return genreTags[GenreTags.chinese]!;
+      case "western":
+        return genreTags[GenreTags.western]!;
+      case "indian":
+        return genreTags[GenreTags.indian]!;
+      case "yhai":
+        return genreTags[GenreTags.thai]!;
+      case "korean":
+        return genreTags[GenreTags.korean]!;
+      case "vietnamese":
+        return genreTags[GenreTags.vietnamese]!;
+      case "hotpot":
+        return genreTags[GenreTags.hotpot]!;
+      case "barbecue":
+        return genreTags[GenreTags.barbecue]!;
+      case "teppanyaki":
+        return genreTags[GenreTags.teppanyaki]!;
+      case "streetFood":
+        return genreTags[GenreTags.streetFood]!;
+      case "drink":
+        return genreTags[GenreTags.drink]!;
+      case "coffee":
+        return genreTags[GenreTags.coffee]!;
+      default:
+        throw ArgumentError("Unknown genre tag: $tag");
+    }
+  }
 }
 
 const genreTags = {
