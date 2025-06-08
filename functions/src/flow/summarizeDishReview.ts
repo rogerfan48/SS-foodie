@@ -25,7 +25,7 @@ const reviewGenerator = ai.definePrompt({
 })
 
 export const summarizeDishReviewFlow = ai.defineFlow({
-    name: "summarizeReviewFlow",
+    name: "summarizeDishReviewFlow",
     inputSchema: z.array(z.string()),
     outputSchema: z.string(),
 },
