@@ -145,6 +145,15 @@ class RestaurantReviewsPage extends StatelessWidget {
                       );
                     }
                   },
+                  onEdit: (newContent) {
+                    vm.updateReviewContent(reviewId: review.reviewID!, newContent: newContent);
+                  },
+                  onDelete: () {
+                    vm.deleteReview(review);
+                  },
+                  onDeleteImage: (imageUrl) {
+                    vm.deleteReviewImage(reviewId: review.reviewID!, imageUrl: imageUrl);
+                  },
                 ),
               );
             }, childCount: reviews.length),

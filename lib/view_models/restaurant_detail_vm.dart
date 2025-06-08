@@ -8,6 +8,7 @@ import 'package:foodie/models/user_model.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
 import 'package:foodie/repositories/user_repo.dart';
+import 'package:foodie/services/storage_service.dart';
 
 enum ReviewSortType { Default, Latest, Highest, Lowest }
 
@@ -17,6 +18,7 @@ class RestaurantDetailViewModel with ChangeNotifier {
   final ReviewRepository _reviewRepository;
   final UserRepository _userRepository;
   final Map<String, UserModel> _userCache = {};
+  final StorageService _storageService;
 
   StreamSubscription? _restaurantSubscription;
   StreamSubscription? _reviewSubscription;
@@ -79,9 +81,11 @@ class RestaurantDetailViewModel with ChangeNotifier {
     required RestaurantRepository restaurantRepository,
     required ReviewRepository reviewRepository,
     required UserRepository userRepository,
+    required StorageService storageService,
   }) : _restaurantRepository = restaurantRepository,
        _reviewRepository = reviewRepository,
-       _userRepository = userRepository {
+       _userRepository = userRepository,
+       _storageService = storageService {
     _listenToData();
   }
 
@@ -203,6 +207,48 @@ class RestaurantDetailViewModel with ChangeNotifier {
     });
 
     return reviewsWithImages.first.reviewImgURLs.first;
+  }
+
+  Future<void> deleteReview(ReviewModel review) async {
+    try {
+      await _reviewRepository.deleteReview(review.reviewID!);
+
+      await _restaurantRepository.removeReviewIdFromRestaurant(
+        restaurantId: review.restaurantID,
+        reviewId: review.reviewID!,
+      );
+
+      if (review.dishID != null) {
+        await _restaurantRepository.removeReviewIdFromDish(
+          restaurantId: review.restaurantID,
+          dishId: review.dishID!,
+          reviewId: review.reviewID!,
+        );
+      }
+
+      if (review.reviewImgURLs.isNotEmpty) {
+        await Future.wait(review.reviewImgURLs.map((url) => _storageService.deleteImage(url)));
+      }
+    } catch (e) {
+      print("Error deleting review: $e");
+    }
+  }
+
+  Future<void> updateReviewContent({required String reviewId, required String newContent}) async {
+    try {
+      await _reviewRepository.updateReviewContent(reviewId: reviewId, newContent: newContent);
+    } catch (e) {
+      print("Error updating review content: $e");
+    }
+  }
+
+  Future<void> deleteReviewImage({required String reviewId, required String imageUrl}) async {
+    try {
+      await _reviewRepository.removeImageUrl(reviewId: reviewId, imageUrl: imageUrl);
+      await _storageService.deleteImage(imageUrl);
+    } catch (e) {
+      print("Error deleting review image: $e");
+    }
   }
 
   @override

@@ -15,7 +15,8 @@ class ReviewRepository {
     return _db.collection('apps/foodie/reviews').snapshots().map((snapshot) {
       return Map.fromEntries(
         snapshot.docs.map(
-          (doc) => MapEntry(doc.id, ReviewModel.fromMap(doc.id, doc.data() as Map<String, dynamic>)),
+          (doc) =>
+              MapEntry(doc.id, ReviewModel.fromMap(doc.id, doc.data() as Map<String, dynamic>)),
         ),
       );
     });
@@ -45,5 +46,19 @@ class ReviewRepository {
 
   Future<DocumentReference> addReview(ReviewModel review) {
     return _reviewCollection.add(review.toMap());
+  }
+
+  Future<void> deleteReview(String reviewId) {
+    return _reviewCollection.doc(reviewId).delete();
+  }
+
+  Future<void> updateReviewContent({required String reviewId, required String newContent}) {
+    return _reviewCollection.doc(reviewId).update({'content': newContent});
+  }
+
+  Future<void> removeImageUrl({required String reviewId, required String imageUrl}) {
+    return _reviewCollection.doc(reviewId).update({
+      'reviewImgURLs': FieldValue.arrayRemove([imageUrl]),
+    });
   }
 }

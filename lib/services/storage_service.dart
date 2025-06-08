@@ -51,4 +51,13 @@ class StorageService {
       rethrow;
     }
   }
+
+  Future<void> deleteImage(String gsUri) async {
+    if (!gsUri.startsWith('gs://')) return;
+    try {
+      await _storage.refFromURL(gsUri).delete();
+    } catch (e) {
+      print("Error deleting image $gsUri: $e");
+    }
+  }
 }

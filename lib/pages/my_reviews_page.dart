@@ -39,7 +39,8 @@ class MyReviewsPage extends StatelessWidget {
                   return ReviewListItem(
                     review: reviewDisplay.review,
                     userDataFuture: myReviewViewModel.getUserData(reviewDisplay.review.reviewerID),
-                    dishNameLookup: (dishId) => myReviewViewModel.getDishNameById(review.restaurantID, dishId),
+                    dishNameLookup:
+                        (dishId) => myReviewViewModel.getDishNameById(review.restaurantID, dishId),
                     onAgree:
                         () =>
                             currentUserId != null
@@ -60,6 +61,12 @@ class MyReviewsPage extends StatelessWidget {
                                   isCurrentlyVoted: hasDisagreed,
                                 )
                                 : null,
+                    onTap: () {
+                      context.go('/map/restaurant/${review.restaurantID}/reviews');
+                    },
+                    onEdit: null,
+                    onDelete: null,
+                    onDeleteImage: null,
                   );
                 },
               ),

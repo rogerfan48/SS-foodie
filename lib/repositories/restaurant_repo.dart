@@ -58,4 +58,23 @@ class RestaurantRepository {
       'dishReviewIDs': FieldValue.arrayUnion([reviewId]),
     });
   }
+
+  Future<void> removeReviewIdFromRestaurant({
+    required String restaurantId,
+    required String reviewId,
+  }) {
+    return _restaurantCollection.doc(restaurantId).update({
+      'restaurantReviewIDs': FieldValue.arrayRemove([reviewId]),
+    });
+  }
+
+  Future<void> removeReviewIdFromDish({
+    required String restaurantId,
+    required String dishId,
+    required String reviewId,
+  }) {
+    return _restaurantCollection.doc(restaurantId).collection('menu').doc(dishId).update({
+      'dishReviewIDs': FieldValue.arrayRemove([reviewId]),
+    });
+  }
 }

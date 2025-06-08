@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/review_repo.dart';
 import 'package:foodie/repositories/user_repo.dart';
+import 'package:foodie/services/storage_service.dart';
 import 'package:foodie/view_models/all_restaurants_vm.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/widgets/map/bottom_sheet.dart';
@@ -110,6 +111,7 @@ class _MapPageState extends State<MapPage> {
                   restaurantRepository: context.read<RestaurantRepository>(),
                   reviewRepository: context.read<ReviewRepository>(),
                   userRepository: context.read<UserRepository>(),
+                  storageService: context.read<StorageService>(),
                 );
 
                 setState(() {
@@ -134,7 +136,10 @@ class _MapPageState extends State<MapPage> {
         children: [
           Positioned.fill(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: initialPosition, zoom: 15),
+              initialCameraPosition: CameraPosition(
+                target: initialPosition,
+                zoom: 15,
+              ),
               markers: restaurantMarkers,
               onMapCreated: (controller) {
                 _mapController = controller;
