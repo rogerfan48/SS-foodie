@@ -182,6 +182,14 @@ class RestaurantDetailViewModel with ChangeNotifier {
     return _restaurant?.menuMap[dishId]?.dishName;
   }
 
+  DishModel? getDishById(String dishId) {
+    return _restaurant?.menuMap[dishId];
+  }
+
+  List<ReviewModel> getReviewsForDish(String dishId) {
+    return _reviews.where((review) => review.dishID == dishId).toList();
+  }
+
   @override
   void dispose() {
     _restaurantSubscription?.cancel();
