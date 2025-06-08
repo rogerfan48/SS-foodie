@@ -11,10 +11,11 @@ enum VeganTags {
 }
 
 class VeganTag {
-  const VeganTag(this.title, this.image);
+  const VeganTag(this.title, this.image, this.level);
 
   final String title;
   final Image image;
+  final int level;
 
   factory VeganTag.fromString(String tag) {
     switch (tag) {
@@ -60,11 +61,17 @@ class VeganTag {
 }
 
 final veganTags = {
-  VeganTags.vegan: VeganTag("Vegan", Image.asset('assets/imgs/leaf.png', width: 150)),
-  VeganTags.veganPartial: VeganTag("Vegan (Partial)", Image.asset('assets/imgs/leaf.png', width: 150)),
-  VeganTags.lacto: VeganTag("Lacto", Image.asset('assets/imgs/milk.png', width: 150)),  
-  VeganTags.lactoPartial: VeganTag("Lacto (Partial)", Image.asset('assets/imgs/milk.png', width: 150)),
-  VeganTags.vegetarian: VeganTag("Vegetarian", Image.asset('assets/imgs/onion.png', width: 150)),
-  VeganTags.vegetarianPartial: VeganTag("Vegetarian (Partial)", Image.asset('assets/imgs/onion.png', width: 150)),
-  VeganTags.nonVegetarian: VeganTag("Non Vegetarian", Image.asset('assets/imgs/meat.png', width: 150)),
+  VeganTags.vegan: VeganTag("Vegan", Image.asset('assets/imgs/leaf.png', width: 150), 0),
+  VeganTags.veganPartial: VeganTag("Vegan (Partial)", Image.asset('assets/imgs/leaf.png', width: 150), 1),
+  VeganTags.lacto: VeganTag("Lacto", Image.asset('assets/imgs/milk.png', width: 150), 2),  
+  VeganTags.lactoPartial: VeganTag("Lacto (Partial)", Image.asset('assets/imgs/milk.png', width: 150), 3),
+  VeganTags.vegetarian: VeganTag("Vegetarian", Image.asset('assets/imgs/onion.png', width: 150), 4),
+  VeganTags.vegetarianPartial: VeganTag("Vegetarian (Partial)", Image.asset('assets/imgs/onion.png', width: 150), 5),
+  VeganTags.nonVegetarian: VeganTag("Non Vegetarian", Image.asset('assets/imgs/meat.png', width: 150), 6),
 };
+
+extension VeganTagsExtension on VeganTags {
+  int get level {
+    return veganTags[this]!.level;
+  }
+}

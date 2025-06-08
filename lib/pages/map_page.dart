@@ -49,7 +49,7 @@ class _MapPageState extends State<MapPage> {
         restaurantRepository: context.read<RestaurantRepository>(),
         reviewRepository: context.read<ReviewRepository>(),
         userRepository: context.read<UserRepository>(),
-        storageService: context.read<StorageService>()
+        storageService: context.read<StorageService>(),
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<MapPositionService>().updateId(null);
@@ -92,10 +92,7 @@ class _MapPageState extends State<MapPage> {
         .where(
           (restaurant) => _filterOptions.selectedGenres.contains(restaurant.genreTag.toGenreTags()),
         )
-        .where(
-          (restaurant) =>
-              _filterOptions.selectedVeganTags.contains(restaurant.veganTag.toVeganTags()),
-        )
+        .where((restaurant) => (restaurant.veganTag.level <= _filterOptions.maxVeganLevel))
         .map((restaurant) {
           return Marker(
             markerId: MarkerId(restaurant.restaurantId),
@@ -135,10 +132,7 @@ class _MapPageState extends State<MapPage> {
         children: [
           Positioned.fill(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: initialPosition,
-                zoom: 15,
-              ),
+              initialCameraPosition: CameraPosition(target: initialPosition, zoom: 15),
               markers: restaurantMarkers,
               onMapCreated: (controller) {
                 _mapController = controller;
