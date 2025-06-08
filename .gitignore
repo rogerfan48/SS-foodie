@@ -159,3 +159,5 @@ app.*.symbols
 .gclient_previous_sync_commits
 
 .venv/
+serviceAccountKey.json
+.firebaserc
