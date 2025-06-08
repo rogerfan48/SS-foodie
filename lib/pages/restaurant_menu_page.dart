@@ -12,18 +12,41 @@ class RestaurantMenuPage extends StatefulWidget {
 }
 
 class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
+  late final ScrollController _scrollController;
   final Map<String, GlobalKey> _categoryKeys = {};
+  final GlobalKey _listKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   void _scrollToCategory(int index) {
+    if (!mounted) return;
+
     final vm = context.read<RestaurantDetailViewModel>();
     final categoryName = vm.categorizedMenu.keys.elementAt(index);
+
     final keyContext = _categoryKeys[categoryName]?.currentContext;
-    if (keyContext != null) {
-      Scrollable.ensureVisible(
-        keyContext,
+    final listContext = _listKey.currentContext;
+
+    if (keyContext != null && listContext != null) {
+      final RenderBox listBox = listContext.findRenderObject() as RenderBox;
+      final RenderBox keyBox = keyContext.findRenderObject() as RenderBox;
+
+      final Offset position = listBox.globalToLocal(keyBox.localToGlobal(Offset.zero));
+
+      _scrollController.animateTo(
+        position.dy,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
-        alignment: 0.05,
       );
     }
   }
@@ -44,20 +67,25 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverPersistentHeader(
-            delegate: _CategoryHeaderDelegate(
-              categoryNames: categoryList,
-              selectedIndex: -1,
-              onCategorySelected: _scrollToCategory,
+      body: NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverPersistentHeader(
+              delegate: _CategoryHeaderDelegate(
+                categoryNames: categoryList,
+                selectedIndex: -1,
+                onCategorySelected: _scrollToCategory,
+              ),
+              pinned: true,
             ),
-            pinned: true,
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final categoryName = categoryList[index];
+          ];
+        },
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            key: _listKey,
+            children: [
+              ...categoryList.map((categoryName) {
                 final dishes = categories[categoryName]!;
                 return Container(
                   key: _categoryKeys[categoryName],
@@ -67,37 +95,45 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 16, 0, 4),
-                        child: Text(categoryName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text(
+                          categoryName,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
                       ),
                       ...dishes.asMap().entries.map((entry) {
                         final dishIndex = entry.key;
                         final dish = entry.value;
-                        
+
                         return Column(
                           children: [
                             InkWell(
                               onTap: () {
-                                context.go('/map/restaurant/${vm.restaurantId}/menu/${dish.dishId}');
+                                context.go(
+                                  '/map/restaurant/${vm.restaurantId}/menu/${dish.dishId}',
+                                );
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12.0,
+                                  horizontal: 12.0,
+                                ),
                                 child: Row(
                                   children: [
-                                    // 菜色圖片
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
-                                      child: FirebaseImage(
-                                        gsUri: null,
-                                        width: 60,
-                                        height: 60,
-                                      ),
+                                      child: FirebaseImage(gsUri: null, width: 60, height: 60),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(dish.dishName, style: Theme.of(context).textTheme.titleMedium),
+                                          Text(
+                                            dish.dishName,
+                                            style: Theme.of(context).textTheme.titleMedium,
+                                          ),
                                           if (dish.bestReviewSummary.isNotEmpty)
                                             Padding(
                                               padding: const EdgeInsets.only(top: 4.0),
@@ -112,29 +148,29 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                                       ),
                                     ),
                                     const SizedBox(width: 16),
-                                    // 右側的價格
                                     Text(
                                       '\$${dish.dishPrice}',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                            // 只在非最後一個項目下方顯示分隔線
                             if (dishIndex < dishes.length - 1)
-                              const Divider(height: 1, indent: 4, endIndent: 4), // 縮排以對齊文字
+                              const Divider(height: 1, indent: 4, endIndent: 4),
                           ],
                         );
                       }).toList(),
                     ],
                   ),
                 );
-              },
-              childCount: categoryList.length,
-            ),
-          )
-        ],
+              }).toList(),
+              const SizedBox(height: 300)
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -177,13 +213,13 @@ class _CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 56.0; // Header 的最大高度
+  double get maxExtent => 56.0;
 
   @override
-  double get minExtent => 56.0; // Header 的最小高度（釘選時的高度）
+  double get minExtent => 56.0;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return true; // 簡單起見，總是重建
+    return true;
   }
 }
