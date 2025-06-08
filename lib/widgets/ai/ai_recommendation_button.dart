@@ -3,9 +3,9 @@ import 'package:foodie/services/ai_chat.dart';
 import 'package:provider/provider.dart';
 
 class AiRecommendationButton extends StatelessWidget {
-  final String msg;
+  final String msg, userId;
 
-  const AiRecommendationButton({Key? key, required this.msg}) : super(key: key);
+  const AiRecommendationButton({Key? key, required this.msg, required this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +20,8 @@ class AiRecommendationButton extends StatelessWidget {
           width: borderSide?.width ?? 1.0,
         ),
       ),
-      onPressed: () {
-        context.read<AiChatService>().addMessage(msg);
+      onPressed: () async {
+        await context.read<AiChatService>().addMessage(Message(message: msg), userId);
       },
       child: Text(
         msg,

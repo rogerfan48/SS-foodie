@@ -43,6 +43,16 @@ class _MapPageState extends State<MapPage> {
       minRating: 0.0,
       priceRange: const RangeValues(0, 300),
     );
+    final String? id = context.read<MapPositionService>().id;
+    _selectedRestaurantDetailVM =
+        id == null
+            ? null
+            : RestaurantDetailViewModel(
+              restaurantId: id,
+              restaurantRepository: context.read<RestaurantRepository>(),
+              reviewRepository: context.read<ReviewRepository>(),
+              userRepository: context.read<UserRepository>(),
+            );
   }
 
   @override
@@ -122,10 +132,7 @@ class _MapPageState extends State<MapPage> {
         children: [
           Positioned.fill(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: initialPosition,
-                zoom: 15,
-              ),
+              initialCameraPosition: CameraPosition(target: initialPosition, zoom: 15),
               markers: restaurantMarkers,
               onMapCreated: (controller) {
                 _mapController = controller;
