@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:foodie/view_models/viewed_restaurants_vm.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:foodie/view_models/account_vm.dart';
 import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:foodie/widgets/restaurant/restaurant_info_card.dart';
 
@@ -9,10 +10,12 @@ class BottomSheet extends StatelessWidget {
   const BottomSheet({super.key});
 
   Future<void> _navigateToRestaurantPage(BuildContext context, RestaurantDetailViewModel vm) async {
-    await context.read<ViewedRestaurantsViewModel>().addViewedRestaurant(
-      vm.restaurantId,
-      DateTime.now(),
-    );
+    if (context.read<AccountViewModel>().firebaseUser != null) {
+      await context.read<ViewedRestaurantsViewModel>().addViewedRestaurant(
+        vm.restaurantId,
+        DateTime.now(),
+      );
+    }
     context.go('/map/restaurant/${vm.restaurantId}/info');
   }
 
