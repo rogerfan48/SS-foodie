@@ -196,8 +196,6 @@ class RestaurantDetailViewModel with ChangeNotifier {
     final reviewsWithImages = dishReviews.where((r) => r.reviewImgURLs.isNotEmpty).toList();
     if (reviewsWithImages.isEmpty) return null;
 
-    print("dish: ${dish.dishName}, reviewsWithImages: ${reviewsWithImages.length}");
-
     reviewsWithImages.sort((a, b) {
       final reactionsA = a.agreedBy.length + a.disagreedBy.length;
       final reactionsB = b.agreedBy.length + b.disagreedBy.length;

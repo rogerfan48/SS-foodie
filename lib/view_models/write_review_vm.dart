@@ -4,6 +4,7 @@ import 'package:foodie/models/dish_model.dart';
 import 'package:foodie/models/review_model.dart';
 import 'package:foodie/models/specific_review_state.dart';
 import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/services/storage_service.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -12,6 +13,7 @@ class WriteReviewViewModel with ChangeNotifier {
   final String _currentUserId;
   final Map<String, List<DishModel>> _categorizedMenu;
   final ReviewRepository _reviewRepository;
+  final RestaurantRepository _restaurantRepository;
   final StorageService _storageService;
   final ImagePicker _picker = ImagePicker();
 
@@ -33,11 +35,13 @@ class WriteReviewViewModel with ChangeNotifier {
     required Map<String, List<DishModel>> categorizedMenu,
     required ReviewRepository reviewRepository,
     required StorageService storageService,
+    required RestaurantRepository restaurantRepository,
   }) : _restaurantId = restaurantId,
        _currentUserId = currentUserId,
        _categorizedMenu = categorizedMenu,
        _reviewRepository = reviewRepository,
-       _storageService = storageService;
+       _storageService = storageService,
+       _restaurantRepository = restaurantRepository;
 
   void addSpecificReview() {
     specificReviews.add(SpecificReviewState());
@@ -106,16 +110,15 @@ class WriteReviewViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
-      // 處理對菜色的評論
+      final List<Future> updateTasks = [];
+
       for (final specificReview in specificReviews) {
         bool hasRating = specificReview.rating > 0;
         bool hasContent = specificReview.contentController.text.isNotEmpty;
         bool hasDish = specificReview.selectedDish != null;
 
         if (hasDish && (hasRating || hasContent)) {
-          // 1. 先上傳圖片
           final imageUris = await _uploadImages(specificReview.images);
-          // 2. 建立 ReviewModel
           final newReview = ReviewModel(
             reviewerID: _currentUserId,
             restaurantID: _restaurantId,
@@ -126,11 +129,26 @@ class WriteReviewViewModel with ChangeNotifier {
             priceLevel: null,
             reviewImgURLs: imageUris,
           );
-          await _reviewRepository.addReview(newReview);
+
+          final newReviewRef = await _reviewRepository.addReview(newReview);
+          final newReviewId = newReviewRef.id;
+
+          updateTasks.add(
+            _restaurantRepository.addReviewIdToRestaurant(
+              restaurantId: _restaurantId,
+              reviewId: newReviewId,
+            ),
+          );
+          updateTasks.add(
+            _restaurantRepository.addReviewIdToDish(
+              restaurantId: _restaurantId,
+              dishId: specificReview.selectedDish!.dishId,
+              reviewId: newReviewId,
+            ),
+          );
         }
       }
 
-      // 處理對餐廳的總體評論
       bool hasOverallRating = overallRating > 0;
       bool hasOverallContent = overallContentController.text.isNotEmpty;
       if (hasOverallRating || hasOverallContent) {
@@ -144,11 +162,22 @@ class WriteReviewViewModel with ChangeNotifier {
           priceLevel: selectedPrice,
           reviewImgURLs: [],
         );
-        await _reviewRepository.addReview(newReview);
+        final newReviewRef = await _reviewRepository.addReview(newReview);
+        updateTasks.add(
+          _restaurantRepository.addReviewIdToRestaurant(
+            restaurantId: _restaurantId,
+            reviewId: newReviewRef.id,
+          ),
+        );
       }
+
+      if (updateTasks.isNotEmpty) {
+        await Future.wait(updateTasks);
+      }
+
       return true;
     } catch (e) {
-      print("Error submitting review: $e");
+      print("Error submitting review with relations: $e");
       return false;
     } finally {
       _isSubmitting = false;

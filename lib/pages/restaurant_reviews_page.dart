@@ -8,6 +8,7 @@ import 'package:foodie/widgets/restaurant/rating_summary_card.dart';
 import 'package:foodie/widgets/restaurant/review_list_item.dart';
 import 'package:foodie/pages/restaurant_write_review_page.dart';
 import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/repositories/restaurant_repo.dart';
 
 class RestaurantReviewsPage extends StatelessWidget {
   const RestaurantReviewsPage({super.key});
@@ -36,9 +37,9 @@ class RestaurantReviewsPage extends StatelessWidget {
                 currentUserId: currentUserId,
                 categorizedMenu: detailVM.categorizedMenu,
                 reviewRepository: context.read<ReviewRepository>(),
-                storageService: context.read<StorageService>(), // ✅ 注入新依賴
+                storageService: context.read<StorageService>(),
+                restaurantRepository: context.read<RestaurantRepository>(),
               ),
-
           child: const RestaurantWriteReviewPage(),
         );
       },

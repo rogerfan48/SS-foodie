@@ -4,9 +4,11 @@ import 'package:foodie/models/dish_model.dart';
 
 class RestaurantRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final CollectionReference _restaurantCollection;
   final timeout = const Duration(seconds: 10);
 
-  RestaurantRepository();
+  RestaurantRepository()
+    : _restaurantCollection = FirebaseFirestore.instance.collection('apps/foodie/restaurants');
 
   Stream<Map<String, RestaurantModel>> streamRestaurantMap() {
     return _db.collection('apps/foodie/restaurants').snapshots().asyncMap((snapshot) async {
@@ -38,6 +40,22 @@ class RestaurantRepository {
         }),
       );
       return Map.fromEntries(entries);
+    });
+  }
+
+  Future<void> addReviewIdToRestaurant({required String restaurantId, required String reviewId}) {
+    return _restaurantCollection.doc(restaurantId).update({
+      'restaurantReviewIDs': FieldValue.arrayUnion([reviewId]),
+    });
+  }
+
+  Future<void> addReviewIdToDish({
+    required String restaurantId,
+    required String dishId,
+    required String reviewId,
+  }) {
+    return _restaurantCollection.doc(restaurantId).collection('menu').doc(dishId).update({
+      'dishReviewIDs': FieldValue.arrayUnion([reviewId]),
     });
   }
 }
