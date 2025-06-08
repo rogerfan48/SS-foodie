@@ -78,8 +78,8 @@ class RestaurantWriteReviewPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: FilledButton(
               style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-              onPressed: () {
-                vm.submitReview();
+              onPressed: () async {
+                await vm.submitReview();
                 Navigator.of(context).pop(); // 提交後關閉頁面
               },
               child: Text(
