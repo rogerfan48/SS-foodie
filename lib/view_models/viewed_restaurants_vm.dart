@@ -7,6 +7,7 @@ import 'package:foodie/repositories/restaurant_repo.dart';
 import 'package:foodie/repositories/user_repo.dart';
 
 class ViewedRestaurant {
+  String? restaurantId;  // Add this field
   DateTime? viewDate;
   String? restaurantName;
   GenreTag? genreTag;
@@ -59,6 +60,7 @@ class ViewedRestaurantsViewModel with ChangeNotifier {
           final parsedDate = DateTime.tryParse(dateString);
           if (parsedDate != null) {
             _viewedRestaurants.add(ViewedRestaurant()
+              ..restaurantId   = restId
               ..viewDate       = parsedDate
               ..restaurantName = r.restaurantName
               ..genreTag       = GenreTag.fromString(r.genreTags.first)
@@ -86,6 +88,36 @@ class ViewedRestaurantsViewModel with ChangeNotifier {
       ifAbsent: () => [dateString],
     );
     await _userRepository.updateUserViewedRestaurants(_userId, idDateMap);
+  }
+
+  Future<void> deleteSpecificHistoryEntry(ViewedRestaurant entry) async {
+    if (entry.restaurantId == null || entry.viewDate == null) return;
+    
+    final dateString = entry.viewDate!.toIso8601String();
+    final restaurantId = entry.restaurantId!;
+    
+    if (idDateMap.containsKey(restaurantId)) {
+      // Remove this specific date from the list
+      idDateMap[restaurantId] = idDateMap[restaurantId]!
+          .where((date) => date != dateString)
+          .toList();
+      
+      // If no dates left, remove the restaurant entry entirely
+      if (idDateMap[restaurantId]!.isEmpty) {
+        idDateMap.remove(restaurantId);
+      }
+      
+      // Update Firebase
+      await _userRepository.updateUserViewedRestaurants(_userId, idDateMap);
+      
+      // Update local list
+      _viewedRestaurants.removeWhere(
+        (item) => item.restaurantId == restaurantId && 
+                  item.viewDate?.toIso8601String() == dateString
+      );
+      
+      notifyListeners();
+    }
   }
 
   @override
