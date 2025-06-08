@@ -33,7 +33,7 @@ class BrowsingHistoryPage extends StatelessWidget {
                       genre: historyItem.genreTag?.title ?? 'N/A',
                       date: formatter.format(DateTime.parse(historyItem.viewDate.toString())),
                       onDelete: () {
-                        // viewModel.deleteViewedRestaurant(historyItem.restaurantId);
+                        viewModel.deleteSpecificHistoryEntry(historyItem);
                       },
                     );
                   },
