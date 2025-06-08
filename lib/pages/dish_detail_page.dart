@@ -38,7 +38,7 @@ class DishDetailPage extends StatelessWidget {
                   ).textTheme.titleLarge!.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  dish.dishPrice.toString(),
+                  "\$${dish.dishPrice.toString()}",
                   style: Theme.of(
                     context,
                   ).textTheme.labelMedium!.copyWith(color: Theme.of(context).colorScheme.secondary),
