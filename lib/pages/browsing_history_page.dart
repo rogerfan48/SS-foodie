@@ -31,7 +31,7 @@ class BrowsingHistoryPage extends StatelessWidget {
                     genre: historyItem.genreTag?.title ?? 'N/A',
                     date: historyItem.viewDate?.toIso8601String().split('T').first ?? 'N/A',
                     onDelete: () {
-                      // TODO: 執行刪除歷史紀錄的邏輯
+                      // viewModel.deleteViewedRestaurant(historyItem.restaurantId);
                     },
                   );
                 },
