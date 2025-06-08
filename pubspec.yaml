@@ -50,6 +50,7 @@ dependencies:
   intl: ^0.20.2
   uuid: ^4.5.1
   photo_view: ^0.15.0
+  cloud_functions: ^5.5.1
 
 
 dev_dependencies:
