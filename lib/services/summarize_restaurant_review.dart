@@ -1,7 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 
 // Input a list of strings representing a review and return a summarized version of the review.
-Future<String> summarizeReview(List<String> reviewTexts) async {
+Future<String> summarizeRestaurantReview(String dishName, List<String> reviewTexts) async {
   try {
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('summarizeReview');
     final response = await callable.call(reviewTexts);

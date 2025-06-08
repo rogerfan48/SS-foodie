@@ -2,7 +2,7 @@ import { gemini20Flash001 } from "@genkit-ai/vertexai";
 import { ai } from "../config";
 import { z } from "genkit";
 
-export const reviewGenerator = ai.definePrompt({
+const reviewGenerator = ai.definePrompt({
     model: gemini20Flash001,
     name: "reviewGenerator",
     input: { schema: z.string() },
@@ -24,7 +24,7 @@ export const reviewGenerator = ai.definePrompt({
     },
 })
 
-export const summarizeReviewFlow = ai.defineFlow({
+export const summarizeRestaurantReviewFlow = ai.defineFlow({
     name: "summarizeReviewFlow",
     inputSchema: z.array(z.string()),
     outputSchema: z.string(),
