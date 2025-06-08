@@ -13,7 +13,7 @@ class MapPositionService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateId(String id) {
+  void updateId(String? id) {
     _id = id;
     notifyListeners();
   }

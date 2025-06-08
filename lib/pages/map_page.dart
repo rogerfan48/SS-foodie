@@ -44,15 +44,17 @@ class _MapPageState extends State<MapPage> {
       priceRange: const RangeValues(0, 300),
     );
     final String? id = context.read<MapPositionService>().id;
-    _selectedRestaurantDetailVM =
-        id == null
-            ? null
-            : RestaurantDetailViewModel(
-              restaurantId: id,
-              restaurantRepository: context.read<RestaurantRepository>(),
-              reviewRepository: context.read<ReviewRepository>(),
-              userRepository: context.read<UserRepository>(),
-            );
+    if (id != null) {
+      _selectedRestaurantDetailVM = RestaurantDetailViewModel(
+        restaurantId: id,
+        restaurantRepository: context.read<RestaurantRepository>(),
+        reviewRepository: context.read<ReviewRepository>(),
+        userRepository: context.read<UserRepository>(),
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<MapPositionService>().updateId(null);
+      });
+    }
   }
 
   @override
