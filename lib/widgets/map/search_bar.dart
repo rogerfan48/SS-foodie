@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final TextEditingController controller;
+  final void Function(String)? onSubmitted;
 
-  const SearchBarWidget({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
+  const SearchBarWidget({super.key, required this.controller, this.onSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +13,7 @@ class SearchBarWidget extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: controller,
+            onSubmitted: onSubmitted,
             decoration: InputDecoration(
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,

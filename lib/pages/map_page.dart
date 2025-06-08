@@ -101,7 +101,7 @@ class _MapPageState extends State<MapPage> {
         .replaceAll('#FILL_COLOR_DARK#', darkColorString);
 
     final PictureInfo pictureInfo = await vg.loadPicture(SvgStringLoader(finalSvgString), null);
-    final ui.Image image = await pictureInfo.picture.toImage(120, 150); // enhanced size for better visibility
+    final ui.Image image = await pictureInfo.picture.toImage(120, 150);
     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List uint8List = byteData!.buffer.asUint8List();
 
@@ -145,6 +145,52 @@ class _MapPageState extends State<MapPage> {
             .toList();
 
     return Future.wait(markerFutures).then((markers) => markers.toSet());
+  }
+
+  void _performSearch(String query) {
+    if (query.isEmpty) return;
+
+    final allRestaurants = context.read<AllRestaurantViewModel>().restaurants;
+    final queryList = query.split(' ');
+
+    final foundRestaurant = allRestaurants.firstWhere(
+      (item) => queryList.every((q) => item.restaurantName.toLowerCase().contains(q.toLowerCase())),
+      orElse:
+          () => RestaurantItem(
+            restaurantId: '',
+            restaurantName: '',
+            latitude: 0.0,
+            longitude: 0.0,
+            genreTag: genreTags[GenreTags.fastFood]!,
+            veganTag: veganTags[VeganTags.nonVegetarian]!,
+          ),
+    );
+
+    if (foundRestaurant.restaurantId.isNotEmpty) {
+      final targetPosition = LatLng(foundRestaurant.latitude, foundRestaurant.longitude);
+      _mapController?.animateCamera(CameraUpdate.newLatLngZoom(targetPosition, 16.0));
+      _triggerBottomSheetForRestaurant(foundRestaurant.restaurantId);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("No restaurant found for '$query'")));
+    }
+  }
+
+  void _triggerBottomSheetForRestaurant(String restaurantId) {
+    if (_selectedRestaurantDetailVM?.restaurantId != restaurantId) {
+      _selectedRestaurantDetailVM?.dispose();
+      final newVM = RestaurantDetailViewModel(
+        restaurantId: restaurantId,
+        restaurantRepository: context.read<RestaurantRepository>(),
+        reviewRepository: context.read<ReviewRepository>(),
+        userRepository: context.read<UserRepository>(),
+        storageService: context.read<StorageService>(),
+      );
+      setState(() {
+        _selectedRestaurantDetailVM = newVM;
+      });
+    }
   }
 
   @override
@@ -200,7 +246,12 @@ class _MapPageState extends State<MapPage> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Row(
                   children: [
-                    Expanded(child: SearchBarWidget(controller: _searchController)),
+                    Expanded(
+                      child: SearchBarWidget(
+                        controller: _searchController,
+                        onSubmitted: _performSearch,
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     CategoryButton(
                       options: _filterOptions,
