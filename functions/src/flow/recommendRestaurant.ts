@@ -215,7 +215,7 @@ const recommendationPrompt = ai.definePrompt({
 
         let userPromptText = '';
         // 3. Construct a prompt for the LLM using the defined prompt
-        let systemPromptText =   
+        let systemPromptText =
            `You are a friendly and helpful restaurant recommendation assistant.
             User's recent restaurant browsing history (from latest to oldest):
             ${historySummary}
@@ -227,21 +227,26 @@ const recommendationPrompt = ai.definePrompt({
             messages.forEach(msg => {
                 userPromptText += `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}\n`;
             });
-        } 
+        }
 
         systemPromptText += `
-Your task is to decide the next step based on the user's viewing history, the list of all available restaurants, and the entire conversation history:
-1.  If you have enough information to confidently recommend one or more restaurants from the provided list,
-    output the criteria you used and the IDs of the recommended restaurants. The format MUST be:
-    RECOMMEND: {"criteria_summary": "A user-friendly explanation of why these are recommended, e.g., 'Since you're looking for vibrant Italian places, you might enjoy [Restaurant Name] for its popular lasagna and great atmosphere!' or 'Based on your interest in spicy food, [Restaurant Name] comes highly recommended for its fiery chicken curry.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
-    (The "criteria_summary" should be engaging and tell the user WHY these are good choices for THEM. The "restaurant_ids" MUST be from the 'All available restaurants' list provided above. Ensure the JSON is valid.)
+Your primary goal is to recommend suitable restaurants from the provided list.
+Analyze the user's request, their viewing history, and the conversation.
 
-2.  If you need more information to make a good recommendation, ask a single, clear, plain text question.
+1.  If the user's current request, combined with their history and previous interactions, provides clear enough information
+    (e.g., they've stated a cuisine preference, price range, occasion, or their viewing history shows a strong pattern),
+    you SHOULD proceed to recommend.
+    Output the criteria you used and the IDs of the recommended restaurants. The format MUST be:
+    RECOMMEND: {"criteria_summary": "A user-friendly explanation of why these are recommended, e.g., 'Since you're looking for vibrant Italian places, you might enjoy [Restaurant Name] for its popular lasagna and great atmosphere!' or 'Based on your interest in spicy food, [Restaurant Name] comes highly recommended for its fiery chicken curry.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
+    (The "criteria_summary" should be engaging and tell the user WHY these are good choices for THEM. The "restaurant_ids" MUST be from the 'All available restaurants' list provided above. Ensure the JSON is valid. Prioritize recommending if a reasonable basis exists.)
+
+2.  Only if the user's request is too vague, ambiguous, or if essential information (like cuisine type if none is hinted) is clearly missing
+    and you cannot make a confident recommendation, then ask a single, clear, plain text question to get the missing piece of information.
     The format MUST be:
     ASK: What type of cuisine are you in the mood for?
     (Do not include any options, just the question text after "ASK: ".)
 
-Consider the user's history and previous answers. If no history and no previous answers, start with a general question (e.g., cuisine preference, price range).
+Consider the user's history and previous answers. If no history and no previous answers, it's appropriate to start with a general question (e.g., cuisine preference, price range).
 Do not add any explanatory text before "RECOMMEND:" or "ASK:". Your entire response should start with one of these keywords.
 `;
         
