@@ -51,6 +51,7 @@ dependencies:
   uuid: ^4.5.1
   photo_view: ^0.15.0
   cloud_functions: ^5.5.1
+  flutter_svg: ^2.1.0
 
 
 dev_dependencies:

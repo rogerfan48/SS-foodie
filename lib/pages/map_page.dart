@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart' hide BottomSheet;
 import 'package:foodie/services/map_position.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,6 +36,8 @@ class _MapPageState extends State<MapPage> {
   RestaurantDetailViewModel? _selectedRestaurantDetailVM;
   final double _sheetHeight = 200;
 
+  final Map<Color, BitmapDescriptor> _markerIconCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -65,59 +71,87 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 
-  Set<Marker> _createMarkers(List<RestaurantItem> restaurants) {
-    double colorToHue(Color color) {
-      double r = color.red / 255.0;
-      double g = color.green / 255.0;
-      double b = color.blue / 255.0;
-      double maxVal = r > g ? (r > b ? r : b) : (g > b ? g : b);
-      double minVal = r < g ? (r < b ? r : b) : (g < b ? g : b);
-      double delta = maxVal - minVal;
-      double hue = 0.0;
-      if (delta == 0) {
-        hue = 0;
-      } else if (maxVal == r) {
-        hue = 60 * (((g - b) / delta) + 0);
-      } else if (maxVal == g) {
-        hue = 60 * (((b - r) / delta) + 2);
-      } else if (maxVal == b) {
-        hue = 60 * (((r - g) / delta) + 4);
-      }
-      if (hue < 0) hue += 360;
-      if (hue >= 360) hue %= 360;
-      return hue;
+  Future<BitmapDescriptor> _createCustomMarker(Color color) async {
+    if (_markerIconCache.containsKey(color)) {
+      return _markerIconCache[color]!;
     }
 
-    return restaurants
-        .where(
-          (restaurant) => _filterOptions.selectedGenres.contains(restaurant.genreTag.toGenreTags()),
-        )
-        .where((restaurant) => (restaurant.veganTag.level <= _filterOptions.maxVeganLevel))
-        .map((restaurant) {
-          return Marker(
-            markerId: MarkerId(restaurant.restaurantId),
-            position: LatLng(restaurant.latitude, restaurant.longitude),
-            icon: BitmapDescriptor.defaultMarkerWithHue(colorToHue(restaurant.genreTag.color)),
-            onTap: () {
-              if (_selectedRestaurantDetailVM?.restaurantId != restaurant.restaurantId) {
-                _selectedRestaurantDetailVM?.dispose();
+    // 1. ✅ 定義一個包含兩個顏色佔位符的 SVG 模板
+    const String svgTemplate = '''
+    <svg width="100" height="120" viewBox="-5 -5 110 125" xmlns="http://www.w3.org/2000/svg">
+      <path 
+        fill="#FILL_COLOR#" 
+        stroke="#FILL_COLOR_DARK#" 
+        stroke-width="4" 
+        d="M50 0 C22.38 0 0 22.38 0 50 C0 85 50 120 50 120 S100 85 100 50 C100 22.38 77.62 0 50 0 Z"
+      />
+      <circle fill="#FILL_COLOR_DARK#" cx="50" cy="50" r="25"/>
+    </svg>
+    ''';
 
-                final newVM = RestaurantDetailViewModel(
-                  restaurantId: restaurant.restaurantId,
-                  restaurantRepository: context.read<RestaurantRepository>(),
-                  reviewRepository: context.read<ReviewRepository>(),
-                  userRepository: context.read<UserRepository>(),
-                  storageService: context.read<StorageService>(),
-                );
 
-                setState(() {
-                  _selectedRestaurantDetailVM = newVM;
-                });
-              }
-            },
-          );
-        })
-        .toSet();
+    // 2. 計算主顏色的深色版本
+    final HSLColor hslColor = HSLColor.fromColor(color);
+    final HSLColor darkerHslColor = hslColor.withLightness(
+      (hslColor.lightness - 0.15).clamp(0.0, 1.0),
+    );
+    final Color darkerColor = darkerHslColor.toColor();
+
+    // 3. 將 Color 物件轉換為 16 進位顏色字串
+    final String mainColorString = '#${color.value.toRadixString(16).substring(2)}';
+    final String darkColorString = '#${darkerColor.value.toRadixString(16).substring(2)}';
+
+    // 4. ✅ 分別替換兩個顏色佔位符
+    final String finalSvgString = svgTemplate
+        .replaceAll('#FILL_COLOR#', mainColorString)
+        .replaceAll('#FILL_COLOR_DARK#', darkColorString);
+
+    // 5. 使用 flutter_svg 將 SVG 字串渲染成圖片
+    final PictureInfo pictureInfo = await vg.loadPicture(SvgStringLoader(finalSvgString), null);
+    final ui.Image image = await pictureInfo.picture.toImage(120, 150); // 提高解析度以獲得更清晰的圖標
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List uint8List = byteData!.buffer.asUint8List();
+
+    final bitmapDescriptor = BitmapDescriptor.fromBytes(uint8List);
+
+    _markerIconCache[color] = bitmapDescriptor;
+    return bitmapDescriptor;
+  }
+
+  Future<Set<Marker>> _createMarkers(List<RestaurantItem> restaurants) async {
+    final List<Future<Marker>> markerFutures =
+        restaurants
+            .where(
+              (restaurant) =>
+                  _filterOptions.selectedGenres.contains(restaurant.genreTag.toGenreTags()),
+            )
+            .where((restaurant) => (restaurant.veganTag.level <= _filterOptions.maxVeganLevel))
+            .map((restaurant) async {
+              return Marker(
+                markerId: MarkerId(restaurant.restaurantId),
+                position: LatLng(restaurant.latitude, restaurant.longitude),
+                // 使用我們自訂的方法來生成圖標
+                icon: await _createCustomMarker(restaurant.genreTag.color),
+                onTap: () {
+                  if (_selectedRestaurantDetailVM?.restaurantId != restaurant.restaurantId) {
+                    _selectedRestaurantDetailVM?.dispose();
+                    final newVM = RestaurantDetailViewModel(
+                      restaurantId: restaurant.restaurantId,
+                      restaurantRepository: context.read<RestaurantRepository>(),
+                      reviewRepository: context.read<ReviewRepository>(),
+                      userRepository: context.read<UserRepository>(),
+                      storageService: context.read<StorageService>(),
+                    );
+                    setState(() {
+                      _selectedRestaurantDetailVM = newVM;
+                    });
+                  }
+                },
+              );
+            })
+            .toList();
+
+    return Future.wait(markerFutures).then((markers) => markers.toSet());
   }
 
   @override
@@ -131,22 +165,35 @@ class _MapPageState extends State<MapPage> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: initialPosition, zoom: 15),
-              markers: restaurantMarkers,
-              onMapCreated: (controller) {
-                _mapController = controller;
-                _mapController?.setMapStyle(_mapStyle);
-              },
-              onTap: (LatLng position) {
-                FocusScope.of(context).unfocus();
-                setState(() {
-                  _selectedRestaurantDetailVM?.dispose();
-                  _selectedRestaurantDetailVM = null;
-                });
-              },
-              onCameraMove: (position) {
-                context.read<MapPositionService>().updatePosition(position.target);
+            // ✅ 使用 FutureBuilder 來等待 Markers 生成完畢
+            child: FutureBuilder<Set<Marker>>(
+              future: _createMarkers(restaurants),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  // 在 Markers 生成期間，可以顯示一個 Loading 或空的 Map
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: context.read<MapPositionService>().position,
+                    zoom: 15,
+                  ),
+                  markers: snapshot.data ?? {},
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _mapController?.setMapStyle(_mapStyle);
+                  },
+                  onTap: (LatLng position) {
+                    FocusScope.of(context).unfocus();
+                    setState(() {
+                      _selectedRestaurantDetailVM?.dispose();
+                      _selectedRestaurantDetailVM = null;
+                    });
+                  },
+                  onCameraMove: (position) {
+                    context.read<MapPositionService>().updatePosition(position.target);
+                  },
+                );
               },
             ),
           ),
