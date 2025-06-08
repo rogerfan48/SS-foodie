@@ -40,12 +40,12 @@ class ViewedRestaurantsViewModel with ChangeNotifier {
         _loadRestaurants();
       }
     });
-
     _restaurantSubscription = _restaurantRepository
       .streamRestaurantMap()
       .listen((allRestaurants) {
         _loadRestaurants(allRestaurants);
       });
+
   }
 
   void _loadRestaurants([Map<String, RestaurantModel>? allRestaurants]) {
@@ -81,6 +81,16 @@ class ViewedRestaurantsViewModel with ChangeNotifier {
   }
 
   Future<void> addViewedRestaurant(String restaurantId, DateTime viewDate) async {
+    // Wait for user data to be loaded if it hasn't been already
+    if (idDateMap.isEmpty && _cachedRestaurants.isEmpty) {
+      // Fetch user data first to initialize idDateMap
+      final userData = await _userRepository.getUser(_userId);
+      if (userData.exists) {
+        final user = UserModel.fromMap(userData.data() as Map<String, dynamic>);
+        idDateMap = user.viewedRestaurantIDs;
+      }
+    }
+    
     final dateString = viewDate.toIso8601String();
     idDateMap.update(
       restaurantId,

@@ -164,11 +164,11 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                               const Divider(height: 1, indent: 4, endIndent: 4),
                           ],
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 300)
             ],
           ),
