@@ -24,6 +24,8 @@ class ViewedRestaurantsViewModel with ChangeNotifier {
   final List<ViewedRestaurant> _viewedRestaurants = [];
   List<ViewedRestaurant> get viewedRestaurants => _viewedRestaurants;
 
+  Map<String, RestaurantModel> _cachedRestaurants = {};
+
   ViewedRestaurantsViewModel(
     this._userId,
     this._userRepository,
@@ -46,23 +48,27 @@ class ViewedRestaurantsViewModel with ChangeNotifier {
   }
 
   void _loadRestaurants([Map<String, RestaurantModel>? allRestaurants]) {
-    // 確保在 restaurant stream 觸發時也能更新
     if (allRestaurants != null) {
-      _viewedRestaurants.clear();
-      idDateMap.forEach((restId, dateList) {
-        final r = allRestaurants[restId];
-        if (r != null) {
-          for (final dateString in dateList) {
+      _cachedRestaurants = allRestaurants;
+    }
+    _viewedRestaurants.clear();
+    idDateMap.forEach((restId, dateList) {
+      final r = _cachedRestaurants[restId];
+      if (r != null) {
+        for (final dateString in dateList) {
+          final parsedDate = DateTime.tryParse(dateString);
+          if (parsedDate != null) {
             _viewedRestaurants.add(ViewedRestaurant()
-              ..viewDate       = DateTime.parse(dateString)
+              ..viewDate       = parsedDate
               ..restaurantName = r.restaurantName
               ..genreTag       = GenreTag.fromString(r.genreTags.first)
             );
           }
         }
-      });
-      notifyListeners();
-    }
+      }
+    });
+    _viewedRestaurants.sort((a, b) => b.viewDate!.compareTo(a.viewDate!));
+    notifyListeners();
   }
 
   Future<void> deleteViewedRestaurant(String restaurantId) async {
