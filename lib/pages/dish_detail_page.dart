@@ -50,7 +50,7 @@ class DishDetailPage extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Text(
                 'Reviews for this dish',
                 style: Theme.of(context).textTheme.headlineSmall,
