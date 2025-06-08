@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:foodie/view_models/my_reviews_vm.dart';
 import 'package:foodie/widgets/restaurant/review_list_item.dart';
 import 'package:foodie/view_models/account_vm.dart';
 import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/services/map_position.dart';
+import 'package:foodie/view_models/all_restaurants_vm.dart';
 
 class MyReviewsPage extends StatelessWidget {
   const MyReviewsPage({Key? key}) : super(key: key);
@@ -13,6 +16,8 @@ class MyReviewsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final myReviewViewModel = context.watch<MyReviewViewModel?>();
     final currentUserId = context.watch<AccountViewModel>().firebaseUser?.uid;
+    final mapPositionService = context.read<MapPositionService>();
+    final allRestaurantViewModel = context.watch<AllRestaurantViewModel>();
 
     return Scaffold(
       appBar: AppBar(
@@ -62,6 +67,14 @@ class MyReviewsPage extends StatelessWidget {
                                 )
                                 : null,
                     onTap: () {
+                      final theRestaurant =
+                          allRestaurantViewModel.restaurants
+                              .where((restaurant) => restaurant.restaurantId == review.restaurantID)
+                              .firstOrNull!;
+                      mapPositionService.updatePosition(
+                        LatLng(theRestaurant.latitude, theRestaurant.longitude),
+                      );
+                      mapPositionService.updateId(theRestaurant.restaurantId);
                       context.go('/map/restaurant/${review.restaurantID}/reviews');
                     },
                     onEdit: null,
