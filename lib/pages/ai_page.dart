@@ -3,10 +3,16 @@ import 'package:foodie/services/ai_chat.dart';
 import 'package:foodie/services/map_position.dart';
 import 'package:foodie/view_models/account_vm.dart';
 import 'package:foodie/view_models/all_restaurants_vm.dart';
+import 'package:foodie/view_models/restaurant_detail_vm.dart';
+import 'package:foodie/repositories/restaurant_repo.dart';
+import 'package:foodie/repositories/review_repo.dart';
+import 'package:foodie/repositories/user_repo.dart';
+import 'package:foodie/services/storage_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/widgets/ai/ai_recommendation_button.dart';
+import 'package:foodie/widgets/firebase_image.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -24,6 +30,20 @@ class _AiPageState extends State<AiPage> {
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String? getImageUrlById(String id) {
+    List<String> urls =
+        RestaurantDetailViewModel(
+          restaurantId: id,
+          restaurantRepository: context.read<RestaurantRepository>(),
+          reviewRepository: context.read<ReviewRepository>(),
+          userRepository: context.read<UserRepository>(),
+          storageService: context.read<StorageService>(),
+        ).displayImageUrls;     // why is always empty?
+    print(id);                  // debug
+    print(urls);                // debug
+    return urls.isNotEmpty ? urls[0] : "gs://foodie-4dee6.firebasestorage.app/images/store.jpeg";
   }
 
   @override
@@ -65,28 +85,60 @@ class _AiPageState extends State<AiPage> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.errorContainer,
+                                      color: Theme.of(context).colorScheme.primaryContainer,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        final item = context
-                                            .read<AllRestaurantViewModel>()
-                                            .restaurants
-                                            .firstWhere((item) => item.restaurantId == msg.message);
-                                        context.read<MapPositionService>().updatePosition(
-                                          LatLng(item.latitude, item.longitude),
-                                        );
-                                        context.read<MapPositionService>().updateId(msg.message);
-                                        context.go('/map');
-                                      },
-                                      child: Text(
-                                        context
-                                            .read<AllRestaurantViewModel>()
-                                            .restaurants
-                                            .firstWhere((item) => item.restaurantId == msg.message)
-                                            .restaurantName, style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
-                                      ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          msg.message.split("\\split\\")[0],
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            children:
+                                                msg.message.split("\\split\\").sublist(1).map((id) {
+                                                  final imageUrl = getImageUrlById(id);
+                                                  return Padding(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 4.0,
+                                                    ),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        final item = context
+                                                            .read<AllRestaurantViewModel>()
+                                                            .restaurants
+                                                            .firstWhere(
+                                                              (item) => item.restaurantId == id,
+                                                            ); 
+                                                        context
+                                                            .read<MapPositionService>()
+                                                            .updatePosition(
+                                                              LatLng(item.latitude, item.longitude),
+                                                            );
+                                                        context.read<MapPositionService>().updateId(
+                                                          id,
+                                                        );
+                                                        context.go('/map');
+                                                      },
+                                                      child: ClipRRect(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        child: FirebaseImage(
+                                                          gsUri: imageUrl,
+                                                          width: 60,
+                                                          height: 60,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 )
@@ -154,7 +206,7 @@ class _AiPageState extends State<AiPage> {
                     ),
                     onSubmitted: (value) async {
                       await context.read<AiChatService>().addMessage(
-                        Message(message: "8Nsa4q0LZMUO6b8wRPsr", isUser: false, isLink: true),
+                        Message(message: _controller.text),
                         user.uid,
                       );
                       _controller.clear();
