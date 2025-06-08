@@ -13,6 +13,7 @@ import 'repositories/review_repo.dart';
 import 'repositories/user_repo.dart';
 import 'services/ai_chat.dart';
 import 'services/auth_service.dart';
+import 'services/map_position.dart';
 import 'services/storage_service.dart';
 import 'services/theme.dart';
 import 'view_models/account_vm.dart';
@@ -45,6 +46,7 @@ void main() async {
 
         // 4. Global ViewModels & Notifiers
         ChangeNotifierProvider<ThemeService>(create: (_) => ThemeService()),
+        ChangeNotifierProvider<MapPositionService>(create: (_) => MapPositionService()),
         ChangeNotifierProvider<AiChatService>(create: (_) => AiChatService()),
         ChangeNotifierProvider<AccountViewModel>(
           create: (context) => AccountViewModel(context.read<AuthService>()),

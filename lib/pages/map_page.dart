@@ -1,6 +1,7 @@
 // lib/pages/map_page.dart
 
 import 'package:flutter/material.dart' hide BottomSheet;
+import 'package:foodie/services/map_position.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
@@ -78,8 +79,10 @@ class _MapPageState extends State<MapPage> {
     return restaurants
         .where(
           (restaurant) => _filterOptions.selectedGenres.contains(restaurant.genreTag.toGenreTags()),
-        ).where(
-          (restaurant) => _filterOptions.selectedVeganTags.contains(restaurant.veganTag.toVeganTags()),
+        )
+        .where(
+          (restaurant) =>
+              _filterOptions.selectedVeganTags.contains(restaurant.veganTag.toVeganTags()),
         )
         .map((restaurant) {
           return Marker(
@@ -109,6 +112,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final LatLng initialPosition = context.read<MapPositionService>().position;
     final allRestaurantViewModel = context.watch<AllRestaurantViewModel>();
     final restaurants = allRestaurantViewModel.restaurants;
     final restaurantMarkers = _createMarkers(restaurants);
@@ -118,8 +122,8 @@ class _MapPageState extends State<MapPage> {
         children: [
           Positioned.fill(
             child: GoogleMap(
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(24.7956, 120.9936),
+              initialCameraPosition: CameraPosition(
+                target: initialPosition,
                 zoom: 15,
               ),
               markers: restaurantMarkers,
@@ -133,6 +137,9 @@ class _MapPageState extends State<MapPage> {
                   _selectedRestaurantDetailVM?.dispose();
                   _selectedRestaurantDetailVM = null;
                 });
+              },
+              onCameraMove: (position) {
+                context.read<MapPositionService>().updatePosition(position.target);
               },
             ),
           ),
