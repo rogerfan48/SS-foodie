@@ -52,6 +52,28 @@ class DishDetailPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Text(
+                'Dish Details',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(
+                dish.bestReviewSummary.isNotEmpty
+                    ? dish.bestReviewSummary
+                    : 'No summary available for this dish yet. Try writing a specific review to make AI generate one!',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(
                 'Reviews for this dish',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),

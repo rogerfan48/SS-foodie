@@ -90,7 +90,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                 final dishes = categories[categoryName]!;
                 return Container(
                   key: _categoryKeys[categoryName],
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
