@@ -136,11 +136,11 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                                             dish.dishName,
                                             style: Theme.of(context).textTheme.titleMedium,
                                           ),
-                                          if (dish.bestReviewSummary.isNotEmpty)
+                                          if (dish.summary.isNotEmpty)
                                             Padding(
                                               padding: const EdgeInsets.only(top: 4.0),
                                               child: Text(
-                                                dish.bestReviewSummary,
+                                                dish.summary,
                                                 style: Theme.of(context).textTheme.bodySmall,
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
