@@ -46,10 +46,8 @@ class HistoryListTile extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 12.0, bottom: 4.0, top: 4.0),
-              child: Text(restaurantName, style: theme.textTheme.bodyLarge)
+              child: Text(restaurantName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold) ?? const TextStyle()),
             ),
-            // Text(restaurantName, style: theme.textTheme.bodyLarge),
-            // Expanded(child: Text(restaurantName, style: theme.textTheme.bodyLarge)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
