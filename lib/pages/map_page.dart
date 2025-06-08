@@ -51,6 +51,7 @@ class _MapPageState extends State<MapPage> {
         restaurantRepository: context.read<RestaurantRepository>(),
         reviewRepository: context.read<ReviewRepository>(),
         userRepository: context.read<UserRepository>(),
+        storageService: context.read<StorageService>()
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<MapPositionService>().updateId(null);
