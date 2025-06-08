@@ -65,7 +65,6 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
-    // 非常重要：在頁面銷毀時，也要 dispose ViewModel 以取消監聽
     _selectedRestaurantDetailVM?.dispose();
     _searchController.dispose();
     super.dispose();
@@ -76,7 +75,6 @@ class _MapPageState extends State<MapPage> {
       return _markerIconCache[color]!;
     }
 
-    // 1. ✅ 定義一個包含兩個顏色佔位符的 SVG 模板
     const String svgTemplate = '''
     <svg width="100" height="120" viewBox="-5 -5 110 125" xmlns="http://www.w3.org/2000/svg">
       <path 
@@ -89,26 +87,21 @@ class _MapPageState extends State<MapPage> {
     </svg>
     ''';
 
-
-    // 2. 計算主顏色的深色版本
     final HSLColor hslColor = HSLColor.fromColor(color);
     final HSLColor darkerHslColor = hslColor.withLightness(
       (hslColor.lightness - 0.15).clamp(0.0, 1.0),
     );
     final Color darkerColor = darkerHslColor.toColor();
 
-    // 3. 將 Color 物件轉換為 16 進位顏色字串
     final String mainColorString = '#${color.value.toRadixString(16).substring(2)}';
     final String darkColorString = '#${darkerColor.value.toRadixString(16).substring(2)}';
 
-    // 4. ✅ 分別替換兩個顏色佔位符
     final String finalSvgString = svgTemplate
         .replaceAll('#FILL_COLOR#', mainColorString)
         .replaceAll('#FILL_COLOR_DARK#', darkColorString);
 
-    // 5. 使用 flutter_svg 將 SVG 字串渲染成圖片
     final PictureInfo pictureInfo = await vg.loadPicture(SvgStringLoader(finalSvgString), null);
-    final ui.Image image = await pictureInfo.picture.toImage(120, 150); // 提高解析度以獲得更清晰的圖標
+    final ui.Image image = await pictureInfo.picture.toImage(120, 150); // enhanced size for better visibility
     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List uint8List = byteData!.buffer.asUint8List();
 
