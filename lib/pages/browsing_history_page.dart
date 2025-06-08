@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:foodie/view_models/viewed_restaurants_vm.dart';
 import 'package:foodie/widgets/account/history_list_tile.dart';
@@ -10,7 +11,7 @@ class BrowsingHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<ViewedRestaurantsViewModel?>();
-
+    final formatter = DateFormat('yyyy-MM-dd HH:mm a');
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -22,20 +23,21 @@ class BrowsingHistoryPage extends StatelessWidget {
       body:
           (viewModel == null || viewModel.viewedRestaurants.isEmpty)
               ? const Center(child: Text('You have no browsing history yet.'))
-              : ListView.builder(
-                itemCount: viewModel.viewedRestaurants.length,
-                itemBuilder: (context, index) {
-                  final historyItem = viewModel.viewedRestaurants[index];
-                  return HistoryListTile(
-                    restaurantName: historyItem.restaurantName ?? 'N/A',
-                    genre: historyItem.genreTag?.title ?? 'N/A',
-                    date: historyItem.viewDate?.toIso8601String().split('T').first ?? 'N/A',
-                    onDelete: () {
-                      // viewModel.deleteViewedRestaurant(historyItem.restaurantId);
-                    },
-                  );
-                },
-              ),
+              : ListView.separated(
+                  itemCount: viewModel.viewedRestaurants.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final historyItem = viewModel.viewedRestaurants[index];
+                    return HistoryListTile(
+                      restaurantName: historyItem.restaurantName ?? 'N/A',
+                      genre: historyItem.genreTag?.title ?? 'N/A',
+                      date: formatter.format(DateTime.parse(historyItem.viewDate.toString())),
+                      onDelete: () {
+                        // viewModel.deleteViewedRestaurant(historyItem.restaurantId);
+                      },
+                    );
+                  },
+                ),
     );
   }
 }
