@@ -3,6 +3,7 @@ import 'package:foodie/view_models/restaurant_detail_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodie/widgets/firebase_image.dart';
+import 'package:foodie/models/dish_model.dart';
 
 class RestaurantMenuPage extends StatefulWidget {
   const RestaurantMenuPage({super.key});
@@ -105,6 +106,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                       ...dishes.asMap().entries.map((entry) {
                         final dishIndex = entry.key;
                         final dish = entry.value;
+                        final String? imageUri = vm.getBestImageForDish(dish);
 
                         return Column(
                           children: [
@@ -123,7 +125,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
-                                      child: FirebaseImage(gsUri: null, width: 60, height: 60),
+                                      child: FirebaseImage(gsUri: imageUri, width: 60, height: 60),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(

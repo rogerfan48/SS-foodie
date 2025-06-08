@@ -64,13 +64,11 @@ class RestaurantDetailViewModel with ChangeNotifier {
         );
         break;
       default:
-        _reviews.sort(
-          (a, b) {
-            final aUser = a.agreedBy.length + a.disagreedBy.length;
-            final bUser = b.agreedBy.length + b.disagreedBy.length;
-            return bUser.compareTo(aUser);
-          },
-        );
+        _reviews.sort((a, b) {
+          final aUser = a.agreedBy.length + a.disagreedBy.length;
+          final bUser = b.agreedBy.length + b.disagreedBy.length;
+          return bUser.compareTo(aUser);
+        });
         break;
     }
     notifyListeners();
@@ -103,7 +101,6 @@ class RestaurantDetailViewModel with ChangeNotifier {
       _checkLoadingStatus();
       notifyListeners();
     });
-
   }
 
   void _checkLoadingStatus() {
@@ -132,14 +129,16 @@ class RestaurantDetailViewModel with ChangeNotifier {
   }
 
   void _buildCategorizedMenu() {
-    _categoriezedMenu = _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
-      final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
-      if (!map.containsKey(category)) {
-        map[category] = [];
-      }
-      map[category]!.add(dish);
-      return map;
-    }) ?? {"test": []};
+    _categoriezedMenu =
+        _restaurant?.menuMap.values.fold<Map<String, List<DishModel>>>({}, (map, dish) {
+          final category = dish.dishGenre.isNotEmpty ? dish.dishGenre : 'Uncategorized';
+          if (!map.containsKey(category)) {
+            map[category] = [];
+          }
+          map[category]!.add(dish);
+          return map;
+        }) ??
+        {"test": []};
   }
 
   Future<UserModel?> getUserData(String userId) async {
@@ -188,6 +187,24 @@ class RestaurantDetailViewModel with ChangeNotifier {
 
   List<ReviewModel> getReviewsForDish(String dishId) {
     return _reviews.where((review) => review.dishID == dishId).toList();
+  }
+
+  String? getBestImageForDish(DishModel dish) {
+    if (dish.dishReviewIDs.isEmpty) return null;
+
+    final dishReviews = _reviews.where((r) => dish.dishReviewIDs.contains(r.reviewID)).toList();
+    final reviewsWithImages = dishReviews.where((r) => r.reviewImgURLs.isNotEmpty).toList();
+    if (reviewsWithImages.isEmpty) return null;
+
+    print("dish: ${dish.dishName}, reviewsWithImages: ${reviewsWithImages.length}");
+
+    reviewsWithImages.sort((a, b) {
+      final reactionsA = a.agreedBy.length + a.disagreedBy.length;
+      final reactionsB = b.agreedBy.length + b.disagreedBy.length;
+      return reactionsB.compareTo(reactionsA);
+    });
+
+    return reviewsWithImages.first.reviewImgURLs.first;
   }
 
   @override

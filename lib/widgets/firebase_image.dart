@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:foodie/services/storage_service.dart';
 import 'package:provider/provider.dart';
@@ -18,39 +19,57 @@ class FirebaseImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 從 Provider 獲取 StorageService
+    if (gsUri == null || gsUri!.isEmpty) {
+      return _buildPlaceholder(context);
+    }
+
     final storageService = context.read<StorageService>();
 
     return FutureBuilder<String?>(
-      // 調用 service 方法獲取下載連結
       future: storageService.getDownloadUrl(gsUri),
       builder: (context, snapshot) {
-        // 正在加載
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
+          return SizedBox(
+            width: width,
+            height: height,
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2.0)),
+          );
         }
-        // 獲取失敗或 URL 為空
+
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-          return const Icon(Icons.broken_image_outlined, color: Colors.grey);
+          return _buildPlaceholder(context);
         }
-        // 成功獲取 URL，使用 Image.network 顯示
+
         final url = snapshot.data!;
         return Image.network(
           url,
           width: width,
           height: height,
           fit: fit,
-          // 圖片加載過程中的佔位符
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
           },
           // 網路圖片加載失敗的佔位符
           errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.error_outline, color: Colors.red);
+            return _buildPlaceholder(context, error: true);
           },
         );
       },
+    );
+  }
+
+  Widget _buildPlaceholder(BuildContext context, {bool error = false}) {
+    return Container(
+      width: width,
+      height: height,
+      color: Theme.of(context).colorScheme.surfaceVariant,
+      child: Icon(
+        size: min(width ?? 20, height ?? 20),
+        // 如果是加載錯誤，顯示錯誤圖示，否則顯示預設圖示
+        error ? Icons.error_outline : Icons.image,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }
