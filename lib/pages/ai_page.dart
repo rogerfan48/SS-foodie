@@ -70,109 +70,113 @@ class _AiPageState extends State<AiPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              // 增加底部空間，避免被輸入框和推薦按鈕遮擋
-              padding: const EdgeInsets.only(bottom: 130.0),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      itemCount: chat.messages.length + 1,
-                      itemBuilder: (context, index) {
-                        // ✅ 如果索引是最後一個，就建立「清除紀錄」按鈕
-                        if (index == chat.messages.length) {
-                          // 如果沒有訊息，就不顯示清除按鈕
-                          if (chat.messages.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          return _buildClearButton(context);
-                        }
-                        // 否則，像往常一樣建立訊息 item
-                        final msg = chat.messages[index];
-                        return _buildMessageItem(context, msg);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                // 增加一點漸變效果，讓 UI 更有層次感
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
-                      Theme.of(context).scaffoldBackgroundColor,
-                      Theme.of(context).scaffoldBackgroundColor,
-                    ],
-                    stops: const [0, 0.4, 1],
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Stack(
+            children: [
+              Padding(
+                // 增加底部空間，避免被輸入框和推薦按鈕遮擋
+                padding: const EdgeInsets.only(bottom: 130.0),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      height: 35,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          AiRecommendationButton(msg: "推薦我一些晚餐選擇", userId: user.uid),
-                          const SizedBox(width: 8),
-                          AiRecommendationButton(msg: "附近有什麼好吃的？", userId: user.uid),
-                          const SizedBox(width: 8),
-                          AiRecommendationButton(msg: "我想吃點辣的", userId: user.uid),
-                        ],
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        itemCount: chat.messages.length + 1,
+                        itemBuilder: (context, index) {
+                          // ✅ 如果索引是最後一個，就建立「清除紀錄」按鈕
+                          if (index == chat.messages.length) {
+                            // 如果沒有訊息，就不顯示清除按鈕
+                            if (chat.messages.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return _buildClearButton(context);
+                          }
+                          // 否則，像往常一樣建立訊息 item
+                          final msg = chat.messages[index];
+                          return _buildMessageItem(context, msg);
+                        },
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _controller,
-                      minLines: 1,
-                      maxLines: 3,
-                      textInputAction: TextInputAction.newline,
-                      enabled: !chat.isLoading,
-                      decoration: InputDecoration(
-                        hintText: "Chat with AI...",
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                        suffixIcon: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            chat.isLoading
-                                ? const Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2.0),
-                                  ),
-                                )
-                                : IconButton(
-                                  onPressed: chat.isLoading ? null : _sendMessage,
-                                  icon: const Icon(Icons.send),
-                                ),
-                          ],
-                        ),
-                      ),
-                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  // 增加一點漸變效果，讓 UI 更有層次感
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+                        Theme.of(context).scaffoldBackgroundColor,
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
+                      stops: const [0, 0.4, 1],
+                    ),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 35,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            AiRecommendationButton(msg: "推薦我一些晚餐選擇", userId: user.uid),
+                            const SizedBox(width: 8),
+                            AiRecommendationButton(msg: "附近有什麼好吃的？", userId: user.uid),
+                            const SizedBox(width: 8),
+                            AiRecommendationButton(msg: "我想吃點辣的", userId: user.uid),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _controller,
+                        minLines: 1,
+                        maxLines: 3,
+                        textInputAction: TextInputAction.newline,
+                        enabled: !chat.isLoading,
+                        decoration: InputDecoration(
+                          hintText: "Chat with AI...",
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
+                          suffixIcon: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              chat.isLoading
+                                  ? const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                                    ),
+                                  )
+                                  : IconButton(
+                                    onPressed: chat.isLoading ? null : _sendMessage,
+                                    icon: const Icon(Icons.send),
+                                  ),
+                            ],
+                          ),
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -21,120 +21,123 @@ class RestaurantWriteReviewPage extends StatelessWidget {
 
     return Dialog.fullscreen(
       child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Write a Review'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-            automaticallyImplyLeading: false,
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Specific review', style: textTheme.headlineSmall),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
-                      onPressed: () async {
-                        final imgPicker = ImagePicker();
-                        final img = await imgPicker.pickImage(source: ImageSource.camera);
-                        if (img != null) {
-                          final imgUri = await context.read<StorageService>().uploadReceiptImage(
-                            file: File(img.path),
-                            userId: userId,
-                          );
-                          final imgUrl = await context.read<StorageService>().getDownloadUrl(
-                            imgUri,
-                          );
-                          print(imgUrl);
-                          List<String> data = await identifyReceiptDish(vm.restaurantId, imgUrl!);
-                          print(data);
-                          List<DishModel> dishes =
-                              vm.categorizedMenu.values
-                                  .expand((list) => list)
-                                  .where((dish) => data.contains(dish.dishId))
-                                  .toList();
-                          vm.replaceSpecificReviews(
-                            dishes.map((d) => SpecificReviewState(selectedDish: d)).toList(),
-                          );
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Icon(Icons.camera_alt, color: Theme.of(context).colorScheme.primary),
-                          const SizedBox(width: 8),
-                          const Text('Scan Receipt'),
-                        ],
-                      ),
-                    ),
-                  ],
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Write a Review'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-                const SizedBox(height: 8),
-                // 動態生成菜色評論區塊
-                ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: vm.specificReviews.length,
-                  separatorBuilder: (context, index) => const Divider(height: 32),
-                  itemBuilder: (context, index) => _buildSpecificReviewForm(context, vm, index),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add another "Specific review"'),
-                  onPressed: vm.addSpecificReview,
-                ),
-                const Divider(height: 48),
-                // 整體評論區塊
-                Text('Overall', style: textTheme.headlineSmall),
-                const SizedBox(height: 16),
-                Center(
-                  child: StarRatingInput(
-                    rating: vm.overallRating,
-                    onRatingChanged: vm.setOverallRating,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: vm.overallContentController,
-                  decoration: const InputDecoration(
-                    hintText: 'Share your experience',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                ),
-                const Divider(height: 48),
-                // 價格區塊
-                Text('Price', style: textTheme.headlineSmall),
-                const SizedBox(height: 16),
-                _buildPriceSelector(context, vm),
               ],
+              automaticallyImplyLeading: false,
             ),
-          ),
-          bottomNavigationBar: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: FilledButton(
-              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-              onPressed: () async {
-                await vm.submitReview();
-                Navigator.of(context).pop(); // 提交後關閉頁面
-              },
-              child: Text(
-                'Submit',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Specific review', style: textTheme.headlineSmall),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
+                        onPressed: () async {
+                          final imgPicker = ImagePicker();
+                          final img = await imgPicker.pickImage(source: ImageSource.camera);
+                          if (img != null) {
+                            final imgUri = await context.read<StorageService>().uploadReceiptImage(
+                              file: File(img.path),
+                              userId: userId,
+                            );
+                            final imgUrl = await context.read<StorageService>().getDownloadUrl(
+                              imgUri,
+                            );
+                            print(imgUrl);
+                            List<String> data = await identifyReceiptDish(vm.restaurantId, imgUrl!);
+                            print(data);
+                            List<DishModel> dishes =
+                                vm.categorizedMenu.values
+                                    .expand((list) => list)
+                                    .where((dish) => data.contains(dish.dishId))
+                                    .toList();
+                            vm.replaceSpecificReviews(
+                              dishes.map((d) => SpecificReviewState(selectedDish: d)).toList(),
+                            );
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            Icon(Icons.camera_alt, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 8),
+                            const Text('Scan Receipt'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // 動態生成菜色評論區塊
+                  ListView.separated(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: vm.specificReviews.length,
+                    separatorBuilder: (context, index) => const Divider(height: 32),
+                    itemBuilder: (context, index) => _buildSpecificReviewForm(context, vm, index),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add another "Specific review"'),
+                    onPressed: vm.addSpecificReview,
+                  ),
+                  const Divider(height: 48),
+                  // 整體評論區塊
+                  Text('Overall', style: textTheme.headlineSmall),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: StarRatingInput(
+                      rating: vm.overallRating,
+                      onRatingChanged: vm.setOverallRating,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: vm.overallContentController,
+                    decoration: const InputDecoration(
+                      hintText: 'Share your experience',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 4,
+                  ),
+                  const Divider(height: 48),
+                  // 價格區塊
+                  Text('Price', style: textTheme.headlineSmall),
+                  const SizedBox(height: 16),
+                  _buildPriceSelector(context, vm),
+                ],
+              ),
+            ),
+            bottomNavigationBar: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: FilledButton(
+                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                onPressed: () async {
+                  await vm.submitReview();
+                  Navigator.of(context).pop(); // 提交後關閉頁面
+                },
+                child: Text(
+                  'Submit',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                ),
               ),
             ),
           ),
