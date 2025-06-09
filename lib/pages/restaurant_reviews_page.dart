@@ -120,7 +120,7 @@ class RestaurantReviewsPage extends StatelessWidget {
                   currentUserId != null && review.disagreedBy.contains(currentUserId);
 
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: ReviewListItem(
                   review: reviews[index],
                   userDataFuture: vm.getUserData(reviews[index].reviewerID),
