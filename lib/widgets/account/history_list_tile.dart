@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:foodie/enums/genre_tag.dart';
+import 'package:foodie/services/map_position.dart';
+import 'package:foodie/view_models/all_restaurants_vm.dart';
+import 'package:provider/provider.dart';
 
 class HistoryListTile extends StatelessWidget {
   final String restaurantName;
+  final String restaurantId;
   final String genre;
   final String date;
   final VoidCallback onDelete;
 
   const HistoryListTile({
-    Key? key,
+    super.key,
     required this.restaurantName,
+    required this.restaurantId,
     required this.genre,
     required this.date,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +49,19 @@ class HistoryListTile extends StatelessWidget {
       direction: DismissDirection.horizontal,
       onDismissed: (_) => onDelete(),
       child: ListTile(
+        onTap: () {
+          if (restaurantId.isEmpty) return;
+          final mapPositionService = context.read<MapPositionService>();
+          final allRestaurantVM = context.read<AllRestaurantViewModel>();
+          final theRestaurant = allRestaurantVM.restaurants.firstWhere(
+            (r) => r.restaurantId == restaurantId,
+          );
+          mapPositionService.updatePosition(
+            LatLng(theRestaurant.latitude, theRestaurant.longitude),
+          );
+          mapPositionService.updateId(restaurantId);
+          context.go('/map');
+        },
         title: Row(
           children: [
             Expanded(

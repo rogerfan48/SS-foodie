@@ -24,20 +24,21 @@ class BrowsingHistoryPage extends StatelessWidget {
           (viewModel == null || viewModel.viewedRestaurants.isEmpty)
               ? const Center(child: Text('You have no browsing history yet.'))
               : ListView.separated(
-                  itemCount: viewModel.viewedRestaurants.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final historyItem = viewModel.viewedRestaurants[index];
-                    return HistoryListTile(
-                      restaurantName: historyItem.restaurantName ?? 'N/A',
-                      genre: historyItem.genreTag?.title ?? 'N/A',
-                      date: formatter.format(DateTime.parse(historyItem.viewDate.toString())),
-                      onDelete: () {
-                        viewModel.deleteSpecificHistoryEntry(historyItem);
-                      },
-                    );
-                  },
-                ),
+                itemCount: viewModel.viewedRestaurants.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final historyItem = viewModel.viewedRestaurants[index];
+                  return HistoryListTile(
+                    restaurantName: historyItem.restaurantName ?? 'N/A',
+                    restaurantId: historyItem.restaurantId ?? '',
+                    genre: historyItem.genreTag?.title ?? 'N/A',
+                    date: formatter.format(DateTime.parse(historyItem.viewDate.toString())),
+                    onDelete: () {
+                      viewModel.deleteSpecificHistoryEntry(historyItem);
+                    },
+                  );
+                },
+              ),
     );
   }
 }

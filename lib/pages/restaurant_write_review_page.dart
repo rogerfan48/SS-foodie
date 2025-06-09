@@ -140,23 +140,29 @@ class RestaurantWriteReviewPage extends StatelessWidget {
                   Text('Price', style: textTheme.headlineSmall),
                   const SizedBox(height: 16),
                   _buildPriceSelector(context, vm),
+                  const SizedBox(height: 48),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          onPressed: () async {
+                            await vm.submitReview();
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'Submit',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-            ),
-            bottomNavigationBar: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: FilledButton(
-                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                onPressed: () async {
-                  await vm.submitReview();
-                  Navigator.of(context).pop(); // 提交後關閉頁面
-                },
-                child: Text(
-                  'Submit',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                ),
               ),
             ),
           ),
