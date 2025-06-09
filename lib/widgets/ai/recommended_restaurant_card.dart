@@ -15,7 +15,7 @@ class RecommendedRestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 130,
+      width: 200,
       child: Card(
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -25,7 +25,7 @@ class RecommendedRestaurantCard extends StatelessWidget {
             children: [
               FirebaseImage(
                 gsUri: restaurant.imageUrl,
-                height: 80,
+                height: 120,
                 width: double.infinity,
               ),
               Padding(

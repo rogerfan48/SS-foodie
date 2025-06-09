@@ -57,22 +57,30 @@ class AiChatService with ChangeNotifier {
 
       if (type == 'recommendation' && data['restaurants'] != null) {
         final List<dynamic> restaurantData = data['restaurants'] as List;
+      debugPrint("Response data: ${restaurantData.toString()}");
         final recommendations =
             restaurantData
-                .map((item) => RecommendedRestaurant.fromMap(item as Map<String, dynamic>))
+                .map((item) => RecommendedRestaurant.fromMap(Map<String, dynamic>.from(item)))
                 .toList();
 
         _messages.add(Message(text: text, isUser: false, recommendations: recommendations));
+        debugPrint("Received recommendations: ${recommendations.map((r) => r.name).join(', ')}");
       } else {
         _messages.add(Message(text: text, isUser: false));
+        debugPrint("Received message: $text");
       }
     } catch (e) {
-      print("Error calling recommendRestaurant: $e");
+      debugPrint("Error calling recommendRestaurant: $e");
       _messages.add(Message(text: "Sorry, I'm having trouble connecting.", isUser: false));
     } finally {
       _isLoading = false;
     }
 
+    notifyListeners();
+  }
+
+  void clearMessages() {
+    _messages.clear();
     notifyListeners();
   }
 }

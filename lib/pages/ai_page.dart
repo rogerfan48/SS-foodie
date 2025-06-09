@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/widgets/ai/ai_recommendation_button.dart';
 import 'package:foodie/widgets/ai/recommended_restaurant_card.dart';
+import 'package:foodie/view_models/all_restaurants_vm.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({super.key});
@@ -74,14 +75,29 @@ class _AiPageState extends State<AiPage> {
             Padding(
               // 增加底部空間，避免被輸入框和推薦按鈕遮擋
               padding: const EdgeInsets.only(bottom: 130.0),
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                itemCount: chat.messages.length,
-                itemBuilder: (context, index) {
-                  final msg = chat.messages[index];
-                  return _buildMessageItem(context, msg);
-                },
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      itemCount: chat.messages.length + 1,
+                      itemBuilder: (context, index) {
+                        // ✅ 如果索引是最後一個，就建立「清除紀錄」按鈕
+                        if (index == chat.messages.length) {
+                          // 如果沒有訊息，就不顯示清除按鈕
+                          if (chat.messages.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return _buildClearButton(context);
+                        }
+                        // 否則，像往常一樣建立訊息 item
+                        final msg = chat.messages[index];
+                        return _buildMessageItem(context, msg);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Positioned(
@@ -144,7 +160,6 @@ class _AiPageState extends State<AiPage> {
                                   ),
                                 )
                                 : IconButton(
-                                  // ✅ 按鈕在 loading 時會被禁用
                                   onPressed: chat.isLoading ? null : _sendMessage,
                                   icon: const Icon(Icons.send),
                                 ),
@@ -160,6 +175,53 @@ class _AiPageState extends State<AiPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildClearButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            _showDeleteConfirmDialog(
+              context,
+              title: "清除聊天紀錄",
+              onConfirm: () => context.read<AiChatService>().clearMessages(),
+            );
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [const Icon(Icons.delete, size: 20), Text("清除聊天紀錄")],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onConfirm,
+  }) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(title),
+            content: const Text('This action cannot be undone.'),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () {
+                  onConfirm();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
     );
   }
 
@@ -194,7 +256,7 @@ class _AiPageState extends State<AiPage> {
             if (msg.recommendations.isNotEmpty) ...[
               const SizedBox(height: 12),
               SizedBox(
-                height: 150,
+                height: 200,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: msg.recommendations.length,
@@ -205,6 +267,13 @@ class _AiPageState extends State<AiPage> {
                       restaurant: restaurant,
                       onTap: () {
                         final mapPositionService = context.read<MapPositionService>();
+                        final allRestaurantVM = context.read<AllRestaurantViewModel>();
+                        final theRestaurant = allRestaurantVM.restaurants.firstWhere(
+                          (r) => r.restaurantId == restaurant.id,
+                        );
+                        mapPositionService.updatePosition(
+                          LatLng(theRestaurant.latitude, theRestaurant.longitude),
+                        );
                         mapPositionService.updateId(restaurant.id);
                         context.go('/map');
                       },
