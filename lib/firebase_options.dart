@@ -60,11 +60,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBy9Odska4qJEy2qdbBXZE4vGibDxmkTCA',
-    appId: '1:346523381880:ios:33ae6de00acc339d43bd8d',
+    appId: '1:346523381880:ios:d15d146b1d5bf29c43bd8d',
     messagingSenderId: '346523381880',
     projectId: 'foodie-4dee6',
     storageBucket: 'foodie-4dee6.firebasestorage.app',
-    iosBundleId: 'com.example.foodie',
+    androidClientId: '346523381880-14lluom2q7sdfiram1537psenvojd7k7.apps.googleusercontent.com',
+    iosClientId: '346523381880-dpjam4uq2hjghiocod0m9gbvfp8nevvm.apps.googleusercontent.com',
+    iosBundleId: 'com.nthucs.foodie',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '346523381880',
     projectId: 'foodie-4dee6',
     storageBucket: 'foodie-4dee6.firebasestorage.app',
+    androidClientId: '346523381880-14lluom2q7sdfiram1537psenvojd7k7.apps.googleusercontent.com',
+    iosClientId: '346523381880-t4qi800lknk7m7udn0504cc1iu90u8g9.apps.googleusercontent.com',
     iosBundleId: 'com.example.foodie',
   );
 

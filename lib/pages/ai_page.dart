@@ -186,13 +186,13 @@ class _AiPageState extends State<AiPage> {
           onPressed: () {
             _showDeleteConfirmDialog(
               context,
-              title: "清除聊天紀錄",
+              title: "Clear Chat History",
               onConfirm: () => context.read<AiChatService>().clearMessages(),
             );
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: [const Icon(Icons.delete, size: 20), Text("清除聊天紀錄")],
+            children: [const Icon(Icons.delete, size: 20), Text(" Clear Chat History")],
           ),
         ),
       ),
