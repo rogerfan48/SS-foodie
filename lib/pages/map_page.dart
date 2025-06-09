@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
+import 'package:foodie/services/theme.dart';
 import 'package:flutter/material.dart' hide BottomSheet;
 import 'package:foodie/services/map_position.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -33,6 +35,9 @@ class _MapPageState extends State<MapPage> {
   GoogleMapController? _mapController;
   final String _mapStyle = '''[{"featureType": "poi","stylers": [{"visibility": "off"}]}]''';
 
+  String? _lightMapStyle;
+  String? _darkMapStyle;
+
   RestaurantDetailViewModel? _selectedRestaurantDetailVM;
   final double _sheetHeight = 200;
 
@@ -60,6 +65,25 @@ class _MapPageState extends State<MapPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<MapPositionService>().updateId(null);
       });
+    }
+    _loadMapStyles();
+  }
+
+  Future<void> _loadMapStyles() async {
+    _lightMapStyle = await rootBundle.loadString('assets/map_styles/light_mode.json');
+    _darkMapStyle = await rootBundle.loadString('assets/map_styles/dark_mode.json');
+    _updateMapStyle();
+  }
+
+  void _updateMapStyle() {
+    if (_mapController == null) return;
+
+    final bool isDarkMode = context.read<ThemeService>().isDarkMode;
+
+    if (isDarkMode && _darkMapStyle != null) {
+      _mapController!.setMapStyle(_darkMapStyle);
+    } else if (!isDarkMode && _lightMapStyle != null) {
+      _mapController!.setMapStyle(_lightMapStyle);
     }
   }
 
@@ -195,6 +219,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<ThemeService>();
     final LatLng initialPosition = context.read<MapPositionService>().position;
     final allRestaurantViewModel = context.watch<AllRestaurantViewModel>();
     final restaurants = allRestaurantViewModel.restaurants;
@@ -220,7 +245,7 @@ class _MapPageState extends State<MapPage> {
                   markers: snapshot.data ?? {},
                   onMapCreated: (controller) {
                     _mapController = controller;
-                    _mapController?.setMapStyle(_mapStyle);
+                    _updateMapStyle();
                   },
                   onTap: (LatLng position) {
                     FocusScope.of(context).unfocus();

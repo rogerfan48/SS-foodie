@@ -72,6 +72,7 @@ flutter:
 
   assets:
     - assets/imgs/
+    - assets/map_styles/
     - assets/imgs/brand_logo.png
     - assets/imgs/halal.png
     - assets/imgs/leaf.png
