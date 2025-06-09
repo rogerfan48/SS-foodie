@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import * as z from 'zod';
 import { ai } from "../config";
 // import { defineFlow, definePrompt } from '@genkit-ai/flow';
-import { gemini20Flash001 } from "@genkit-ai/vertexai";
+import { gemini25FlashPreview0417 } from "@genkit-ai/vertexai";
 import { ImageAnnotatorClient } from '@google-cloud/vision';
 
 // Initialize Firebase Admin SDK if not already initialized
@@ -66,7 +66,7 @@ async function getAllDishesForRestaurant(restaurantId: string): Promise<Dish[]> 
 // AI Prompt to identify dishes from OCR text
 const dishFinderPrompt = ai.definePrompt({
   name: 'dishFinderFromReceipt',
-  model: gemini20Flash001, // Ensure this model is configured in your Genkit setup
+  model: gemini25FlashPreview0417, // Ensure this model is configured in your Genkit setup
   input: {
     schema: z.object({
       ocrText: z.string(),

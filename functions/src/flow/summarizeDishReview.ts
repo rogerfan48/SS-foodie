@@ -1,10 +1,10 @@
-import { gemini20Flash001 } from "@genkit-ai/vertexai";
+import { gemini25FlashPreview0417 } from "@genkit-ai/vertexai";
 import { ai } from "../config";
 import { z } from "genkit";
 
 // New AI Prompt for verifying the summary
 const dishSummaryVerifier = ai.definePrompt({
-    model: gemini20Flash001, // You might consider a more powerful model for verification if needed
+    model: gemini25FlashPreview0417, // You might consider a more powerful model for verification if needed
     name: "dishSummaryVerifier",
     input: { schema: z.string() }, // Input is the generated summary text
     output: {
@@ -60,7 +60,7 @@ If \`meetsCriteria\` is true, feedback can be null or a short confirmation.`
 
 // Modified reviewGenerator to accept feedback
 const dishReviewGenerator = ai.definePrompt({
-    model: gemini20Flash001,
+    model: gemini25FlashPreview0417,
     name: "dishReviewGenerator",
     input: { schema: z.object({ reviews: z.string(), feedback: z.string().optional() }) },
     messages: (inputParams) => {

@@ -1,4 +1,4 @@
-import { gemini20Flash001 } from "@genkit-ai/vertexai";
+import { gemini25FlashPreview0417 } from "@genkit-ai/vertexai";
 import { ai } from "../config";
 import { z } from "genkit";
 import * as admin from 'firebase-admin';
@@ -10,7 +10,7 @@ const db = admin.firestore();
 
 // New AI Prompt for verifying the restaurant summary
 const restaurantSummaryVerifier = ai.definePrompt({
-    model: gemini20Flash001,
+    model: gemini25FlashPreview0417,
     name: "restaurantSummaryVerifier",
     input: { schema: z.string() }, // Input is the generated summary text
     output: {
@@ -82,7 +82,7 @@ If \`meetsCriteria\` is true, feedback can be null or a short confirmation (e.g.
 });
 
 const restaurantReviewGenerator = ai.definePrompt({
-    model: gemini20Flash001,
+    model: gemini25FlashPreview0417,
     name: "restaurantReviewGenerator",
     input: { schema: z.object({
         dishNames: z.string(), // For context for Paragraph 1
