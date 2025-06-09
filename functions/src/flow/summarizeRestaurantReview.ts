@@ -46,7 +46,7 @@ Criteria:
 
 A.  **Paragraph 1 (Dish Types Description)**:
     *   This paragraph MUST always be present and meet all its criteria.
-    1.  Length: Approximately 20-50 Traditional Chinese characters.
+    1.  Length: Approximately 5-50 Traditional Chinese characters.
     2.  Content: Describes the restaurant's general dish types. This paragraph is NOT based on customer reviews.
     3.  Language: Must be in Traditional Chinese.
     4.  Style: Remove subjects, use only descriptive sentences.
@@ -58,7 +58,7 @@ B.  **Paragraph 2 (Review Summary / Implicitly Empty)**:
         This is an acceptable state for Paragraph 2. It is presumed this occurs if the generator determined reviews were unsuitable for summary (e.g., all negative without concrete reasons, too few/vague, or predominantly subjective without actionable details).
         If Paragraph 1 is valid and Paragraph 2 is implicitly empty, the overall summary meets criteria.
     2.  **If Paragraph 2 is a review summary (i.e., text is present after a newline following Paragraph 1):**
-        a.  Length: Approximately 20-50 Traditional Chinese characters.
+        a.  Length: Approximately 5-50 Traditional Chinese characters.
         b.  Content Source: Must be entirely based on the provided customer reviews; no self-generated information.
         c.  Focus: Highlights common themes, positive/negative viewpoints from reviews.
         d.  Clarity: Clear and easy to understand.
@@ -68,7 +68,6 @@ B.  **Paragraph 2 (Review Summary / Implicitly Empty)**:
         f.  Objectivity: No subjective opinions (e.g., "recommend", "not recommend").
         g.  Language: Must be in Traditional Chinese.
         h.  Style: Remove subjects, use only descriptive sentences.
-        i.  Order: Describe advantages first, then disadvantages.
         If these conditions for Paragraph 2 are met (and Paragraph 1 is valid), the overall summary meets criteria.
 
 Respond with a JSON object: \`{ "meetsCriteria": boolean, "feedback": "concise, actionable feedback if not met, otherwise a brief confirmation or null" }\`.
@@ -94,7 +93,7 @@ const restaurantReviewGenerator = ai.definePrompt({
 
 **Paragraph 1 (Mandatory - Dish Types Description):**
 - Generate a description of the restaurant's general dish types. This paragraph is NOT based on customer reviews. You can use the provided "Restaurant Dish Names" for context if helpful.
-- Length: Approximately 20-50 Traditional Chinese characters.
+- Length: Approximately 5-50 Traditional Chinese characters.
 - Language: Traditional Chinese.
 - Style: Remove subjects, use only descriptive sentences.
 - Objectivity: No subjective opinions (e.g., "recommend", "not recommend").
@@ -104,7 +103,7 @@ const restaurantReviewGenerator = ai.definePrompt({
 After crafting Paragraph 1, analyze the provided "Customer Reviews" to determine if a meaningful summary for Paragraph 2 can be formed:
 - **Condition for OMITTING Paragraph 2 (Output only Paragraph 1):** If ALL input reviews are negative AND lack concrete reasons, OR if the reviews are too few or too vague to form any meaningful summary, OR if the reviews are predominantly purely subjective opinions without actionable reasons or concrete details, THEN DO NOT generate Paragraph 2.
 - **Condition for GENERATING Paragraph 2 (Review Summary):** Otherwise (if reviews can be meaningfully summarized based on the above), THEN Paragraph 2 should be a summary of the reviews:
-    - Length: Approximately 20-50 Traditional Chinese characters.
+    - Length: Approximately 5-50 Traditional Chinese characters.
     - Content Source: Must be entirely based on the provided customer reviews; no self-generated information.
     - Focus: Highlights common themes, positive/negative viewpoints from reviews.
     - Negative Comments Handling: Ignore negative reviews if no reason is provided. Include if negative content is significant (e.g., represents over 40% of overall review sentiment) AND a reason is provided.
@@ -198,7 +197,7 @@ export const summarizeRestaurantReviewFlow = ai.defineFlow({
         
         let summary = "No summary generated.";
         let currentFeedback: string | undefined = undefined;
-        const maxAttempts = 3;
+        const maxAttempts = 5;
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             console.log(`Restaurant summarization attempt ${attempt + 1}/${maxAttempts}`);

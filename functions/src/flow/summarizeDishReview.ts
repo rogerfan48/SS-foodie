@@ -37,7 +37,7 @@ A.  **Overall Output Check**:
         If the summary is an empty string, DO NOT evaluate against criteria B.
 
 B.  **Non-Empty Output Check (if "Summary to verify" is not an empty string)**:
-    1.  **Length**: Approximately 20-50 Traditional Chinese characters.
+    1.  **Length**: Approximately 5-50 Traditional Chinese characters.
     2.  **Content Source**: Must be entirely based on customer reviews; no self-generated information.
     3.  **Focus**: Highlights most important points, common themes, positive/negative viewpoints, and any particularly prominent comments from the original reviews.
     4.  **Clarity**: Clear and easy to understand.
@@ -46,7 +46,6 @@ B.  **Non-Empty Output Check (if "Summary to verify" is not an empty string)**:
         b.  Negative content should be significant (e.g., represent over 40% of overall review sentiment) to be included. (Assess qualitatively if precise quantification from summary alone is hard).
     6.  **Language**: Must be in Traditional Chinese.
     7.  **Style**: Remove subjects, use only descriptive sentences.
-    8.  **Order**: Describe advantages first, then disadvantages.
 
 Respond with a JSON object of the following structure: \`{ "meetsCriteria": boolean, "feedback": "concise, actionable feedback for improvement if not met, otherwise a brief confirmation like 'Meets all criteria.' or null" }\`.
 If \`meetsCriteria\` is false (and it's not an accepted empty string from section A), provide specific feedback on which criteria in section B were not met and how to improve.
@@ -104,7 +103,7 @@ export const summarizeDishReviewFlow = ai.defineFlow({
         const reviewTexts = inputReviews.map((review, idx) => `Review ${idx + 1}: ${review}`).join("\n\n");
         let summary = "No summary generated.";
         let currentFeedback: string | undefined = undefined;
-        const maxAttempts = 3; // Maximum number of attempts to generate and verify
+        const maxAttempts = 5; // Maximum number of attempts to generate and verify
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             console.log(`Summarization attempt ${attempt + 1}/${maxAttempts}`);
