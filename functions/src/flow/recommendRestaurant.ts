@@ -29,7 +29,7 @@ interface Review {
     userID?: string; // Optional, if needed
     reviewImgURLs: string[];
     reviewDate: admin.firestore.Timestamp; // For sorting by recency
-    // agreedByCount?: number; // Optional, if you want to sort by reactions later
+    agreedByCount?: number; // Optional, if you want to sort by reactions later
     // Add other fields like 'agreedByCount' if you want to sort by reactions later
 }
 
@@ -58,12 +58,15 @@ async function findAllReviews(): Promise<Review[]> {
         const reviews: Review[] = [];
         reviewsSnapshot.forEach(doc => {
             const data = doc.data();
+            const agreeCount = (data.agreedBy && Array.isArray(data.agreedBy)) ? data.agreedBy.length : 0;
+            const disagreeCount = typeof data.disag === 'number' ? data.disag : 0; // Assumes data.disag is a number
+
             reviews.push({
                 reviewID: doc.id,
                 restaurantID: data.restaurantID,
                 reviewImgURLs: data.reviewImgURLs || [],
                 reviewDate: data.reviewDate || admin.firestore.Timestamp.now(), // Ensure a valid Timestamp
-                // agreedByCount: data.agreedBy. - data.disag || 0, // Optional, default to 0 if not present
+                agreedByCount: (agreeCount - disagreeCount), // Calculate net count
                 // Map other fields from your review document to the Review interface
             } as Review);
         });
@@ -83,10 +86,15 @@ function getBestImageForRestaurant(restaurantId: string, allReviews: Review[]): 
         return null;
     }
 
-    // Sort by reviewDate descending (most recent first)
-    // reviewsWithImages.sort((a, b) => b.reviewDate.toMillis() - a.reviewDate.toMillis());
+    // Sort by agreedByCount descending (highest first), then by reviewDate descending (most recent first)
+    reviewsWithImages.sort((a, b) => {
+        const agreedByCountA = a.agreedByCount || 0;
+        const agreedByCountB = b.agreedByCount || 0;
 
-    // Return the first image URL from the most recent review that has images
+        return agreedByCountB - agreedByCountA; // Sort by agreedByCount descending
+    });
+
+    // Return the first image URL from the best-rated (or most recent among ties) review that has images
     return reviewsWithImages[0].reviewImgURLs[0];
 }
 
@@ -295,7 +303,9 @@ const recommendationPrompt = ai.definePrompt({
         }
 
         const systemContext =
-           `You are a friendly and helpful restaurant recommendation assistant.
+           `IMPORTANT: Your entire response MUST be in Traditional Chinese.
+
+You are a friendly and helpful restaurant recommendation assistant.
 User's recent restaurant browsing history (from latest to oldest):
 ${historySummary}
 
@@ -305,30 +315,30 @@ ${allRestaurantsPromptSection}
 Your primary goal is to recommend suitable restaurants from the provided list or ask clarifying questions.
 Analyze the user's request, their viewing history, and the conversation. **Prioritize explicit user statements and recent conversation turns over past browsing history when deciding what to recommend. The browsing history is a secondary reference point and should not heavily dictate the recommendations if more direct information is available.**
 
-IMPORTANT: Your default action should be to RECOMMEND if there's any reasonable basis. Only ask questions if essential information is clearly missing and no recommendation can be formed.
+IMPORTANT (Content Strategy): Your goal is to provide relevant recommendations. If the user's request is specific and clear, proceed to recommend. However, if the user's input is vague (e.g., "I'm hungry," "suggest something good," or provides no clear direction on cuisine, dish type, price, or occasion), **you MUST prioritize asking a clarifying question** to better understand their needs. Avoid making recommendations based on very weak or ambiguous signals.
 
 1.  RECOMMEND restaurants if:
-    *   The user explicitly states a preference (e.g., cuisine, specific dish, price, occasion).
-    *   The conversation history provides enough clues.
-    If ANY of these conditions are met, you SHOULD recommend.
+    *   The user explicitly states a clear preference (e.g., specific cuisine, dish, price range, occasion).
+    *   The conversation history provides clear and specific clues about their current preferences.
+    If these conditions are clearly met, you SHOULD recommend.
     Output the recommended restaurant IDs and a 'recommend_text'. The format MUST be:
-    RECOMMEND: {"recommend_text": "A friendly and appealing message for the USER, directly highlighting what's special or good about the recommended restaurants. Focus *only* on the unique features, atmosphere, popular dishes, or positive reviews of the restaurants themselves. Do NOT mention why you are recommending them (e.g., do not say 'based on your history', 'since you were looking at similar places', or 'because you liked X'). For example: 'These spots are known for their fiery curries and vibrant flavors!' or 'These restaurants offer amazing pasta and a great atmosphere for a cozy Italian dinner.' or 'You'll find exceptionally fresh seafood and a beautiful ocean view at these places.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
+    RECOMMEND: {"recommend_text": "A friendly and appealing message for the USER, in Traditional Chinese, directly highlighting what's special or good about the recommended restaurants. Focus *only* on the unique features, atmosphere, popular dishes, or positive reviews of the restaurants themselves. Do NOT mention why you are recommending them (e.g., do not say 'based on your history', 'since you were looking at similar places', or 'because you liked X'). For example (translate these to Traditional Chinese in your actual output): 'These spots are known for their fiery curries and vibrant flavors!' or 'These restaurants offer amazing pasta and a great atmosphere for a cozy Italian dinner.' or 'You'll find exceptionally fresh seafood and a beautiful ocean view at these places.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
     (The "recommend_text" is for the end-user and should make them want to try the places. The "restaurant_ids" MUST be from the 'All available restaurants' list.)
 
-2.  ASK a question ONLY IF you absolutely cannot make a recommendation based on the above:
+2.  ASK a question if the conditions for recommending in section 1 are NOT clearly met, OR if the user's input is vague/ambiguous as described in the 'IMPORTANT (Content Strategy)' section above.
     a.  If the user explicitly states they have no idea, are unsure, or don't know what they want (e.g., "I don't know", "no idea", "surprise me", "you choose"),
-        respond by asking a question that also suggests some options to help them.
+        respond by asking a question that also suggests some options to help them. The entire question MUST be in Traditional Chinese.
         To generate these suggestions:
         - Pick 2-3 distinct and appealing cuisine types from the 'genreTags' of the available restaurants.
         - Pick 1-2 popular-sounding or interesting dish names from the 'dishes' of the available restaurants.
-        The format MUST be:
+        The format MUST be (ensure the entire string, including placeholders, is in Traditional Chinese in your actual output):
         ASK: 沒問題！為了協助您決定，您比較傾向於 [來自 genreTags 的菜系1]、[來自 genreTags 的菜系2]，還是像是 [來自 dishes 的菜餚名稱1] 這樣的菜色呢？如果這些聽起來都不太對，或者您有其他想法，也可以告訴我。
-    b.  Otherwise (if the user hasn't explicitly stated "no idea" but critical information is genuinely missing and you cannot recommend),
-        ask a single, clear, plain text question to get the missing piece of information.
-        The format MUST be:
-        ASK: What type of cuisine are you in the mood for?
+    b.  Otherwise (e.g., the user's input is vague like "I'm hungry" or "suggest something", or if critical information is genuinely missing and you cannot make a strong recommendation),
+        ask a single, clear, plain text question in Traditional Chinese to get the missing piece of information. This question should aim to clarify their general preferences.
+        The format MUST be (ensure the entire string is in Traditional Chinese in your actual output):
+        ASK: To help me find the perfect spot, could you tell me a bit more about what you're looking for? For example, are you craving a specific type of cuisine, or is there a particular mood or occasion for this meal?
 
-Do not add any explanatory text before "RECOMMEND:" or "ASK:". Your entire response should start with one of these keywords.
+Do not add any explanatory text before "RECOMMEND:" or "ASK:". Your entire response should start with one of these keywords. Your entire response MUST be in Traditional Chinese.
 `;
         return [
             { role: "system", content: [{ text: systemContext }] },
