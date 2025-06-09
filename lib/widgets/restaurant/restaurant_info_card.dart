@@ -37,7 +37,9 @@ class RestaurantInfoCard extends StatelessWidget {
                               color: tag.color,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(tag.title, style: Theme.of(context).textTheme.bodyMedium),
+                            child: Text(tag.title, style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Colors.black,
+                            )),
                           ),
                         ],
                       );

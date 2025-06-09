@@ -61,7 +61,9 @@ class _CategoryOverlayState extends State<CategoryOverlay> {
                 color: tagInfo.color,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(tagInfo.title, style: Theme.of(context).textTheme.bodyMedium),
+              child: Text(tagInfo.title, style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                color: Colors.black,
+              )),
             ),
           ],
         ),

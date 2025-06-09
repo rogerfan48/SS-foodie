@@ -46,7 +46,12 @@ class HistoryListTile extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 12.0, bottom: 4.0, top: 4.0),
-              child: Text(restaurantName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold) ?? const TextStyle()),
+              child: Text(
+                restaurantName,
+                style:
+                    theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold) ??
+                    const TextStyle(),
+              ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -56,7 +61,7 @@ class HistoryListTile extends StatelessWidget {
               ),
               child: Text(
                 genreTag.title,
-                style: theme.textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium!.copyWith(color: Colors.black),
               ),
             ),
           ],
