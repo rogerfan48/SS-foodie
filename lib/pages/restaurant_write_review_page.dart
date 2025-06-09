@@ -41,7 +41,11 @@ class RestaurantWriteReviewPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Specific review', style: textTheme.headlineSmall),
-                    IconButton(
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
                       onPressed: () async {
                         final imgPicker = ImagePicker();
                         final img = await imgPicker.pickImage(source: ImageSource.camera);
@@ -66,7 +70,13 @@ class RestaurantWriteReviewPage extends StatelessWidget {
                           );
                         }
                       },
-                      icon: Icon(Icons.qr_code),
+                      child: Row(
+                        children: [
+                          Icon(Icons.camera_alt, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 8),
+                          const Text('Scan Receipt'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
