@@ -3,9 +3,9 @@ import { ai } from "../config";
 import { z } from "genkit";
 
 // New AI Prompt for verifying the summary
-const summaryVerifier = ai.definePrompt({
+const dishSummaryVerifier = ai.definePrompt({
     model: gemini20Flash001, // You might consider a more powerful model for verification if needed
-    name: "summaryVerifier",
+    name: "dishSummaryVerifier",
     input: { schema: z.string() }, // Input is the generated summary text
     output: {
         schema: z.object({
@@ -140,7 +140,7 @@ export const summarizeDishReviewFlow = ai.defineFlow({
 
             // Verify the summary
             try {
-                const verificationResult = await summaryVerifier(summary); // Pass the potentially empty summary
+                const verificationResult = await dishSummaryVerifier(summary); // Pass the potentially empty summary
 
                 if (verificationResult.output && verificationResult.output.meetsCriteria) {
                     console.log("Summary meets criteria. Final summary:", summary);
