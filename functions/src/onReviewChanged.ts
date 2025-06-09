@@ -32,17 +32,41 @@ export const onReviewChanged = onDocumentWritten('apps/foodie/reviews/{reviewId}
     
 
     // Access change data from event.data
-    const change = event.data; 
+    const change = event.data;
     if (!change) {
       console.log(`[${reviewId}] No change data found in event. Exiting.`);
       return null;
     }
 
+    const beforeData = change.before.exists ? change.before.data() : undefined;
+    const afterData = change.after.exists ? change.after.data() : undefined;
+
+    // If it's an update (both before and after data exist)
+    if (beforeData && afterData) {
+        // Create copies for comparison, excluding 'agreedBy' and 'disagreedBy'
+        const beforeComparable = { ...beforeData };
+        delete beforeComparable.agreedBy;
+        delete beforeComparable.disagreedBy;
+
+        const afterComparable = { ...afterData };
+        delete afterComparable.agreedBy;
+        delete afterComparable.disagreedBy;
+
+        // If only 'agreedBy' or 'disagreedBy' changed (or no other relevant fields changed),
+        // the comparable versions will be identical.
+        if (JSON.stringify(beforeComparable) === JSON.stringify(afterComparable)) {
+            console.log(`[${reviewId}] Review update only involves 'agreedBy', 'disagreedBy', or no relevant content fields. Skipping summary generation.`);
+            return null; // Exit early
+        }
+    }
+
     const isReviewDeleted = !change.after.exists;
-    const reviewData = isReviewDeleted ? change.before.data() : change.after.data();
+    // Use the already fetched beforeData or afterData
+    const reviewData = isReviewDeleted ? beforeData : afterData;
 
     if (!reviewData) {
-      console.log(`[${reviewId}] No data found for review. Exiting.`);
+      // This condition implies neither beforeData nor afterData was available.
+      console.log(`[${reviewId}] No review data found (current or previous state). Exiting.`);
       return null;
     }
 
