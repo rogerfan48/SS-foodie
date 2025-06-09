@@ -1,3 +1,3 @@
 # foodie
 
-Simplifying dining discovery with clear menus and authentic reviews
+Simplifying dining discovery with categorized map, clear menus and powerful AI
