@@ -44,15 +44,22 @@ class HistoryListTile extends StatelessWidget {
       child: ListTile(
         title: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0, bottom: 4.0, top: 4.0),
+            Expanded(
               child: Text(
                 restaurantName,
                 style:
                     theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold) ??
                     const TextStyle(),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
+          ],
+        ),
+        subtitle: Text(date, style: theme.textTheme.bodySmall),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
@@ -64,10 +71,9 @@ class HistoryListTile extends StatelessWidget {
                 style: theme.textTheme.bodyMedium!.copyWith(color: Colors.black),
               ),
             ),
+            IconButton(icon: const Icon(Icons.close), onPressed: onDelete),
           ],
         ),
-        subtitle: Text(date, style: theme.textTheme.bodySmall),
-        trailing: IconButton(icon: const Icon(Icons.close), onPressed: onDelete),
         contentPadding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 4.0),
       ),
     );
