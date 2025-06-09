@@ -1,5 +1,5 @@
 // filepath: c:\WorkspaceFlutter\foodie\functions\src\flow\recommendRestaurant.ts
-import { gemini20Flash001 } from "@genkit-ai/vertexai";
+import { gemini25FlashPreview0417 } from "@genkit-ai/vertexai";
 import { ai } from "../config"; // Your Genkit AI configuration
 import { z } from "genkit";
 import * as admin from 'firebase-admin';
@@ -21,6 +21,73 @@ interface Restaurant {
     name: string;
     dishes: Dish[];
     genreTags: string[];
+}
+
+interface Review {
+    reviewID: string; // Document ID
+    restaurantID: string;
+    userID?: string; // Optional, if needed
+    reviewImgURLs: string[];
+    reviewDate: admin.firestore.Timestamp; // For sorting by recency
+    // agreedByCount?: number; // Optional, if you want to sort by reactions later
+    // Add other fields like 'agreedByCount' if you want to sort by reactions later
+}
+
+// Define Zod schemas for the output
+const RecommendedRestaurantSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  imageUrl: z.string().nullable(),
+});
+
+// Simplified FlowOutputSchema using a plain object
+const FlowOutputSchema = z.object({
+    type: z.string(),
+    text: z.string().describe("For a question, this is the question text. For a recommendation, this is the 'recommend_text' explaining the recommendation."),
+    restaurants: z.array(RecommendedRestaurantSchema).optional().describe("An array of recommended restaurants. Only present if the output is a recommendation."),
+});
+
+async function findAllReviews(): Promise<Review[]> {
+    try {
+        // Assuming reviews are stored in a top-level collection: /apps/foodie/reviews
+        // Adjust if your structure is different (e.g., subcollections or collectionGroup)
+        const reviewsSnapshot = await db.collection('apps').doc('foodie').collection('reviews').get();
+        if (reviewsSnapshot.empty) {
+            return [];
+        }
+        const reviews: Review[] = [];
+        reviewsSnapshot.forEach(doc => {
+            const data = doc.data();
+            reviews.push({
+                reviewID: doc.id,
+                restaurantID: data.restaurantID,
+                reviewImgURLs: data.reviewImgURLs || [],
+                reviewDate: data.reviewDate || admin.firestore.Timestamp.now(), // Ensure a valid Timestamp
+                // agreedByCount: data.agreedBy. - data.disag || 0, // Optional, default to 0 if not present
+                // Map other fields from your review document to the Review interface
+            } as Review);
+        });
+        return reviews;
+    } catch (error) {
+        console.error("Error finding all reviews:", error);
+        return [];
+    }
+}
+
+// Helper function to get the best image for a restaurant from its reviews
+function getBestImageForRestaurant(restaurantId: string, allReviews: Review[]): string | null {
+    const restaurantReviews = allReviews.filter(r => r.restaurantID === restaurantId);
+    const reviewsWithImages = restaurantReviews.filter(r => r.reviewImgURLs && r.reviewImgURLs.length > 0);
+
+    if (reviewsWithImages.length === 0) {
+        return null;
+    }
+
+    // Sort by reviewDate descending (most recent first)
+    // reviewsWithImages.sort((a, b) => b.reviewDate.toMillis() - a.reviewDate.toMillis());
+
+    // Return the first image URL from the most recent review that has images
+    return reviewsWithImages[0].reviewImgURLs[0];
 }
 
 // Helper function to fetch user's viewed restaurant IDs
@@ -175,7 +242,7 @@ function generateAllRestaurantsInfoForPrompt(allRestaurantsData: Restaurant[]): 
             }
         });
         // Consider truncating if too long:
-        // const MAX_PROMPT_RESTAURANTS_SECTION_LENGTH = 10000; // Adjust as needed
+        // const MAX_PROMPT_RESTAURANTS_SECTION_LENGTH = 5000; // Adjust as needed
         // if (section.length > MAX_PROMPT_RESTAURANTS_SECTION_LENGTH) {
         //    section = section.substring(0, MAX_PROMPT_RESTAURANTS_SECTION_LENGTH) + "\n... (list truncated due to length)";
         // }
@@ -184,104 +251,98 @@ function generateAllRestaurantsInfoForPrompt(allRestaurantsData: Restaurant[]): 
 }
 
 const recommendationPrompt = ai.definePrompt({
-    model: gemini20Flash001,
+    model: gemini25FlashPreview0417,
     name: "recommendationPrompt",
-    input: { schema: z.object({
-                viewedRestaurantIds: z.array(z.string()).describe("List of restaurant IDs the user has viewed."),
-                allRestaurantsData: z.array(
+    input: { schema: z.object({ // Ensure this was corrected from input: {schema: ...}
+        viewedRestaurantIds: z.array(z.string()).describe("List of restaurant IDs the user has viewed."),
+        allRestaurantsData: z.array(
+            z.object({ 
+                restaurantId: z.string(),
+                name: z.string(),
+                genreTags: z.array(z.string()),
+                dishes: z.array(
                     z.object({
-                        restaurantId: z.string().describe("The unique ID of the restaurant."),
-                        name: z.string().describe("The name of the restaurant."),
-                        genreTags: z.array(z.string()).describe("List of genre tags associated with the restaurant."),
-                        dishes: z.array(
-                            z.object({
-                                name: z.string().describe("The name of the dish."),
-                                bestReviewSummary: z.string().describe("A summary of the best review for the dish."),
-                                price: z.number().describe("The price of the dish."),
-                            })).describe("List of dishes available at the restaurant."),
-                    })).describe("List of all restaurants with their details."),
-                messages: z.array(
-                    z.object({
-                        isUser: z.boolean().describe("True if the message is from the user, false if from the AI."),
-                        text: z.string().describe("The text content of the message."),
-                    })).describe("The history of messages in the conversation."), 
-                userId: z.string().describe("The ID of the user requesting recommendations."),
-    }) },
+                        name: z.string(),
+                        bestReviewSummary: z.string(),
+                        price: z.number(),
+                    })),
+            })).describe("List of all restaurants with their details."),
+        messages: z.array(
+            z.object({
+                isUser: z.boolean(),
+                text: z.string(),
+            })).describe("The history of messages in the conversation.").optional(),
+        userId: z.string().describe("The ID of the user requesting recommendations.")
+    })},
     messages: async (input) => {
-
         const { viewedRestaurantIds, allRestaurantsData, messages, userId } = input;
+        
         const historySummary = await generateHistoryRestaurantNameForPrompt(viewedRestaurantIds, allRestaurantsData, userId);
         const allRestaurantsPromptSection = generateAllRestaurantsInfoForPrompt(allRestaurantsData);
 
-        let userPromptText = '';
-        // 3. Construct a prompt for the LLM using the defined prompt
-        let systemPromptText =
-           `You are a friendly and helpful restaurant recommendation assistant.
-            User's recent restaurant browsing history (from latest to oldest):
-            ${historySummary}
-
-            All available restaurants in our database:
-            ${allRestaurantsPromptSection}`;
-
+        let userConversationHistoryText = '';
         if (messages && messages.length > 0) {
-            messages.forEach(msg => {
-                userPromptText += `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}\n`;
+            interface ConversationMessage {
+                isUser: boolean;
+                text: string;
+            }
+            const typedMessages: ConversationMessage[] = messages;
+            typedMessages.forEach((msg: ConversationMessage) => {
+                userConversationHistoryText += `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}\n`;
             });
+        } else {
+            userConversationHistoryText = "No previous conversation turns.\n";
         }
 
-        systemPromptText += `
-Your primary goal is to recommend suitable restaurants from the provided list.
-Analyze the user's request, their viewing history, and the conversation.
+        const systemContext =
+           `You are a friendly and helpful restaurant recommendation assistant.
+User's recent restaurant browsing history (from latest to oldest):
+${historySummary}
 
-1.  If the user's current request, combined with their history and previous interactions, provides clear enough information
-    (e.g., they've stated a cuisine preference, price range, occasion, or their viewing history shows a strong pattern),
-    you SHOULD proceed to recommend.
-    Output the criteria you used and the IDs of the recommended restaurants. The format MUST be:
-    RECOMMEND: {"criteria_summary": "A user-friendly explanation of why these are recommended, e.g., 'Since you're looking for vibrant Italian places, you might enjoy [Restaurant Name] for its popular lasagna and great atmosphere!' or 'Based on your interest in spicy food, [Restaurant Name] comes highly recommended for its fiery chicken curry.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
-    (The "criteria_summary" should be engaging and tell the user WHY these are good choices for THEM. The "restaurant_ids" MUST be from the 'All available restaurants' list provided above. Ensure the JSON is valid. Prioritize recommending if a reasonable basis exists.)
+All available restaurants in our database:
+${allRestaurantsPromptSection}
 
-2.  If you cannot make a confident recommendation based on the criteria in point 1:
+Your primary goal is to recommend suitable restaurants from the provided list or ask clarifying questions.
+Analyze the user's request, their viewing history, and the conversation. **Prioritize explicit user statements and recent conversation turns over past browsing history when deciding what to recommend. The browsing history is a secondary reference point and should not heavily dictate the recommendations if more direct information is available.**
+
+IMPORTANT: Your default action should be to RECOMMEND if there's any reasonable basis. Only ask questions if essential information is clearly missing and no recommendation can be formed.
+
+1.  RECOMMEND restaurants if:
+    *   The user explicitly states a preference (e.g., cuisine, specific dish, price, occasion).
+    *   The conversation history provides enough clues.
+    If ANY of these conditions are met, you SHOULD recommend.
+    Output the recommended restaurant IDs and a 'recommend_text'. The format MUST be:
+    RECOMMEND: {"recommend_text": "A friendly and appealing message for the USER, directly highlighting what's special or good about the recommended restaurants. Focus *only* on the unique features, atmosphere, popular dishes, or positive reviews of the restaurants themselves. Do NOT mention why you are recommending them (e.g., do not say 'based on your history', 'since you were looking at similar places', or 'because you liked X'). For example: 'These spots are known for their fiery curries and vibrant flavors!' or 'These restaurants offer amazing pasta and a great atmosphere for a cozy Italian dinner.' or 'You'll find exceptionally fresh seafood and a beautiful ocean view at these places.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
+    (The "recommend_text" is for the end-user and should make them want to try the places. The "restaurant_ids" MUST be from the 'All available restaurants' list.)
+
+2.  ASK a question ONLY IF you absolutely cannot make a recommendation based on the above:
     a.  If the user explicitly states they have no idea, are unsure, or don't know what they want (e.g., "I don't know", "no idea", "surprise me", "you choose"),
         respond by asking a question that also suggests some options to help them.
         To generate these suggestions:
-        - Pick 2-3 distinct and appealing cuisine types from the 'genreTags' of the available restaurants in the 'All available restaurants' list.
-        - Pick 1-2 popular-sounding or interesting dish names from the 'dishes' of the available restaurants in the 'All available restaurants' list.
+        - Pick 2-3 distinct and appealing cuisine types from the 'genreTags' of the available restaurants.
+        - Pick 1-2 popular-sounding or interesting dish names from the 'dishes' of the available restaurants.
         The format MUST be:
-        ASK: No problem! To help you decide, are you leaning towards something like [Cuisine1 from genreTags], [Cuisine2 from genreTags], or perhaps a dish like [DishName1 from dishes]? You can also tell me if none ofthese sound right or if you have a different thought.
-        (Example: "ASK: No problem! To help you decide, are you leaning towards something like Italian, Thai, or perhaps a dish like our popular Gourmet Burger? You can also tell me if none of these sound right.")
-    b.  Otherwise (if the user hasn't explicitly stated "no idea" but information is still missing and you cannot recommend),
+        ASK: 沒問題！為了協助您決定，您比較傾向於 [來自 genreTags 的菜系1]、[來自 genreTags 的菜系2]，還是像是 [來自 dishes 的菜餚名稱1] 這樣的菜色呢？如果這些聽起來都不太對，或者您有其他想法，也可以告訴我。
+    b.  Otherwise (if the user hasn't explicitly stated "no idea" but critical information is genuinely missing and you cannot recommend),
         ask a single, clear, plain text question to get the missing piece of information.
         The format MUST be:
         ASK: What type of cuisine are you in the mood for?
-        (Do not include any options, just the question text after "ASK: ".)
 
-Consider the user's history and previous answers. If the user has no history and their first message is vague or indicates uncertainty (like "recommend something"), it's appropriate to start with the suggestive question from point 2.a. Otherwise, if information is simply missing, use 2.b.
 Do not add any explanatory text before "RECOMMEND:" or "ASK:". Your entire response should start with one of these keywords.
 `;
-        
         return [
-            {
-                role: "system",
-                content: [
-                    { text: systemPromptText }
-                ],
-            },
-            {
-                role: "user",
-                content: [
-                    { text: userPromptText }
-                ]
-            }
+            { role: "system", content: [{ text: systemContext }] },
+            { role: "user", content: [{ text: userConversationHistoryText + "\nAssistant, what is your response based on the above context and instructions?" }] } 
         ];
     }
 });
-
 
 export const recommendRestaurantFlow = ai.defineFlow(
     {
         name: "recommendRestaurantFlow",
         inputSchema: z.object({
-            userId: z.string().describe("The ID of the user requesting recommendations."),
+            userId: z.string().min(1, { message: "User ID cannot be empty." })
+                .describe("The ID of the user requesting recommendations."),
             messages: z.array(
                 z.object({
                     isUser: z.boolean().describe("True if the message is from the user, false if from the AI."),
@@ -289,55 +350,70 @@ export const recommendRestaurantFlow = ai.defineFlow(
                 })
             ).describe("The history of messages in the conversation."),
         }),
-        outputSchema: z.object({
-            question: z.string().optional().describe("A new plain text question to ask the user to refine preferences."),
-            recommendRestaurantId: z.array(z.string()).optional().describe("A list of recommended restaurant IDs, if a decision is made."),
-            debugMessage: z.string().optional().describe("A message for debugging or simple feedback to the client."),
-        }),
+        outputSchema: FlowOutputSchema, // Use the simplified schema
     },
-    async (input) => {
+    async (input): Promise<z.infer<typeof FlowOutputSchema>> => {
         const { userId, messages } = input;
 
-        // 1. Fetch user's viewed restaurant IDs and ALL restaurant data
         const viewedRestaurantIDs = await getUserViewedRestaurantIds(userId);
-        const allRestaurantsData = await findAllRestaurants(); // Renamed for clarity within this scope
-        
-        const llmResponse = await recommendationPrompt({
+        const allRestaurantsData = await findAllRestaurants(); 
+        const allReviewsData = await findAllReviews();
+
+        // Ensure recommendationPrompt is called with .generate() and its inputSchema is correct
+        const llmResponse = await recommendationPrompt({ 
             viewedRestaurantIds: viewedRestaurantIDs,
             allRestaurantsData: allRestaurantsData,
             messages: messages,
             userId: userId,
         });
 
-        const llmOutput = llmResponse.text.trim();
+        const llmOutput = llmResponse.text.trim(); // Ensure .text() is called
 
-        // 5. Parse LLM output and act accordingly
         if (llmOutput.startsWith("RECOMMEND:")) {
             try {
                 const recommendStr = llmOutput.substring("RECOMMEND:".length).trim();
                 const recommendData = JSON.parse(recommendStr);
-
-                if (recommendData.restaurant_ids && Array.isArray(recommendData.restaurant_ids) && recommendData.restaurant_ids.length > 0) {
-                    return {
-                        question: recommendData.criteria_summary || "I have a recommendation for you!",
-                        recommendRestaurantId: recommendData.restaurant_ids,
-                        debugMessage: `LLM recommended based on: ${recommendData.criteria_summary || 'criteria not specified'}`
-                    };
+        
+                if (recommendData.restaurant_ids && Array.isArray(recommendData.restaurant_ids) && recommendData.restaurant_ids.length > 0 && recommendData.recommend_text) {
+                    const recommendedRestaurantsOutput: z.infer<typeof RecommendedRestaurantSchema>[] = [];
+        
+                    for (const recId of recommendData.restaurant_ids) {
+                        const restaurantInfo = allRestaurantsData.find(r => r.restaurantId === recId);
+                        if (restaurantInfo) {
+                            const imageUrl = getBestImageForRestaurant(recId, allReviewsData);
+                            recommendedRestaurantsOutput.push({
+                                id: restaurantInfo.restaurantId,
+                                name: restaurantInfo.name,
+                                imageUrl: imageUrl,
+                            });
+                        }
+                    }
+                    
+                    if (recommendedRestaurantsOutput.length > 0) {
+                        return {
+                            type: "recommendation",
+                            text: recommendData.recommend_text, 
+                            restaurants: recommendedRestaurantsOutput,
+                        };
+                    } else {
+                         return {
+                            type: "question",
+                            text: "I found some ideas, but couldn't fetch the details. Could you tell me more about what you like?",
+                            // 'restaurants' field is absent, implying a question
+                        };
+                    }
                 } else {
-                     // If LLM says RECOMMEND but doesn't provide IDs, ask a question
-                    console.warn("LLM said RECOMMEND but didn't provide valid restaurant_ids:", recommendStr);
+                    console.warn("LLM said RECOMMEND but didn't provide valid restaurant_ids or recommend_text:", recommendStr);
                     return {
-                        question: "I was about to make a recommendation, but I need a bit more clarity. Could you specify your main preference again?",
-                        recommendRestaurantId: recommendData.restaurant_ids,
-                        debugMessage: `LLM RECOMMEND output was missing restaurant_ids. Output: ${recommendStr}`
+                        type: "question",
+                        text: "I was about to make a recommendation, but I need a bit more clarity. Could you specify your main preference again?",
                     };
                 }
             } catch (error: any) {
                 console.error("Error processing RECOMMEND action:", error);
                 return {
-                    question: "I had a little trouble processing the recommendation. What's your most important preference right now (e.g., cuisine, price)?",
-                    recommendRestaurantId: [],
-                    debugMessage: `Error during recommendation processing: ${error.message}. LLM Output: ${llmOutput}`
+                    type: "question",
+                    text: "I had a little trouble processing the recommendation. What's your most important preference right now?",
                 };
             }
         } else if (llmOutput.startsWith("ASK:")) {
@@ -347,24 +423,22 @@ export const recommendRestaurantFlow = ai.defineFlow(
                     throw new Error("LLM returned ASK: with no question text.");
                 }
                 return {
-                    question: questionText,
-                    recommendRestaurantId: [],
-                    debugMessage: "Generated a new question."
+                    type: "question",
+                    text: questionText,
+                    // 'restaurants' field is absent, implying a question
                 };
             } catch (error: any) {
                 console.error("Error processing ASK action:", error);
-                return {
-                    question: "I'm trying to figure out what to ask next! What's a general type of food you enjoy?",
-                    recommendRestaurantId: [],
-                    debugMessage: `Error parsing question from LLM: ${error.message}`
+                 return {
+                    type: "question",
+                    text: "I'm trying to figure out what to ask next! What's a general type of food you enjoy?",
                 };
             }
         } else {
             console.warn("LLM output not recognized:", llmOutput);
             return {
-                question: "Let's try a different angle. Are you looking for a place for a specific occasion?",
-                recommendRestaurantId: [],
-                debugMessage: "LLM output was not in the expected RECOMMEND: or ASK: format."
+                type: "question",
+                text: "Let's try a different angle. Are you looking for a place for a specific occasion?",
             };
         }
     }
