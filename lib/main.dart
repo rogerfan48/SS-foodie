@@ -14,6 +14,7 @@ import 'repositories/user_repo.dart';
 import 'services/ai_chat.dart';
 import 'services/auth_service.dart';
 import 'services/map_position.dart';
+import 'services/location_service.dart';
 import 'services/storage_service.dart';
 import 'services/theme.dart';
 import 'view_models/account_vm.dart';
@@ -37,6 +38,7 @@ void main() async {
         Provider<FirebaseAuth>(create: (_) => FirebaseAuth.instance),
         Provider<GoogleSignIn>(create: (_) => GoogleSignIn()),
         Provider<StorageService>(create: (_) => StorageService()),
+        Provider<LocationService>(create: (_) => LocationService()),
 
         // 3. Services (服務層)
         ProxyProvider3<FirebaseAuth, GoogleSignIn, UserRepository, AuthService>(

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:foodie/services/theme.dart';
 import 'package:flutter/material.dart' hide BottomSheet;
 import 'package:foodie/services/map_position.dart';
+import 'package:foodie/services/location_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:foodie/repositories/restaurant_repo.dart';
@@ -67,6 +68,7 @@ class _MapPageState extends State<MapPage> {
       });
     }
     _loadMapStyles();
+    _centerOnUserLocation();
   }
 
   Future<void> _loadMapStyles() async {
@@ -84,6 +86,19 @@ class _MapPageState extends State<MapPage> {
       _mapController!.setMapStyle(_darkMapStyle);
     } else if (!isDarkMode && _lightMapStyle != null) {
       _mapController!.setMapStyle(_lightMapStyle);
+    }
+  }
+
+  Future<void> _centerOnUserLocation() async {
+    try {
+      final locationService = context.read<LocationService>();
+      final position = await locationService.getCurrentPosition();
+
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(LatLng(position.latitude, position.longitude), 16.0),
+      );
+    } catch (e) {
+      print("Failed to get user location: $e");
     }
   }
 
@@ -257,6 +272,8 @@ class _MapPageState extends State<MapPage> {
                   onCameraMove: (position) {
                     context.read<MapPositionService>().updatePosition(position.target);
                   },
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
                 );
               },
             ),
@@ -290,6 +307,14 @@ class _MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: _centerOnUserLocation,
+              child: const Icon(Icons.my_location),
             ),
           ),
           AnimatedPositioned(
