@@ -18,8 +18,10 @@ class WriteReviewViewModel with ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
 
   bool _isSubmitting = false;
+  bool _isLoading = false;
   bool get isSubmitting => _isSubmitting;
   String get restaurantId => _restaurantId;
+  bool get isLoading => _isLoading;
 
   // State variables
   final List<SpecificReviewState> specificReviews = [SpecificReviewState()]; // one initial review
@@ -192,6 +194,12 @@ class WriteReviewViewModel with ChangeNotifier {
       _isSubmitting = false;
       notifyListeners();
     }
+  }
+
+  void toggleLoading() {
+    _isLoading = _isLoading == true ? false : true;
+    print("loading: $_isLoading");
+    notifyListeners();
   }
 
   @override

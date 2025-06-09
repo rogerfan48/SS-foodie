@@ -49,32 +49,51 @@ class RestaurantWriteReviewPage extends StatelessWidget {
                           foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                         ),
                         onPressed: () async {
+                          if (vm.isLoading) {
+                            return;
+                          }
+                          vm.toggleLoading();
                           final imgPicker = ImagePicker();
-                          final img = await imgPicker.pickImage(source: ImageSource.camera);
-                          if (img != null) {
-                            final imgUri = await context.read<StorageService>().uploadReceiptImage(
-                              file: File(img.path),
-                              userId: userId,
-                            );
-                            final imgUrl = await context.read<StorageService>().getDownloadUrl(
-                              imgUri,
-                            );
-                            print(imgUrl);
-                            List<String> data = await identifyReceiptDish(vm.restaurantId, imgUrl!);
-                            print(data);
-                            List<DishModel> dishes =
-                                vm.categorizedMenu.values
-                                    .expand((list) => list)
-                                    .where((dish) => data.contains(dish.dishId))
-                                    .toList();
-                            vm.replaceSpecificReviews(
-                              dishes.map((d) => SpecificReviewState(selectedDish: d)).toList(),
-                            );
+                          try {
+                            final img = await imgPicker.pickImage(source: ImageSource.camera);
+                            if (img != null) {
+                              final imgUri = await context
+                                  .read<StorageService>()
+                                  .uploadReceiptImage(file: File(img.path), userId: userId);
+                              final imgUrl = await context.read<StorageService>().getDownloadUrl(
+                                imgUri,
+                              );
+                              print(imgUrl);
+                              List<String> data = await identifyReceiptDish(
+                                vm.restaurantId,
+                                imgUrl!,
+                              );
+                              print(data);
+                              List<DishModel> dishes =
+                                  vm.categorizedMenu.values
+                                      .expand((list) => list)
+                                      .where((dish) => data.contains(dish.dishId))
+                                      .toList();
+                              vm.replaceSpecificReviews(
+                                dishes.map((d) => SpecificReviewState(selectedDish: d)).toList(),
+                              );
+                            }
+                          } finally {
+                            vm.toggleLoading();
                           }
                         },
                         child: Row(
                           children: [
-                            Icon(Icons.camera_alt, color: Theme.of(context).colorScheme.primary),
+                            vm.isLoading
+                                ? const SizedBox(
+                                  width: 8,
+                                  height: 8,
+                                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                                )
+                                : Icon(
+                                  Icons.camera_alt,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                             const SizedBox(width: 8),
                             const Text('Scan Receipt'),
                           ],
