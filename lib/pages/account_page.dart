@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:foodie/services/theme.dart';
 import 'package:foodie/view_models/account_vm.dart';
+import 'package:foodie/services/map_position.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({Key? key}) : super(key: key);
@@ -83,6 +84,19 @@ class AccountPage extends StatelessWidget {
                     accountViewModel.isLoggedIn
                         ? () => GoRouter.of(context).push('/account/reviews')
                         : null, // 如果未登入則禁用,
+              ),
+              const Divider(height: 1),
+              _buildSettingsTile(
+                context,
+                title: 'Start Tutorial',
+                onTap: () {
+                  context.read<MapPositionService>().triggerTutorial();
+                  GoRouter.of(context).go('/map');
+                },
+                trailing: Icon(
+                  Icons.play_circle_fill,
+                  color: colorScheme.secondary,
+                ),
               ),
               const Divider(height: 1),
               _buildSettingsTile(

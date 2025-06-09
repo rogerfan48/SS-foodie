@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import 'app.dart';
 import 'firebase_options.dart';
@@ -42,8 +43,9 @@ void main() async {
 
         // 3. Services (服務層)
         ProxyProvider3<FirebaseAuth, GoogleSignIn, UserRepository, AuthService>(
-          update: (_, auth, googleSignIn, userRepo, previous) =>
-              AuthService(auth, googleSignIn, userRepo),
+          update:
+              (_, auth, googleSignIn, userRepo, previous) =>
+                  AuthService(auth, googleSignIn, userRepo),
         ),
 
         // 4. Global ViewModels & Notifiers
@@ -85,7 +87,7 @@ void main() async {
           },
         ),
       ],
-      child: const FoodieApp(),
+      child: ShowCaseWidget(builder: (context) => const FoodieApp()),
     ),
   );
 }

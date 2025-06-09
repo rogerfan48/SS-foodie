@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:showcaseview/showcaseview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:foodie/services/theme.dart';
@@ -34,7 +35,6 @@ class _MapPageState extends State<MapPage> {
   final TextEditingController _searchController = TextEditingController();
   late FilterOptions _filterOptions;
   GoogleMapController? _mapController;
-  final String _mapStyle = '''[{"featureType": "poi","stylers": [{"visibility": "off"}]}]''';
 
   String? _lightMapStyle;
   String? _darkMapStyle;
@@ -43,6 +43,11 @@ class _MapPageState extends State<MapPage> {
   final double _sheetHeight = 200;
 
   final Map<Color, BitmapDescriptor> _markerIconCache = {};
+
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _categoryKey = GlobalKey();
+  final GlobalKey _preferenceKey = GlobalKey();
+  final GlobalKey _locationKey = GlobalKey();
 
   @override
   void initState() {
@@ -69,6 +74,25 @@ class _MapPageState extends State<MapPage> {
     }
     _loadMapStyles();
     _centerOnUserLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final mapPositionService = context.read<MapPositionService>();
+      final id = mapPositionService.id;
+
+      if (id != null) {
+        _triggerBottomSheetForRestaurant(id);
+        mapPositionService.updateId(null);
+      } 
+
+      else if (mapPositionService.startTutorialOnLoad) {
+        ShowCaseWidget.of(context).startShowCase([
+          _searchKey,
+          _categoryKey,
+          _preferenceKey,
+          _locationKey,
+        ]);
+        mapPositionService.consumeTutorial();
+      }
+    });
   }
 
   Future<void> _loadMapStyles() async {
@@ -162,7 +186,6 @@ class _MapPageState extends State<MapPage> {
               return Marker(
                 markerId: MarkerId(restaurant.restaurantId),
                 position: LatLng(restaurant.latitude, restaurant.longitude),
-                // 使用我們自訂的方法來生成圖標
                 icon: await _createCustomMarker(restaurant.genreTag.color),
                 onTap: () {
                   if (_selectedRestaurantDetailVM?.restaurantId != restaurant.restaurantId) {
@@ -234,7 +257,6 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<ThemeService>();
     final LatLng initialPosition = context.read<MapPositionService>().position;
     final allRestaurantViewModel = context.watch<AllRestaurantViewModel>();
     final restaurants = allRestaurantViewModel.restaurants;
@@ -244,12 +266,10 @@ class _MapPageState extends State<MapPage> {
       body: Stack(
         children: [
           Positioned.fill(
-            // ✅ 使用 FutureBuilder 來等待 Markers 生成完畢
             child: FutureBuilder<Set<Marker>>(
               future: _createMarkers(restaurants),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  // 在 Markers 生成期間，可以顯示一個 Loading 或空的 Map
                   return const Center(child: CircularProgressIndicator());
                 }
                 return GoogleMap(
@@ -289,20 +309,42 @@ class _MapPageState extends State<MapPage> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: SearchBarWidget(
-                        controller: _searchController,
-                        onSubmitted: _performSearch,
+                      child: Showcase(
+                        key: _searchKey,
+                        title: 'Search Restaurants',
+                        description:
+                            'You can type here to search for any restaurant by name or keyword.',
+                        targetShapeBorder: const OvalBorder(),
+                        targetPadding: const EdgeInsets.all(16),
+                        child: SearchBarWidget(
+                          controller: _searchController,
+                          onSubmitted: _performSearch,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    CategoryButton(
-                      options: _filterOptions,
-                      onUpdate: (newOptions) => setState(() => _filterOptions = newOptions),
+                    Showcase(
+                      key: _categoryKey,
+                      title: 'Filter by Category',
+                      description: 'Tap here to select your favorite food categories.',
+                      targetShapeBorder: const CircleBorder(),
+                      targetPadding: const EdgeInsets.all(16),
+                      child: CategoryButton(
+                        options: _filterOptions,
+                        onUpdate: (newOptions) => setState(() => _filterOptions = newOptions),
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    PreferenceButton(
-                      options: _filterOptions,
-                      onUpdate: (newOptions) => setState(() => _filterOptions = newOptions),
+                    Showcase(
+                      key: _preferenceKey,
+                      title: 'Set Preferences',
+                      description: 'Set your preferences like price range and dietary options.',
+                      targetShapeBorder: const CircleBorder(),
+                      targetPadding: const EdgeInsets.all(16),
+                      child: PreferenceButton(
+                        options: _filterOptions,
+                        onUpdate: (newOptions) => setState(() => _filterOptions = newOptions),
+                      ),
                     ),
                   ],
                 ),
