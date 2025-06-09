@@ -52,6 +52,29 @@ class StorageService {
     }
   }
 
+  Future<String> uploadReceiptImage({required File file, required String userId}) async {
+    try {
+      // 1. 生成一個唯一的檔案名稱，避免重名覆蓋
+      final String fileName = '${const Uuid().v4()}.jpg';
+
+      // 2. 定義上傳路徑：reviews/{使用者ID}/{唯一檔案名稱}
+      final String filePath = 'receipts/$userId/$fileName';
+
+      // 3. 獲取 Storage 的引用
+      final storageRef = _storage.ref(filePath);
+
+      // 4. 執行上傳
+      await storageRef.putFile(file);
+
+      // 5. 返回 gs:// 格式的 URI
+      return 'gs://${storageRef.bucket}/${storageRef.fullPath}';
+    } on FirebaseException catch (e) {
+      print("Firebase Storage upload error: $e");
+      // 重新拋出錯誤，讓上層的 ViewModel 知道上傳失敗
+      rethrow;
+    }
+  }
+
   Future<void> deleteImage(String gsUri) async {
     if (!gsUri.startsWith('gs://')) return;
     try {

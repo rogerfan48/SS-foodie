@@ -19,6 +19,7 @@ class WriteReviewViewModel with ChangeNotifier {
 
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
+  String get restaurantId => _restaurantId;
 
   // State variables
   final List<SpecificReviewState> specificReviews = [SpecificReviewState()]; // one initial review
@@ -53,6 +54,14 @@ class WriteReviewViewModel with ChangeNotifier {
       specificReviews.removeAt(index);
       notifyListeners();
     }
+  }
+
+  void replaceSpecificReviews(List<SpecificReviewState> reviews) {
+    specificReviews.clear();
+    for (var i = 0; i < reviews.length; i++) {
+      specificReviews.add(reviews[i]);
+    }
+    notifyListeners();
   }
 
   void setDish(int index, DishModel dish) {

@@ -1,9 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodie/models/dish_model.dart';
+import 'package:foodie/models/specific_review_state.dart';
+import 'package:foodie/services/auth_service.dart';
+import 'package:foodie/services/storage_service.dart';
 import 'package:foodie/view_models/write_review_vm.dart';
 import 'package:foodie/widgets/restaurant/star_rating_input.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:foodie/services/identify_receipt_dish.dart';
 
 class RestaurantWriteReviewPage extends StatelessWidget {
   const RestaurantWriteReviewPage({super.key});
@@ -12,6 +17,7 @@ class RestaurantWriteReviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<WriteReviewViewModel>();
     final textTheme = Theme.of(context).textTheme;
+    final userId = context.read<AuthService>().currentUser!.uid;
 
     return Dialog.fullscreen(
       child: SafeArea(
@@ -31,7 +37,39 @@ class RestaurantWriteReviewPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Specific review', style: textTheme.headlineSmall),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Specific review', style: textTheme.headlineSmall),
+                    IconButton(
+                      onPressed: () async {
+                        final imgPicker = ImagePicker();
+                        final img = await imgPicker.pickImage(source: ImageSource.camera);
+                        if (img != null) {
+                          final imgUri = await context.read<StorageService>().uploadReceiptImage(
+                            file: File(img.path),
+                            userId: userId,
+                          );
+                          final imgUrl = await context.read<StorageService>().getDownloadUrl(
+                            imgUri,
+                          );
+                          print(imgUrl);
+                          List<String> data = await identifyReceiptDish(vm.restaurantId, imgUrl!);
+                          print(data);
+                          List<DishModel> dishes =
+                              vm.categorizedMenu.values
+                                  .expand((list) => list)
+                                  .where((dish) => data.contains(dish.dishId))
+                                  .toList();
+                          vm.replaceSpecificReviews(
+                            dishes.map((d) => SpecificReviewState(selectedDish: d)).toList(),
+                          );
+                        }
+                      },
+                      icon: Icon(Icons.qr_code),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 8),
                 // 動態生成菜色評論區塊
                 ListView.separated(

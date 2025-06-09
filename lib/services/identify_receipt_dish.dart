@@ -7,7 +7,7 @@ Future<List<String>> identifyReceiptDish(String restaurantId, String imageURL) a
       'restaurantId': restaurantId,
       'receiptImageUrl': imageURL,
     });
-    final data = response.data as List<String>;
+    final data = List<String>.from(response.data);
     return data;
   } catch (e) {
     print('Error summarizing review: $e');
