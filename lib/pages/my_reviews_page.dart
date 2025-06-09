@@ -46,26 +46,36 @@ class MyReviewsPage extends StatelessWidget {
                     userDataFuture: myReviewViewModel.getUserData(reviewDisplay.review.reviewerID),
                     dishNameLookup:
                         (dishId) => myReviewViewModel.getDishNameById(review.restaurantID, dishId),
-                    onAgree:
-                        () =>
-                            currentUserId != null
-                                ? myReviewViewModel.toggleReviewVote(
-                                  reviewId: review.reviewID!,
-                                  currentUserId: currentUserId,
-                                  voteType: VoteType.agree,
-                                  isCurrentlyVoted: hasAgreed,
-                                )
-                                : null,
-                    onDisagree:
-                        () =>
-                            currentUserId != null
-                                ? myReviewViewModel.toggleReviewVote(
-                                  reviewId: review.reviewID!,
-                                  currentUserId: currentUserId,
-                                  voteType: VoteType.disagree,
-                                  isCurrentlyVoted: hasDisagreed,
-                                )
-                                : null,
+                    onAgree: () {
+                      if (currentUserId != null) {
+                        myReviewViewModel.toggleReviewVote(
+                          reviewId: review.reviewID!,
+                          currentUserId: currentUserId,
+                          voteType: VoteType.agree,
+                          isCurrentlyVoted: hasAgreed,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please log in to react to reviews.")),
+                        );
+                      }
+                    },
+                    onDisagree: () {
+                      if (currentUserId != null) {
+                        myReviewViewModel.toggleReviewVote(
+                          reviewId: review.reviewID!,
+                          currentUserId: currentUserId,
+                          voteType: VoteType.disagree,
+                          isCurrentlyVoted: hasDisagreed,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please log in to react to reviews.")),
+                        );
+                      }
+                    },
                     onTap: () {
                       final theRestaurant =
                           allRestaurantViewModel.restaurants

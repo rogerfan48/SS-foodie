@@ -74,7 +74,12 @@ class AccountPage extends StatelessWidget {
                 onTap:
                     accountViewModel.isLoggedIn
                         ? () => GoRouter.of(context).push('/account/history')
-                        : null, // 如果未登入則禁用
+                        : () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please log in to view your history.')),
+                          );
+                        },
               ),
               const Divider(height: 1),
               _buildSettingsTile(
@@ -83,7 +88,12 @@ class AccountPage extends StatelessWidget {
                 onTap:
                     accountViewModel.isLoggedIn
                         ? () => GoRouter.of(context).push('/account/reviews')
-                        : null, // 如果未登入則禁用,
+                        : () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please log in to view your reviews.')),
+                          );
+                        },
               ),
               const Divider(height: 1),
               _buildSettingsTile(
@@ -93,10 +103,7 @@ class AccountPage extends StatelessWidget {
                   context.read<MapPositionService>().triggerTutorial();
                   GoRouter.of(context).go('/map');
                 },
-                trailing: Icon(
-                  Icons.play_circle_fill,
-                  color: colorScheme.secondary,
-                ),
+                trailing: Icon(Icons.play_circle_fill, color: colorScheme.secondary),
               ),
               const Divider(height: 1),
               _buildSettingsTile(

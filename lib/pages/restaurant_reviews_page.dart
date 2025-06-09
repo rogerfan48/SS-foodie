@@ -133,6 +133,11 @@ class RestaurantReviewsPage extends StatelessWidget {
                         voteType: VoteType.agree,
                         isCurrentlyVoted: hasAgreed,
                       );
+                    } else {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Please log in to react to reviews.")),
+                      );
                     }
                   },
                   onDisagree: () {
@@ -142,6 +147,11 @@ class RestaurantReviewsPage extends StatelessWidget {
                         currentUserId: currentUserId,
                         voteType: VoteType.disagree,
                         isCurrentlyVoted: hasDisagreed,
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Please log in to react to reviews.")),
                       );
                     }
                   },

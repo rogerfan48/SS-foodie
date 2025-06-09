@@ -131,9 +131,10 @@ class DishDetailPage extends StatelessWidget {
   ) {
     final currentUserId = context.read<AccountViewModel>().firebaseUser?.uid;
     if (currentUserId == null) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please log in to react to this review.")));
+      ).showSnackBar(const SnackBar(content: Text("Please log in to react to reviews.")));
       return;
     }
     final bool isCurrentlyVoted =
