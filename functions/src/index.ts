@@ -9,5 +9,8 @@ export const summarizeRestaurantReview = onCallGenkit(summarizeRestaurantReviewF
 import { recommendRestaurantFlow } from "./flow/recommendRestaurant";
 export const recommendRestaurant = onCallGenkit(recommendRestaurantFlow);
 
+import { identifyReceiptDishFlow } from "./flow/identifyReceiptDish";
+export const identifyReceiptDish = onCallGenkit(identifyReceiptDishFlow);
+
 import { onReviewChanged } from "./onReviewChanged";
 export { onReviewChanged };
