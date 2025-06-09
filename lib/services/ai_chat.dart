@@ -1,38 +1,78 @@
+import 'dart:convert'; // ✅ 引入 dart:convert 來解析 JSON
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
-class AiChatService with ChangeNotifier {
-  final List<Message> _messages = [];
+class RecommendedRestaurant {
+  final String id;
+  final String name;
+  final String? imageUrl;
 
-  List<Message> get messages => _messages;
+  RecommendedRestaurant({required this.id, required this.name, this.imageUrl});
 
-  Future<void> addMessage(Message msg, String id) async {
-    if (msg.message.isNotEmpty) {
-      _messages.add(msg);
-
-      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-        'recommendRestaurant',
-      );
-      final response = await callable.call({
-        "messages": _messages.map((msg) => {"text": msg.message, "isUser": msg.isUser}).toList(),
-        "userId": id,
-      });
-      final data = Map<String, dynamic>.from(response.data as Map);
-      if (data['recommendRestaurantId'].isEmpty) {
-        _messages.add(Message(message: data['question'], isUser: false));
-      }
-      else {
-        _messages.add(Message(message: data['question'] + "\\split\\" + data['recommendRestaurantId'].join("\\split\\"), isUser: false, isLink: true));
-      }
-    }
-    notifyListeners();
+  factory RecommendedRestaurant.fromMap(Map<String, dynamic> map) {
+    return RecommendedRestaurant(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      imageUrl: map['imageUrl'] as String?,
+    );
   }
 }
 
 class Message {
-  final String message;
+  final String text;
   final bool isUser;
-  final bool isLink;
+  final List<RecommendedRestaurant> recommendations;
 
-  Message({required this.message, this.isUser = true, this.isLink = false});
+  Message({required this.text, this.isUser = true, List<RecommendedRestaurant>? recommendations})
+    : recommendations = recommendations ?? [];
+}
+
+class AiChatService with ChangeNotifier {
+  final List<Message> _messages = [];
+  bool _isLoading = false;
+
+  List<Message> get messages => _messages;
+  bool get isLoading => _isLoading;
+
+  Future<void> addMessage(Message msg, String id) async {
+    if (msg.text.isEmpty || _isLoading) return;
+
+    _messages.add(msg);
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+        'recommendRestaurant',
+      );
+      final response = await callable.call({
+        "messages": _messages.map((m) => {"text": m.text, "isUser": m.isUser}).toList(),
+        "userId": id,
+      });
+
+      // ✅ 解析後端回傳的 JSON
+      final data = response.data as Map<String, dynamic>;
+      final type = data['type'];
+      final text = data['text'] as String;
+
+      if (type == 'recommendation' && data['restaurants'] != null) {
+        final List<dynamic> restaurantData = data['restaurants'] as List;
+        final recommendations =
+            restaurantData
+                .map((item) => RecommendedRestaurant.fromMap(item as Map<String, dynamic>))
+                .toList();
+
+        _messages.add(Message(text: text, isUser: false, recommendations: recommendations));
+      } else {
+        _messages.add(Message(text: text, isUser: false));
+      }
+    } catch (e) {
+      print("Error calling recommendRestaurant: $e");
+      _messages.add(Message(text: "Sorry, I'm having trouble connecting.", isUser: false));
+    } finally {
+      _isLoading = false;
+    }
+
+    notifyListeners();
+  }
 }

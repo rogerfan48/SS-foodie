@@ -13,15 +13,16 @@ class AiRecommendationButton extends StatelessWidget {
 
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.surface,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         side: BorderSide(
-          color: borderSide?.color ?? Colors.grey,
+          color: borderSide?.color ?? Theme.of(context).colorScheme.outline,
           width: borderSide?.width ?? 1.0,
         ),
       ),
       onPressed: () async {
-        await context.read<AiChatService>().addMessage(Message(message: msg), userId);
+        await context.read<AiChatService>().addMessage(Message(text: msg), userId);
       },
       child: Text(
         msg,
