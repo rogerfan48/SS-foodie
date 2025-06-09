@@ -240,13 +240,22 @@ Analyze the user's request, their viewing history, and the conversation.
     RECOMMEND: {"criteria_summary": "A user-friendly explanation of why these are recommended, e.g., 'Since you're looking for vibrant Italian places, you might enjoy [Restaurant Name] for its popular lasagna and great atmosphere!' or 'Based on your interest in spicy food, [Restaurant Name] comes highly recommended for its fiery chicken curry.'", "restaurant_ids": ["restaurantId1", "restaurantId2"]}
     (The "criteria_summary" should be engaging and tell the user WHY these are good choices for THEM. The "restaurant_ids" MUST be from the 'All available restaurants' list provided above. Ensure the JSON is valid. Prioritize recommending if a reasonable basis exists.)
 
-2.  Only if the user's request is too vague, ambiguous, or if essential information (like cuisine type if none is hinted) is clearly missing
-    and you cannot make a confident recommendation, then ask a single, clear, plain text question to get the missing piece of information.
-    The format MUST be:
-    ASK: What type of cuisine are you in the mood for?
-    (Do not include any options, just the question text after "ASK: ".)
+2.  If you cannot make a confident recommendation based on the criteria in point 1:
+    a.  If the user explicitly states they have no idea, are unsure, or don't know what they want (e.g., "I don't know", "no idea", "surprise me", "you choose"),
+        respond by asking a question that also suggests some options to help them.
+        To generate these suggestions:
+        - Pick 2-3 distinct and appealing cuisine types from the 'genreTags' of the available restaurants in the 'All available restaurants' list.
+        - Pick 1-2 popular-sounding or interesting dish names from the 'dishes' of the available restaurants in the 'All available restaurants' list.
+        The format MUST be:
+        ASK: No problem! To help you decide, are you leaning towards something like [Cuisine1 from genreTags], [Cuisine2 from genreTags], or perhaps a dish like [DishName1 from dishes]? You can also tell me if none ofthese sound right or if you have a different thought.
+        (Example: "ASK: No problem! To help you decide, are you leaning towards something like Italian, Thai, or perhaps a dish like our popular Gourmet Burger? You can also tell me if none of these sound right.")
+    b.  Otherwise (if the user hasn't explicitly stated "no idea" but information is still missing and you cannot recommend),
+        ask a single, clear, plain text question to get the missing piece of information.
+        The format MUST be:
+        ASK: What type of cuisine are you in the mood for?
+        (Do not include any options, just the question text after "ASK: ".)
 
-Consider the user's history and previous answers. If no history and no previous answers, it's appropriate to start with a general question (e.g., cuisine preference, price range).
+Consider the user's history and previous answers. If the user has no history and their first message is vague or indicates uncertainty (like "recommend something"), it's appropriate to start with the suggestive question from point 2.a. Otherwise, if information is simply missing, use 2.b.
 Do not add any explanatory text before "RECOMMEND:" or "ASK:". Your entire response should start with one of these keywords.
 `;
         
