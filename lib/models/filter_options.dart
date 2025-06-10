@@ -17,7 +17,7 @@ class FilterOptions {
     required this.selectedVeganTags,
     this.halalStatus,
     this.isOpenNow = false,
-    this.priceRange = const RangeValues(0, 300),
+    this.priceRange = const RangeValues(1, 4),
     this.minRating = 0.0,
   });
 

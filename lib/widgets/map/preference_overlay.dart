@@ -117,11 +117,11 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
                 child: RangeSlider(
                   values: _currentOptions.priceRange,
                   min: 0,
-                  max: 500,
+                  max: 5,
                   divisions: 5,
                   labels: RangeLabels(
-                    '\$${_currentOptions.priceRange.start.round()}',
-                    '\$${_currentOptions.priceRange.end.round()}',
+                    '\$' * _currentOptions.priceRange.start.round(),
+                    '\$' * _currentOptions.priceRange.end.round(),
                   ),
                   activeColor: Theme.of(context).colorScheme.primary,
                   inactiveColor: Theme.of(context).colorScheme.surfaceDim,

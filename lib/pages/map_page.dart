@@ -57,7 +57,7 @@ class _MapPageState extends State<MapPage> {
       selectedVeganTags: {VeganTags.nonVegetarian},
       isOpenNow: false,
       minRating: 0.0,
-      priceRange: const RangeValues(0, 300),
+      priceRange: const RangeValues(0, 4),
     );
     final String? id = context.read<MapPositionService>().id;
     if (id != null) {
