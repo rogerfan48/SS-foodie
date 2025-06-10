@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:foodie/enums/vegan_tag.dart';
 import 'package:foodie/models/filter_options.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
+import 'package:syncfusion_flutter_core/theme.dart'; // Add this import
 
 class PreferenceOverlay extends StatefulWidget {
   final RenderBox buttonRenderBox;
@@ -133,21 +134,36 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
                 ),
               ),
               _buildSectionHeader(context, 'Rating'),
-              SfSlider(
-                value: _currentOptions.minRating,
-                min: 0,
-                max: 5,
-                interval: 1,
-                showTicks: true,
-                showLabels: true,
-                activeColor: Theme.of(context).colorScheme.primary,
-                inactiveColor: Theme.of(context).colorScheme.surfaceDim,
-                onChanged: (value) {
-                  setState(() {
-                    _currentOptions.minRating = value;
-                    widget.onUpdate(_currentOptions);
-                  });
-                },
+              SfSliderTheme(
+                data: SfSliderThemeData(
+                  thumbColor: Theme.of(context).colorScheme.primary,
+                  activeTrackColor: Theme.of(context).colorScheme.surfaceDim, // Track from 0 to pointer
+                  inactiveTrackColor: Theme.of(context).colorScheme.primary, // Track from pointer to 5
+                  // You might need to set other properties like active/inactive tick and label colors
+                  // if their defaults are not suitable with these changes.
+                  // For example:
+                  // activeTickColor: Theme.of(context).colorScheme.surfaceDim,
+                  // inactiveTickColor: Theme.of(context).colorScheme.primary,
+                  // activeLabelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87)),
+                  // inactiveLabelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87)),
+                  activeTrackHeight: 4,
+                  inactiveTrackHeight: 6,
+                ),
+                child: SfSlider(
+                  value: _currentOptions.minRating,
+                  min: 0,
+                  max: 5,
+                  interval: 1,
+                  showTicks: true,
+                  showLabels: true,
+                  // activeColor and inactiveColor are now controlled by SfSliderThemeData
+                  onChanged: (value) {
+                    setState(() {
+                      _currentOptions.minRating = value;
+                      widget.onUpdate(_currentOptions);
+                    });
+                  },
+                ),
               ),
               _buildSectionHeader(context, 'Vegan Options'),
               ListView.builder(
