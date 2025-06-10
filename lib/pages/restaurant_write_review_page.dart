@@ -274,18 +274,35 @@ class RestaurantWriteReviewPage extends StatelessWidget {
   // 輔助方法：建立價格選擇器
   Widget _buildPriceSelector(BuildContext context, WriteReviewViewModel vm) {
     final prices = {1: '\$', 2: '\$\$', 3: '\$\$\$', 4: '\$\$\$\$'};
-    return Wrap(
-      spacing: 8.0,
-      children:
-          prices.entries.map((entry) {
-            return ChoiceChip(
-              label: Text(entry.value),
-              selected: vm.selectedPrice == entry.key,
-              onSelected: (selected) {
-                if (selected) vm.setPrice(entry.key);
-              },
+    final actualPrice = {1: '~150', 2: '150-300', 3: '300-500', 4: '500+'};
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          ...prices.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: ChoiceChip(
+                label: Column(
+                  children: [
+                    Text(entry.value),
+                    Text(
+                      actualPrice[entry.key] ?? '',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelSmall!.copyWith(color: Theme.of(context).colorScheme.outline),
+                    ),
+                  ],
+                ),
+                selected: vm.selectedPrice == entry.key,
+                onSelected: (selected) {
+                  if (selected) vm.setPrice(entry.key);
+                },
+              ),
             );
           }).toList(),
+        ],
+      ),
     );
   }
 
