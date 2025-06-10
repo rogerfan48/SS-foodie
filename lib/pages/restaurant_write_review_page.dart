@@ -294,6 +294,7 @@ class RestaurantWriteReviewPage extends StatelessWidget {
                     ),
                   ],
                 ),
+                showCheckmark: false,
                 selected: vm.selectedPrice == entry.key,
                 onSelected: (selected) {
                   if (selected) vm.setPrice(entry.key);
