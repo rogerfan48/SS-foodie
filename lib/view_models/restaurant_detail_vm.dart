@@ -95,6 +95,8 @@ class RestaurantDetailViewModel with ChangeNotifier {
         _restaurant = restaurantMap[restaurantId];
         _checkLoadingStatus();
         _buildCategorizedMenu();
+        _calculateRating();
+        _calculatePriceLevel();
         notifyListeners();
       }
     });
@@ -116,7 +118,14 @@ class RestaurantDetailViewModel with ChangeNotifier {
   double _calculateRating() {
     if (_reviews.isEmpty) return 0; // 沒有評論則返回 0 顆星
     final total = _reviews.fold<double>(0, (sum, review) => sum + review.rating);
-    return (total / _reviews.length);
+    final average = ( total / _reviews.length ).clamp(0, 5) as double;
+    if (_restaurant?.averageRating == null || _restaurant!.averageRating! != average) {
+      _restaurantRepository.updateAverageRating(
+        restaurantId: _restaurant!.restaurantId,
+        newAverageRating: average,
+      );
+    }
+    return average;
   }
 
   int _calculatePriceLevel() {
@@ -124,7 +133,14 @@ class RestaurantDetailViewModel with ChangeNotifier {
     final validReviews = _reviews.where((r) => r.priceLevel != null).toList();
     if (validReviews.isEmpty) return 1;
     final total = validReviews.fold<int>(0, (sum, review) => sum + review.priceLevel!);
-    return (total / validReviews.length).round().clamp(1, 5); // 確保價格等級在 1-5 之間
+    final level = (total / validReviews.length).round().clamp(1, 5);
+    if (_restaurant?.averagePriceLevel == null || _restaurant!.averagePriceLevel != level) {
+      _restaurantRepository.updateAveragePriceLevel(
+        restaurantId: _restaurant!.restaurantId,
+        newAveragePriceLevel: level,
+      );
+    }
+    return level;
   }
 
   List<String> _getImageURLs() {

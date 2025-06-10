@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodie/enums/vegan_tag.dart';
 import 'package:foodie/models/filter_options.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class PreferenceOverlay extends StatefulWidget {
   final RenderBox buttonRenderBox;
@@ -32,10 +33,7 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
+      child: Text(title, style: Theme.of(context).textTheme.titleMedium),
     );
   }
 
@@ -116,7 +114,6 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
               SizedBox(
                 height: 32,
                 child: RangeSlider(
-                  // padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
                   values: _currentOptions.priceRange,
                   min: 0,
                   max: 500,
@@ -130,30 +127,26 @@ class _PreferenceOverlayState extends State<PreferenceOverlay> {
                   onChanged: (values) {
                     setState(() {
                       _currentOptions.priceRange = values;
+                      widget.onUpdate(_currentOptions);
                     });
-                  },
-                  onChangeEnd: (values) {
-                    widget.onUpdate(_currentOptions);
                   },
                 ),
               ),
               _buildSectionHeader(context, 'Rating'),
-              Slider(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
+              SfSlider(
                 value: _currentOptions.minRating,
                 min: 0,
                 max: 5,
-                divisions: 5,
-                label: _currentOptions.minRating.toStringAsFixed(1),
+                interval: 1,
+                showTicks: true,
+                showLabels: true,
                 activeColor: Theme.of(context).colorScheme.primary,
                 inactiveColor: Theme.of(context).colorScheme.surfaceDim,
                 onChanged: (value) {
                   setState(() {
                     _currentOptions.minRating = value;
+                    widget.onUpdate(_currentOptions);
                   });
-                },
-                onChangeEnd: (value) {
-                  widget.onUpdate(_currentOptions);
                 },
               ),
               _buildSectionHeader(context, 'Vegan Options'),

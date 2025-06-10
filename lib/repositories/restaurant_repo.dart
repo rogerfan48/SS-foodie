@@ -34,6 +34,8 @@ class RestaurantRepository {
             googleMapURL: data['googleMapURL'] as String,
             veganTag: data['veganTag'] as String,
             menuMap: menuMap,
+            averageRating: (data['averageRating'] as num?)?.toDouble(),
+            averagePriceLevel: data['averagePriceLevel'] as int?,
             restaurantReviewIDs: List<String>.from(data['restaurantReviewIDs'] ?? []),
           );
           return MapEntry(doc.id, restaurant);
@@ -75,6 +77,24 @@ class RestaurantRepository {
   }) {
     return _restaurantCollection.doc(restaurantId).collection('menu').doc(dishId).update({
       'dishReviewIDs': FieldValue.arrayRemove([reviewId]),
+    });
+  }
+
+  Future<void> updateAverageRating({
+    required String restaurantId,
+    required double newAverageRating,
+  }) {
+    return _restaurantCollection.doc(restaurantId).update({
+      'averageRating': newAverageRating,
+    });
+  }
+
+  Future<void> updateAveragePriceLevel({
+    required String restaurantId,
+    required int newAveragePriceLevel,
+  }) {
+    return _restaurantCollection.doc(restaurantId).update({
+      'averagePriceLevel': newAveragePriceLevel,
     });
   }
 }

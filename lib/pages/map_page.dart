@@ -81,15 +81,10 @@ class _MapPageState extends State<MapPage> {
       if (id != null) {
         _triggerBottomSheetForRestaurant(id);
         mapPositionService.updateId(null);
-      } 
-
-      else if (mapPositionService.startTutorialOnLoad) {
-        ShowCaseWidget.of(context).startShowCase([
-          _searchKey,
-          _categoryKey,
-          _preferenceKey,
-          _locationKey,
-        ]);
+      } else if (mapPositionService.startTutorialOnLoad) {
+        ShowCaseWidget.of(
+          context,
+        ).startShowCase([_searchKey, _categoryKey, _preferenceKey, _locationKey]);
         mapPositionService.consumeTutorial();
       }
     });
@@ -182,6 +177,13 @@ class _MapPageState extends State<MapPage> {
                   _filterOptions.selectedGenres.contains(restaurant.genreTag.toGenreTags()),
             )
             .where((restaurant) => (restaurant.veganTag.level <= _filterOptions.maxVeganLevel))
+            .where((restaurant) {
+              if (restaurant.averageRating == null) return true;
+              if (restaurant.averageRating! < _filterOptions.minRating) return false;
+              if (restaurant.averagePriceLevel == null) return true;
+              return restaurant.averagePriceLevel! >= _filterOptions.priceRange.start &&
+                  restaurant.averagePriceLevel! <= _filterOptions.priceRange.end;
+            })
             .map((restaurant) async {
               return Marker(
                 markerId: MarkerId(restaurant.restaurantId),
@@ -225,6 +227,8 @@ class _MapPageState extends State<MapPage> {
             longitude: 0.0,
             genreTag: genreTags[GenreTags.fastFood]!,
             veganTag: veganTags[VeganTags.nonVegetarian]!,
+            averageRating: null,
+            averagePriceLevel: null,
           ),
     );
 

@@ -11,6 +11,8 @@ class RestaurantItem {
   final double latitude, longitude;
   final GenreTag genreTag;
   final VeganTag veganTag;
+  final double? averageRating;
+  final int? averagePriceLevel;
 
   RestaurantItem({
     required this.restaurantId,
@@ -19,6 +21,8 @@ class RestaurantItem {
     required this.longitude,
     required this.genreTag,
     required this.veganTag,
+    this.averageRating,
+    this.averagePriceLevel,
   });
 }
 
@@ -41,6 +45,8 @@ class AllRestaurantViewModel with ChangeNotifier {
             longitude: restaurant.longitude,
             genreTag: GenreTag.fromString(restaurant.genreTags.firstOrNull ?? 'others'),
             veganTag: VeganTag.fromString(restaurant.veganTag),
+            averageRating: restaurant.averageRating,
+            averagePriceLevel: restaurant.averagePriceLevel,
           ),
         );
       });

@@ -54,6 +54,7 @@ dependencies:
   flutter_svg: ^2.1.0
   geolocator: ^14.0.1
   showcaseview: ^4.0.1
+  syncfusion_flutter_sliders: ^29.2.9
 
 
 dev_dependencies:

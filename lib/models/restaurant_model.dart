@@ -14,6 +14,8 @@ class RestaurantModel {
   final Map<String, DishModel> menuMap;
   final String? googleMapURL;
   final String veganTag;
+  final double? averageRating; // Optional, can be calculated
+  final int? averagePriceLevel; // Optional, can be calculated
 
   RestaurantModel({
     required this.restaurantId,  // ← new
@@ -27,6 +29,8 @@ class RestaurantModel {
     required this.longitude,
     required this.menuMap,
     required this.veganTag,
+    this.averageRating,
+    this.averagePriceLevel,
     this.googleMapURL,
     List<String>? restaurantReviewIDs,
   }) : restaurantReviewIDs = restaurantReviewIDs ?? [];
