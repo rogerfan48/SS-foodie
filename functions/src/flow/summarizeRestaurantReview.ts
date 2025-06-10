@@ -90,6 +90,7 @@ const restaurantReviewGenerator = ai.definePrompt({
     })  },
     messages: (input) => {
         const baseUserPrompt = `Your task is to generate a restaurant summary.
+Do NOT output your reasoning or any explanation, and the summary should not contradict itself. 
 
 **Paragraph 1 (Mandatory - Dish Types Description):**
 - Generate a description of the restaurant's general dish types. This paragraph is NOT based on customer reviews. You can use the provided "Restaurant Dish Names" for context if helpful.

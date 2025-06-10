@@ -65,6 +65,7 @@ const dishReviewGenerator = ai.definePrompt({
     messages: (inputParams) => {
         const basePrompt = `IMPORTANT ASSESSMENT:
 First, analyze ALL provided reviews.
+Do NOT output your reasoning or any explanation, and the summary should not contradict itself. 
 IF all reviews are negative AND all negative reviews lack concrete reasons, THEN your entire output for this task MUST be a completely empty string (i.e., generate no characters, no text, not even quotes).
 
 IF THE ABOVE CONDITION IS NOT MET, proceed as follows:
