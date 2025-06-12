@@ -161,3 +161,4 @@ app.*.symbols
 .venv/
 serviceAccountKey.json
 .firebaserc
+.env
